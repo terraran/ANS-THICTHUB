@@ -66,13 +66,14 @@ function state_(room, name) {
   if (!room || !name) throw new Error('room/name');
   const open = openFor_(room);
   const status = {}, rounds = {};
+  const me = nameKey_(name);
   subSheet_().getDataRange().getValues().forEach(r => {
     if (String(r[COL.room]) !== room) return;
     const d = parseJson_(r[COL.json]);
     if (!d || !d.act) return;
     const who = r[COL.members] ? parseJson_(r[COL.members]) : null;
     const list = Array.isArray(who) ? who : splitNames_(r[COL.names]);
-    if (list.indexOf(name) < 0) return;
+    if (!list.some(n => nameKey_(n) === me)) return;
     status[d.act] = 'done';
     rounds[d.act] = Math.max(rounds[d.act] || 0, Number(d.round || r[COL.round]) || 1);
   });
@@ -125,6 +126,8 @@ function rows_(tab) {
 function splitNames_(s) {
   return String(s || '').split('+').map(x => x.trim()).filter(String);
 }
+// ใบงานเก่าให้เด็กพิมพ์ชื่อเอง ("yuki", "Loukpear") จึงเทียบชื่อแบบไม่สนตัวพิมพ์เล็ก/ใหญ่และช่องว่าง
+function nameKey_(s) { return String(s || '').replace(/\s+/g, '').toUpperCase(); }
 function parseJson_(s) { try { return JSON.parse(s); } catch (e) { return null; } }
 function isOn_(v) { return v === true || /^(true|1|yes|on|เปิด)$/i.test(String(v).trim()); }
 function isOff_(v) { return v === false || /^(false|0|no|off|ซ่อน|ปิด)$/i.test(String(v).trim()); }

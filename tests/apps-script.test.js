@@ -52,9 +52,14 @@ assert.deepStrictEqual(S.get({ action: 'state', room: 'Y3.1', name: 'ขิม' 
 tabs.Submissions.push([new Date()].concat(row('y3w1', 'Y3.3', 'เก่า + เพื่อน')));
 assert.deepStrictEqual(S.get({ action: 'state', room: 'Y3.3', name: 'เพื่อน' }).status, { y3w1: 'done' });
 
+// ชื่อที่เด็กพิมพ์เองในใบงานเก่า: ไม่สนตัวพิมพ์เล็ก/ใหญ่และช่องว่าง
+tabs.Submissions.push([new Date()].concat(row('y3w1', 'Y3.4', 'Loukpear + yuki ')));
+for (const n of ['LOUK PEAR', 'YUKI']) assert.deepStrictEqual(S.get({ action: 'state', room: 'Y3.4', name: n }).status, { y3w1: 'done' }, n);
+assert.deepStrictEqual(S.get({ action: 'state', room: 'Y3.4', name: 'YUK' }).status, {});
+
 // หน้าแชร์เดิม
 assert.deepStrictEqual(S.get({ key: 'wrong', level: 'Y3', week: '1' }), { error: 'key' });
-assert.strictEqual(S.get({ key: 'secret', level: 'Y3', week: '1' }).rows.length, 3);
+assert.strictEqual(S.get({ key: 'secret', level: 'Y3', week: '1' }).rows.length, 4);
 assert.deepStrictEqual(load(tabs).get({ key: '', level: 'Y3', week: '1' }), { error: 'key' }, 'no key set → locked');
 assert.strictEqual(S.get({ action: 'roster' }).ok, false);
 console.log('apps-script tests: ok');
