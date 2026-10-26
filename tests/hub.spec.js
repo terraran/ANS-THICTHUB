@@ -189,3 +189,47 @@ test('เกมนักสืบแชท: แชทค่อย ๆ เด้�
   await expect(page.locator('#pLines .ln.target')).toBeVisible({ timeout: 6000 });
   await expect(page.locator('.sg').first()).toBeEnabled();
 });
+
+test('เกมผจญภัย: ป๊อปอัปหน้าตาเหมือนกัน ไม่มี X ปลอม · หลอก=ต้องปิด · ของเกม=กดได้', async ({ page }) => {
+  const errs = []; page.on('pageerror', e => errs.push(e.message));
+  await page.route('**/fonts.googleapis.com/**', r => r.abort());
+  await page.goto('/games/adventure.html');
+  await page.click('#goE');
+  await page.waitForFunction(() => state === 'play');
+  const st = () => page.evaluate(() => ({ coins, hearts, n: layer.children.length }));
+  // ล้างป๊อปอัปที่เกมสุ่มเอง แล้วสร้างอันที่ต้องการ (ปุ่มเต้นตลอดจึงคลิกแบบ force)
+  const spawnOne = kind => page.evaluate(k => { layer.innerHTML = ''; bag = [{ x: (k === 't' ? TRICKS : SAFES)[0], k }]; spawn(false); layer.lastChild.id = 'P'; }, kind);
+  const tap = sel => page.click('#P ' + sel, { force: true });
+
+  await spawnOne('t');
+  await expect(page.locator('#P .fakex, #P .nothanks, #P .barfake')).toHaveCount(0);
+  const trickCls = await page.locator('#P').getAttribute('class');
+  let s0 = await st();
+  await tap('.realx');                      // ปิดป๊อปอัปหลอก = ถูก
+  let s1 = await st();
+  expect([s1.coins - s0.coins, s1.hearts - s0.hearts]).toEqual([5, 0]);
+
+  await spawnOne('s');
+  const safeCls = await page.locator('#P').getAttribute('class');
+  expect(safeCls.replace(/c\d/, '')).toBe(trickCls.replace(/c\d/, ''));   // คลาสเหมือนกัน ต่างแค่สี
+  s0 = await st();
+  await tap('.bait');            // กดปุ่มป๊อปอัปของเกม = ได้เหรียญ
+  s1 = await st();
+  expect([s1.coins - s0.coins, s1.hearts - s0.hearts]).toEqual([5, 0]);
+
+  await spawnOne('t');
+  s0 = await st();
+  await tap('.bait');            // กดปุ่มป๊อปอัปหลอก = เสียหัวใจ
+  s1 = await st();
+  expect(s1.hearts - s0.hearts).toBe(-1);
+  expect(errs).toEqual([]);
+});
+
+test('ใบงาน Y3: การ์ดใหม่ 16 ใบ และเก็บการ์ดเก่าไว้ใน retired', async () => {
+  const C = content('y3w1');
+  expect(C.cards).toHaveLength(16);
+  expect(C.cards.filter(c => c.bin === 'a')).toHaveLength(8);
+  expect(C.cards.map(c => c.id)).toEqual(expect.arrayContaining(['a9', 'a10', 'a11', 'b9', 'b10', 'b11']));
+  expect(C.retired.map(c => c.id).sort()).toEqual(['a2', 'a5', 'a7', 'b5', 'b6', 'b7']);
+  for (const c of C.cards.filter(c => c.bin === 'b')) expect(c.signs.length).toBeGreaterThan(0);
+});

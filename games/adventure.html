@@ -25,25 +25,21 @@ canvas{position:absolute;left:0;top:0;width:1600px;height:900px;touch-action:non
 .pop.out{animation:popout .2s ease-in forwards}
 @keyframes popout{to{transform:scale(.2);opacity:0}}
 .pop .bar{display:flex;align-items:center;justify-content:space-between;padding:5px 10px 5px 16px;font-size:16px}
-.pop .realx{font-family:inherit;border:none;background:#ffffff33;color:inherit;opacity:.9;font-size:17px;cursor:pointer;padding:2px 8px;border-radius:8px}
+.pop .realx{font-family:inherit;border:2px solid #ffffffaa;background:#ffffff33;color:inherit;font-size:18px;font-weight:600;cursor:pointer;padding:2px 12px;border-radius:10px}
 .pop.tiny .realx{font-size:13px;padding:0 5px;opacity:.7}
 .pop .content{padding:14px 22px 16px;text-align:center;position:relative}
-.trick{background:linear-gradient(160deg,#fde047,#f97316 70%,#ec4899);color:#fff;border:6px solid #fff}
-.trick .bar{background:#0002;color:#fff}
-.trick .ic{font-size:64px;line-height:1;animation:wig 1s ease-in-out infinite}
+.gp{color:#fff;border:6px solid #fff}
+.gp.c0{background:linear-gradient(160deg,#fde047,#f97316 70%,#ec4899)}
+.gp.c1{background:linear-gradient(160deg,#67e8f9,#3b82f6 70%,#7c3aed)}
+.gp.c2{background:linear-gradient(160deg,#bef264,#22c55e 70%,#0d9488)}
+.gp.c3{background:linear-gradient(160deg,#f0abfc,#a855f7 70%,#4f46e5)}
+.gp .bar{background:#0003;color:#fff}
+.gp .ic{font-size:64px;line-height:1;animation:wig 1s ease-in-out infinite}
 @keyframes wig{25%{transform:rotate(-8deg)}75%{transform:rotate(8deg)}}
-.trick h3{margin:6px 0 2px;font-size:28px;font-weight:800;text-shadow:0 3px 0 #9a341288;line-height:1.2}
+.gp h3{margin:6px 0 2px;font-size:28px;font-weight:800;text-shadow:0 3px 0 #9a341288;line-height:1.2}
 .bait{margin-top:10px;font-family:inherit;font-size:28px;font-weight:800;color:#fff;border:5px solid #fff;border-radius:18px;padding:6px 28px;background:linear-gradient(#4ade80,#16a34a);box-shadow:0 7px 0 #14532d;cursor:pointer;animation:pulse .8s ease-in-out infinite}
 @keyframes pulse{50%{transform:scale(1.07)}}
-.fakex{position:absolute;width:50px;height:50px;border-radius:50%;background:#ef4444;color:#fff;border:4px solid #fff;font-size:26px;font-weight:800;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 0 #7f1d1d}
-.nothanks{display:block;margin:10px auto 0;font-family:inherit;border:none;background:none;color:#fff;opacity:.85;font-size:16px;text-decoration:underline;cursor:pointer}
-.pop.tiny .nothanks{font-size:13px;opacity:.7}
-.safe{background:#fff;color:#1e293b;border:5px solid #334155}
-.safe .bar{background:#334155;color:#fff}
-.safe .ic{font-size:50px;line-height:1}
-.safe h3{margin:8px 0 4px;font-size:26px;font-weight:600}
-.ok{margin-top:8px;font-family:inherit;font-size:24px;font-weight:600;border:none;border-radius:14px;padding:6px 32px;background:#334155;color:#fff;cursor:pointer;box-shadow:0 5px 0 #0f172a}
-.toast{position:absolute;z-index:30;font-size:28px;font-weight:800;padding:8px 22px;border-radius:18px;pointer-events:none;animation:fly 1.4s ease-out forwards;white-space:nowrap}
+.pop.tiny .toast{position:absolute;z-index:30;font-size:28px;font-weight:800;padding:8px 22px;border-radius:18px;pointer-events:none;animation:fly 1.4s ease-out forwards;white-space:nowrap}
 .toast.good{background:#16a34a;color:#fff}.toast.bad{background:#dc2626;color:#fff}
 @keyframes fly{0%{transform:translate(-50%,0) scale(.6);opacity:0}15%{transform:translate(-50%,-10px) scale(1.05);opacity:1}100%{transform:translate(-50%,-90px);opacity:0}}
 .shake{animation:shake .35s}
@@ -61,7 +57,6 @@ canvas{position:absolute;left:0;top:0;width:1600px;height:900px;touch-action:non
 .big.hard{background:linear-gradient(#f87171,#b91c1c);box-shadow:0 7px 0 #7f1d1d}
 .ready{position:absolute;left:50%;top:330px;transform:translateX(-50%);z-index:16;font-size:90px;font-weight:800;color:#fff;text-shadow:0 6px 0 #0008;pointer-events:none}
 .pausedim{position:absolute;inset:0;background:#0003;z-index:9;pointer-events:none}
-.pop .barfake{font-family:inherit;border:none;background:#ffffff33;color:inherit;font-size:17px;cursor:pointer;padding:2px 8px;border-radius:8px}
 .big{font-family:inherit;font-size:30px;font-weight:800;border:none;border-radius:20px;padding:12px 34px;background:linear-gradient(#fb923c,#ea580c);color:#fff;box-shadow:0 7px 0 #9a3412;cursor:pointer;line-height:1.2}
 .big small{display:block;font-size:17px;font-weight:400}
 .big.alt{background:linear-gradient(#60a5fa,#2563eb);box-shadow:0 7px 0 #1e3a8a}
@@ -116,21 +111,27 @@ const SIGNS = [
   { th: '⏰ เร่งให้รีบกด', en: '⏰ Rushes you to tap' },
   { th: '📥 ขอข้อมูลหรือให้ดาวน์โหลด', en: '📥 Asks for info or a download' },
 ];
+// ป๊อปอัปหลอก: ต้องกด ✕ ปิด · s = สัญญาณ (0 ของฟรี, 1 เร่งรีบ, 2 ขอข้อมูล/ดาวน์โหลด)
 const TRICKS = [
   { ic: '🎁', h: { th: 'ยินดีด้วย! คุณชนะรางวัลใหญ่', en: 'Congrats! You won a big prize!' }, b: { th: 'รับรางวัล', en: 'Get prize' }, s: [0] },
-  { ic: '🎡', h: { th: 'หมุนวงล้อ ลุ้นมือถือฟรี!', en: 'Spin to win a free phone!' }, b: { th: 'หมุนเลย!', en: 'Spin now!' }, s: [0] },
   { ic: '💎', h: { th: 'เพชรฟรี 9,999 เม็ด!', en: '9,999 free gems!' }, b: { th: 'รับฟรี', en: 'Get free' }, s: [0] },
   { ic: '⏰', h: { th: 'รีบกด! เหลือ 5 วินาที', en: 'Hurry! 5 seconds left!' }, b: { th: 'กดเลย!', en: 'Tap now!' }, s: [1] },
-  { ic: '🔥', h: { th: 'ลด 99% วันนี้วันเดียว!', en: '99% off, today only!' }, b: { th: 'ซื้อเลย', en: 'Buy now' }, s: [1] },
-  { ic: '⚠️', h: { th: 'เครื่องติดไวรัส! กดแก้ทันที', en: 'Virus found! Fix it now!' }, b: { th: 'แก้เลย', en: 'Fix now' }, s: [1, 2] },
+  { ic: '⏳', h: { th: 'ข้อเสนอพิเศษ หมดใน 10 วินาที!', en: 'Special offer ends in 10 seconds!' }, b: { th: 'ซื้อเลย', en: 'Buy now' }, s: [1] },
   { ic: '📥', h: { th: 'ดาวน์โหลดแอปนี้ รับสกินฟรี', en: 'Download this app for a free skin' }, b: { th: 'ดาวน์โหลด', en: 'Download' }, s: [2, 0] },
+  { ic: '🔄', h: { th: 'มีเกมเวอร์ชันใหม่ ดาวน์โหลดตอนนี้', en: 'A new version is out. Download now' }, b: { th: 'ดาวน์โหลด', en: 'Download' }, s: [2] },
   { ic: '🔑', h: { th: 'ใส่รหัสผ่าน รับเหรียญ 1,000', en: 'Enter your password for 1,000 coins' }, b: { th: 'ใส่รหัส', en: 'Enter' }, s: [2, 0] },
   { ic: '📝', h: { th: 'กรอกชื่อและเบอร์โทร รับเพชร', en: 'Type your name and phone for gems' }, b: { th: 'กรอกเลย', en: 'Fill in' }, s: [2, 0] },
+  { ic: '📺', h: { th: 'ดูโฆษณาจบ รับหัวใจฟรี', en: 'Watch an ad to get free hearts' }, b: { th: 'ดูโฆษณา', en: 'Watch ad' }, s: [0] },
+  { ic: '👥', h: { th: 'ชวนเพื่อน 3 คน ใส่เบอร์เพื่อน รับสกินฟรี', en: 'Invite 3 friends with their phone numbers for a free skin' }, b: { th: 'ชวนเลย', en: 'Invite' }, s: [0, 2] },
 ];
+// ป๊อปอัปของเกม: กดปุ่มได้เลย (+5 🪙) · บางอันหน้าตาเหมือนหลอก
 const SAFES = [
   { ic: '💾', h: { th: 'บันทึกเกมเรียบร้อย', en: 'Game saved' }, b: { th: 'ตกลง', en: 'OK' } },
-  { ic: '⭐', h: { th: 'เก็บเหรียญครบ 10 เหรียญแล้ว', en: 'You collected 10 coins' }, b: { th: 'ตกลง', en: 'OK' } },
-  { ic: '🗺️', h: { th: 'เส้นทางข้างหน้าเปิดแล้ว', en: 'The path ahead is open' }, b: { th: 'ตกลง', en: 'OK' } },
+  { ic: '⭐', h: { th: 'เก็บเหรียญครบ 10 เหรียญแล้ว', en: 'You collected 10 coins' }, b: { th: 'เยี่ยม!', en: 'Great!' } },
+  { ic: '🗺️', h: { th: 'เส้นทางข้างหน้าเปิดแล้ว', en: 'The path ahead is open' }, b: { th: 'ไปต่อ', en: 'Go on' } },
+  { ic: '🎁', h: { th: 'รางวัลประจำวัน: รับ 10 เหรียญในเกม', en: 'Daily reward: 10 in-game coins' }, b: { th: 'รับรางวัล', en: 'Get prize' } },
+  { ic: '⏰', h: { th: 'ด่านพิเศษ เหลือเวลาเล่น 2 นาที', en: 'Bonus level: 2 minutes left to play' }, b: { th: 'เล่นเลย!', en: 'Play!' } },
+  { ic: '🏆', h: { th: 'ขึ้นเลเวล 5 แล้ว! ได้หมวกใหม่ในเกม', en: 'Level 5! You got a new hat in the game' }, b: { th: 'ใส่หมวก', en: 'Wear it' } },
   { ic: '🔇', h: { th: 'ปิดเสียงเพลงประกอบแล้ว', en: 'Music turned off' }, b: { th: 'ตกลง', en: 'OK' } },
 ];
 const ZONES = [
@@ -140,19 +141,19 @@ const ZONES = [
 ];
 const UI = {
   th: { title: 'ผจญภัยป่ามหัศจรรย์', sub: 'พาเด็กหมวกแดงวิ่งไปเอาสมบัติที่ปราสาท ระวังป๊อปอัปหลอกที่เด้งมาบังทาง!',
-        r0: '<b>⬆ กระโดด</b>กด Spacebar หรือปุ่มกระโดด เพื่อข้ามหินและเก็บเหรียญ ป๊อปอัปขึ้นเมื่อไร เกมจะหยุดรอให้ปิดก่อน', r1: '<b>✅ ปุ่มปิดจริง</b>ตัวเล็กหรือสีจาง เช่น "✕ ปิด" ที่แถบบนสุด หรือ "ไม่ล่ะ ขอบคุณ"',
-        r2: '<b>❌ ปุ่มหลอก</b>ปุ่มสีสด ปุ่มใหญ่ หรือ X สีแดงในรูป กดแล้วเสียหัวใจ และโฆษณาจะเด้งเพิ่ม! (โหมดยาก: X ที่มุมก็อาจหลอก)', r3: '<b>👌 ป๊อปอัปของเกม</b>สีขาวเรียบ ๆ ไม่ได้ขออะไร กด "ตกลง" ได้เลย',
+        r0: '<b>⬆ กระโดด</b>กด Spacebar หรือปุ่มกระโดด เพื่อข้ามหินและเก็บเหรียญ ป๊อปอัปขึ้นเมื่อไร เกมจะหยุดรอให้ปิดก่อน', r1: '<b>👀 อ่านก่อนกด</b>ป๊อปอัปทุกอันหน้าตาคล้ายกัน ต้องอ่านข้อความถึงจะรู้ว่าอันไหนหลอก',
+        r2: '<b>✋ ป๊อปอัปหลอก</b>ล่อด้วยของฟรี เร่งให้รีบ หรือขอข้อมูล/ให้ดาวน์โหลด กด "✕ ปิด" เท่านั้น! กดปุ่มอื่นเสียหัวใจ และโฆษณาเด้งเพิ่ม', r3: '<b>✅ ป๊อปอัปของเกม</b>ไม่ขออะไร ไม่พาออกจากเกม กดปุ่มได้เลย รับ +5 🪙',
         goN: 'ปกติ ▶<small>กระโดดเอง · ป๊อปอัป 1–2</small>', goE: 'ง่าย ▶<small>กระโดดอัตโนมัติ · ป๊อปอัป 1</small>', goH: 'ยาก ▶<small>เร็ว · ป๊อปอัป 2–3 · ❤️ 3</small>', ready: 'พร้อม…', go: 'ไป!', jump: '⬆<br>กระโดด',
-        closed: 'ปิดได้! +5 🪙', okd: 'ตกลง +5 🪙', fooled: 'โดนหลอก!', fakex: 'X ปลอม!', more: 'โฆษณาเพิ่ม!', ouch: 'โอ๊ย!', ad: 'โฆษณา', close: '✕ ปิด', nothanks: 'ไม่ล่ะ ขอบคุณ', wait: 'ปิดป๊อปอัปก่อนนะ!',
+        closed: 'ปิดได้! +5 🪙', okd: 'ของเกมจริง +5 🪙', shut: 'ปิดแล้ว', fooled: 'โดนหลอก!', more: 'โฆษณาเพิ่ม!', ouch: 'โอ๊ย!', close: '✕ ปิด', wait: 'ปิดป๊อปอัปก่อนนะ!',
         win: 'ได้สมบัติแล้ว! 🎉', lose: 'หัวใจหมดแล้ว 💔', lCoins: 'เหรียญ', lClosed: 'ปิดป๊อปอัปถูก', lFooled: 'โดนหลอก', most: 'สัญญาณที่หลอกเราได้บ่อยที่สุด:', noFool: 'ไม่โดนหลอกเลย สุดยอด! 🏆', signs: 'จำไว้! สัญญาณหลอก 3 ข้อ:',
-        retry: 'เล่นต่อจากด่านนี้ ↻', gback: '↩ กลับใบงาน', again: 'เริ่มใหม่ทั้งหมด ↺' },
+        retry: 'เล่นต่อจากด่านนี้ ↻', gback: '↩ กลับ', again: 'เริ่มใหม่ทั้งหมด ↺' },
   en: { title: 'Magic Forest Adventure', sub: 'Help the red-cap kid run to the castle treasure. Watch out for trick pop-ups that block the way!',
-        r0: '<b>⬆ Jump</b>Press Spacebar or the jump button to hop over rocks and grab coins. When a pop-up appears, the game pauses until you close it.', r1: '<b>✅ Real close buttons</b>are small or faint, like "✕ Close" on the top bar or "No thanks".',
-        r2: '<b>❌ Trick buttons</b>are bright, big, or a red X in the picture. Tapping one costs a heart and opens more ads! (Hard: even a corner X can be fake)', r3: '<b>👌 Game messages</b>are plain white and ask for nothing. Just tap "OK".',
+        r0: '<b>⬆ Jump</b>Press Spacebar or the jump button to hop over rocks and grab coins. When a pop-up appears, the game pauses until you close it.', r1: '<b>👀 Read first</b>All pop-ups look alike. Read the words to find the tricks.',
+        r2: '<b>✋ Trick pop-ups</b>offer free stuff, rush you, or ask for info or a download. Only tap "✕ Close"! Other buttons cost a heart and open more ads.', r3: '<b>✅ Game messages</b>ask for nothing and keep you in the game. Tap the button for +5 🪙',
         goN: 'Normal ▶<small>you jump · 1–2 pop-ups</small>', goE: 'Easy ▶<small>auto jump · 1 pop-up</small>', goH: 'Hard ▶<small>fast · 2–3 pop-ups · ❤️ 3</small>', ready: 'Ready…', go: 'Go!', jump: '⬆<br>Jump',
-        closed: 'Closed! +5 🪙', okd: 'OK +5 🪙', fooled: 'Tricked!', fakex: 'Fake X!', more: 'More ads!', ouch: 'Ouch!', ad: 'Ad', close: '✕ Close', nothanks: 'No thanks', wait: 'Close the pop-ups first!',
+        closed: 'Closed! +5 🪙', okd: 'Real game message +5 🪙', shut: 'Closed', fooled: 'Tricked!', more: 'More ads!', ouch: 'Ouch!', close: '✕ Close', wait: 'Close the pop-ups first!',
         win: 'You found the treasure! 🎉', lose: 'Out of hearts 💔', lCoins: 'Coins', lClosed: 'Pop-ups closed', lFooled: 'Tricked', most: 'The sign that tricked you most:', noFool: 'Never tricked. Amazing! 🏆', signs: 'Remember the 3 trick signs:',
-        retry: 'Continue from this stage ↻', gback: '↩ Back to worksheet', again: 'Start over ↺' },
+        retry: 'Continue from this stage ↻', gback: '↩ Back', again: 'Start over ↺' },
 };
 
 // ---------- sound ----------
@@ -165,9 +166,9 @@ const sCoin = () => beep([[988, .05], [1319, .09]]), sJump = () => beep([[400, .
 // ---------- world ----------
 const ZLEN = 3000, GROUND = 720, HX = 320, GRAV = 2400, JV = -1150;
 const MODES = {
-  easy:   { speed: 210, burst: [1, 1], hearts: 5, auto: true,  tinyAdd: -1, fakeCorner: 0,  obMul: 1.1, gapMul: 1.15 },
-  normal: { speed: 240, burst: [1, 2], hearts: 5, auto: false, tinyAdd: 0,  fakeCorner: 0,  obMul: 1,   gapMul: 1 },
-  hard:   { speed: 310, burst: [2, 3], hearts: 3, auto: false, tinyAdd: .4, fakeCorner: .7, obMul: .85, gapMul: .85 },
+  easy:   { speed: 210, burst: [1, 1], hearts: 5, auto: true,  tinyAdd: -1,  obMul: 1.1, gapMul: 1.15 },
+  normal: { speed: 240, burst: [1, 2], hearts: 5, auto: false, tinyAdd: 0,  obMul: 1,   gapMul: 1 },
+  hard:   { speed: 310, burst: [2, 3], hearts: 3, auto: false, tinyAdd: .4, obMul: .85, gapMul: .85 },
 };
 let M = MODES.normal, SPEED = 240, maxHearts = 5, resumeT = 0, wasPaused = false;
 let world = [], camX = 0, hero, zoneIdx = 0, hearts = 5, coins = 0, closed = 0, fooled = 0, fooledBy = [0, 0, 0], state = 'title', easy = false, lastT = 0, spawnT = 0, inv = 0, raf = 0, bag = [], zoneShown = -1, coinsAtZone = 0;
@@ -242,7 +243,7 @@ function roundRect(x, y, w, h, r){ g.beginPath(); g.moveTo(x + r, y); g.arcTo(x 
 const openPops = () => [...layer.children].filter(p => !p._done).length;
 const blocked = () => openPops() > 0 || (spawn._pending > 0);
 const paused = () => blocked() || resumeT > 0;
-function pick(){ if (!bag.length) bag = [...TRICKS, ...TRICKS, ...SAFES].map(x => ({ x, k: x.s ? 't' : 's' })).sort(() => Math.random() - .5); return bag.pop(); }
+function pick(){ if (!bag.length) bag = [...TRICKS, ...SAFES, ...SAFES].map(x => ({ x, k: x.s ? 't' : 's' })).sort(() => Math.random() - .5); return bag.pop(); }
 function freeSpot(){
   for (let i = 0; i < 30; i++) { const x = 380 + Math.random() * (1600 - 380 - 450 - 180), y = 100 + Math.random() * 360;
     if (![...layer.children].some(p => Math.abs(p.offsetLeft - x) < 400 && Math.abs(p.offsetTop - y) < 240)) return [x, y]; }
@@ -255,10 +256,10 @@ function hud(){
   const p = Math.min(1, camX / (3 * ZLEN)); $('#pfill').style.width = (p * 100) + '%'; $('#pme').style.left = (p * 96 + 2) + '%';
 }
 function hurt(){ hearts--; inv = 1.2; sBad(); cv.classList.remove('shake'); void cv.offsetWidth; cv.classList.add('shake'); hud(); if (hearts <= 0) lose(); }
-function popHit(p, good, msg){
+function popHit(p, good, msg, gain = 5){
   if (state !== 'play' || p._done) return;
   const cx = p.offsetLeft + 210, cy = p.offsetTop + 50; removePop(p);
-  if (good) { coins += 5; closed++; sGood(); toast(cx, cy, msg, true); hud(); return; }
+  if (good) { coins += gain; closed++; sGood(); toast(cx, cy, msg, true); hud(); return; }
   fooled++; (p._signs || []).forEach(s => fooledBy[s]++);
   toast(cx, cy, msg + (p._signs ? ' ' + T(SIGNS[p._signs[0]]) : ''), false); hurt();
   if (state === 'play') { spawn._pending = (spawn._pending || 0) + 2; setTimeout(() => { if (state !== 'play') { spawn._pending = 0; return; } toast(800, 420, UI[L].more, false); spawn(true); spawn(true); }, 500); }
@@ -266,22 +267,14 @@ function popHit(p, good, msg){
 function spawn(forceTrick){
   const U = UI[L], z = ZONES[zoneIdx]; let it = pick(); if (forceTrick && it.k !== 't') it = { k: 't', x: TRICKS[Math.floor(Math.random() * TRICKS.length)] };
   const p = document.createElement('div'), [x, y] = freeSpot(); p.style.left = x + 'px'; p.style.top = y + 'px';
-  if (it.k === 't') {
-    const t = it.x, useBar = Math.random() < .55, fx = [['8px', 'left'], ['8px', 'right']][Math.floor(Math.random() * 2)];
-    p.className = 'pop trick' + (Math.random() < z.tiny + M.tinyAdd ? ' tiny' : ''); p._signs = t.s;
-    const cornerFake = useBar ? false : Math.random() < M.fakeCorner;
-    p.innerHTML = `<div class="bar"><span>${U.ad}</span>${useBar ? `<button class="realx">${U.close}</button>` : (cornerFake ? '<button class="barfake">✕</button>' : '<span></span>')}</div>
-      <div class="content"><div class="fakex" style="top:${fx[0]};${fx[1]}:8px">✕</div><div class="ic">${t.ic}</div><h3>${T(t.h)}</h3><button class="bait">${T(t.b)}</button>${useBar ? '' : `<button class="nothanks">${U.nothanks}</button>`}</div>`;
-    p.querySelector('.bait').onclick = e => { e.stopPropagation(); popHit(p, false, U.fooled); };
-    p.querySelector('.fakex').onclick = e => { e.stopPropagation(); popHit(p, false, U.fakex); };
-    if (cornerFake) p.querySelector('.barfake').onclick = e => { e.stopPropagation(); popHit(p, false, U.fakex); };
-    p.querySelector(useBar ? '.realx' : '.nothanks').onclick = e => { e.stopPropagation(); popHit(p, true, U.closed); };
-  } else {
-    const t = it.x; p.className = 'pop safe';
-    p.innerHTML = `<div class="bar"><span>🎮</span><button class="realx">✕</button></div><div class="content"><div class="ic">${t.ic}</div><h3>${T(t.h)}</h3><button class="ok">${T(t.b)}</button></div>`;
-    p.querySelector('.ok').onclick = e => { e.stopPropagation(); popHit(p, true, U.okd); };
-    p.querySelector('.realx').onclick = e => { e.stopPropagation(); popHit(p, true, U.okd); };
-  }
+  // ทุกป๊อปอัปมี 2 ปุ่มเหมือนกัน: [ปุ่มตามข้อความ] กับ [✕ ปิด] · หลอก = ต้องปิด · ของเกม = กดปุ่มได้ (+5) หรือปิดเฉย ๆ
+  const t = it.x, trick = it.k === 't';
+  p.className = 'pop gp c' + Math.floor(Math.random() * 4) + (Math.random() < z.tiny + M.tinyAdd ? ' tiny' : '');
+  if (trick) p._signs = t.s;
+  p.innerHTML = `<div class="bar"><span>🎮</span><button class="realx">${U.close}</button></div>
+    <div class="content"><div class="ic">${t.ic}</div><h3>${T(t.h)}</h3><button class="bait">${T(t.b)}</button></div>`;
+  p.querySelector('.bait').onclick = e => { e.stopPropagation(); trick ? popHit(p, false, U.fooled) : popHit(p, true, U.okd); };
+  p.querySelector('.realx').onclick = e => { e.stopPropagation(); trick ? popHit(p, true, U.closed) : popHit(p, true, U.shut, 0); };
   p.addEventListener('pointerdown', e => e.stopPropagation());
   layer.appendChild(p); sPop(); if (spawn._pending > 0) spawn._pending--;
 }
