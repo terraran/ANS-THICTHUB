@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>นักสืบแชท</title>
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#0b2545;--navy2:#13315c;--sel:#facc15;--act:#0284c7;--ok:#16a34a;--bad:#dc2626;--ink:#0f172a;--muted:#475569;--line:#cbd5e1}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--navy);color:#fff;font-family:Kanit,Tahoma,sans-serif}
+button{font-family:inherit;cursor:pointer;border:none;border-radius:14px;min-height:48px;font-size:20px;font-weight:600;padding:6px 20px;background:var(--act);color:#fff;box-shadow:0 4px 0 #0005}
+button:disabled{background:#94a3b8;color:#1e293b;box-shadow:none;cursor:not-allowed}
+.hide{display:none!important}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 16px;flex-wrap:wrap}
+.ctls{display:flex;gap:8px}
+.ctl{background:var(--navy2);border:2px solid #ffffff55;box-shadow:none;font-size:17px;min-height:44px;padding:4px 14px}
+.ctl.on{background:#fff;color:var(--navy)}
+.hud{display:flex;gap:10px;flex-wrap:wrap;font-size:18px}
+.hud span{background:var(--navy2);border-radius:20px;padding:4px 14px}
+.timer{background:#7f1d1d!important}
+.wrap{max-width:860px;margin:0 auto;padding:8px 16px 32px}
+/* title */
+.title{text-align:center;display:flex;flex-direction:column;align-items:center;gap:16px;padding-top:24px}
+.badge{font-size:84px;line-height:1}
+.title h1{margin:0;font-size:52px;font-weight:800}
+.title p{margin:0;font-size:21px;color:#bfdbfe;max-width:640px}
+.legend{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.legend span{background:var(--navy2);border-radius:20px;padding:4px 14px;font-size:17px}
+.modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(220px,100%),1fr));gap:14px;width:100%;margin-top:8px}
+.modes button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:14px;font-size:26px}
+.modes small{font-size:16px;font-weight:400;opacity:.9}
+#goE{background:var(--ok)}#goH{background:var(--bad)}
+/* play */
+.file{background:#fff;color:var(--ink);border-radius:24px;padding:22px;display:flex;flex-direction:column;gap:16px;box-shadow:0 10px 0 #020617}
+.casehd{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.casehd b{background:var(--sel);color:var(--navy);border-radius:12px;padding:2px 14px;font-size:18px}
+.casehd span{color:var(--muted);font-size:17px}
+.chat{background:#1e293b;border-radius:18px;padding:16px;display:flex;gap:12px;align-items:flex-start}
+.chat .av{flex:none;width:52px;height:52px;border-radius:50%;background:#4f46e5;color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800}
+.chat .who{color:#93c5fd;font-size:16px}
+.chat .msg{background:#fff;color:var(--ink);border-radius:4px 16px 16px 16px;padding:10px 16px;font-size:24px;line-height:1.35;margin-top:4px}
+.hint{background:#fef9c3;color:#713f12;border-radius:12px;padding:6px 14px;font-size:18px}
+.ask{font-size:20px;font-weight:600}
+.signs{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(190px,100%),1fr));gap:10px}
+.sg{background:#f8fafc;color:var(--ink);border:3px solid var(--line);box-shadow:0 3px 0 var(--line);font-size:19px;text-align:left;display:flex;align-items:center;gap:8px}
+.sg[aria-pressed="true"]{background:#fde68a;border-color:#f59e0b}
+.sg.safe{grid-column:1/-1;justify-content:center}
+.sg.right{background:#bbf7d0;border-color:var(--ok)}
+.sg.wrong{background:#fecaca;border-color:var(--bad);text-decoration:line-through}
+.sg.miss{border-style:dashed;border-color:var(--ok);background:#f0fdf4}
+.sg:disabled{cursor:default;color:var(--ink)}
+.res{border-radius:14px;padding:12px 16px;font-size:19px;line-height:1.4}
+.res.good{background:#dcfce7;color:#14532d}.res.part{background:#fef3c7;color:#78350f}.res.no{background:#fee2e2;color:#7f1d1d}
+.res b{font-size:22px}
+.go{align-self:flex-end}
+/* case end / final */
+.sum{display:flex;flex-direction:column;gap:8px}
+.sum div{display:flex;justify-content:space-between;gap:10px;background:#f1f5f9;border-radius:12px;padding:8px 14px;font-size:18px}
+.final{text-align:center;align-items:center}
+.final .badge{font-size:110px}
+.final h2{margin:0;font-size:38px}
+.final p{margin:0;font-size:22px;color:var(--muted)}
+.row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+@media (max-width:560px){.title h1{font-size:38px}.chat .msg{font-size:20px}}
+</style></head><body>
+<div class="top">
+ <div class="hud hide" id="hud"><span id="hCase"></span><span id="hStar"></span><span id="hTime" class="timer hide"></span></div>
+ <div class="ctls"><button class="ctl hide" id="gback"></button><button class="ctl on" id="lth">TH</button><button class="ctl" id="len">EN</button></div>
+</div>
+<div class="wrap">
+ <section id="sTitle" class="title">
+  <div class="badge">🕵️</div>
+  <h1 id="tTitle"></h1>
+  <p id="tSub"></p>
+  <div class="legend" id="tLegend"></div>
+  <div class="modes"><button id="goE"></button><button id="goN"></button><button id="goH"></button></div>
+ </section>
+ <section id="sPlay" class="file hide">
+  <div class="casehd"><b id="pCase"></b><span id="pNum"></span></div>
+  <div class="chat"><div class="av" id="pAv"></div><div><div class="who" id="pWho"></div><div class="msg" id="pMsg"></div></div></div>
+  <div class="hint hide" id="pHint"></div>
+  <div class="ask" id="pAsk"></div>
+  <div class="signs" id="pSigns"></div>
+  <div class="res hide" id="pRes"></div>
+  <button class="go" id="pCheck" disabled></button>
+  <button class="go hide" id="pNext"></button>
+ </section>
+ <section id="sCase" class="file hide">
+  <div class="casehd"><b id="cTitle"></b><span id="cStars"></span></div>
+  <div class="sum" id="cSum"></div>
+  <button class="go" id="cNext"></button>
+ </section>
+ <section id="sEnd" class="file final hide">
+  <div class="badge" id="eBadge"></div>
+  <h2 id="eRank"></h2>
+  <p id="eStars"></p>
+  <div class="row"><button id="eAgain"></button><button id="eTitle" style="background:var(--navy2)"></button></div>
+ </section>
+</div>
+<script>
+const $ = s => document.querySelector(s);
+// สัญญาณอันตราย 4 ข้อ (ตรงกับใบงาน Y4 สัปดาห์ 1)
+const SIGNS = [null,
+  { th: '🔑 ขอข้อมูล/รหัสผ่าน', en: '🔑 Info / password' },
+  { th: '📷 ขอรูป/เปิดกล้อง', en: '📷 Photos / camera' },
+  { th: '🎁 ให้ของรางวัล', en: '🎁 Gifts / prizes' },
+  { th: '🤫 ให้เก็บเป็นความลับ', en: '🤫 Keep it secret' }];
+// ข้อความใหม่ (ไม่ซ้ำกับการ์ดในใบงาน) · s = สัญญาณที่มี ([] = ปลอดภัย)
+const MSGS = [
+  { who: 'Leo_Blast', s: [], th: 'เมื่อกี้ยิงแม่นมาก!', en: 'Nice shot just now!', wth: 'ชมการเล่นเฉย ๆ ไม่ได้ขออะไร', wen: 'Just praise. Nothing is asked.' },
+  { who: 'PandaPro', s: [], th: 'ด่านนี้มีทางลับอยู่หลังน้ำตกนะ', en: 'There is a secret path behind the waterfall.', wth: '"ทางลับ" เป็นเรื่องในเกม ไม่ได้ให้เราปิดบังผู้ใหญ่', wen: 'A "secret path" is part of the game. It does not ask you to hide anything from adults.' },
+  { who: 'Kiki_99', s: [], th: 'พักกินน้ำก่อนนะ เดี๋ยวมาเล่นต่อ', en: 'Taking a water break, back soon.', wth: 'บอกว่าจะพักเฉย ๆ', wen: 'Just saying they will take a break.' },
+  { who: 'RocketMan', s: [], th: 'ใครอยากเข้าทีมแดงบ้าง', en: 'Who wants to join the red team?', wth: 'ชวนเล่นเป็นทีมในเกม', wen: 'Inviting players to a team in the game.' },
+  { who: 'Mochi', s: [], th: 'แพ้แล้ว ไม่เป็นไร รอบหน้าเอาใหม่', en: 'We lost. That is okay, next round!', wth: 'ให้กำลังใจกันในเกม', wen: 'Cheering each other on in the game.' },
+  { who: 'GGWP', s: [], th: 'กดปุ่ม E เพื่อเปิดประตู', en: 'Press E to open the door.', wth: 'บอกวิธีเล่นเกม', wen: 'A tip about how to play.' },
+  { who: 'StarLight', s: [], th: 'ชุดใหม่ในร้านค้าเกมสวยมาก', en: 'The new outfit in the game shop looks great.', wth: 'คุยเรื่องของในร้านค้าเกม ไม่ได้จะให้ของเรา', wen: 'Talking about the game shop. Not offering you anything.' },
+  { who: 'TinyTank', s: [], th: 'ขอบคุณที่ช่วยกันป้องกันฐานนะ', en: 'Thanks for helping defend the base!', wth: 'ขอบคุณเรื่องในเกม', wen: 'Saying thanks for something in the game.' },
+  { who: 'GiftBox', s: [1, 3], th: 'พี่จะเติมเพชรให้ฟรี บอกชื่อผู้ใช้กับรหัสผ่านมาสิ', en: 'I will give you free gems. Tell me your username and password.', wth: 'ล่อด้วยของฟรี แล้วขอรหัสผ่าน', wen: 'Offers free gems, then asks for your password.' },
+  { who: 'Camy', s: [2], th: 'ส่งรูปห้องนอนมาให้ดูหน่อย', en: 'Send me a photo of your bedroom.', wth: 'ขอรูปจากคนแปลกหน้า', wen: 'A stranger asking for photos.' },
+  { who: 'SecretPal', s: [4], th: 'อย่าบอกพ่อแม่นะว่าเราคุยกัน', en: 'Don’t tell your parents we are chatting.', wth: 'ให้ปิดบังผู้ใหญ่ เป็นสัญญาณอันตราย', wen: 'Asks you to hide it from adults. That is a warning sign.' },
+  { who: 'Vip_Bro', s: [1], th: 'เบอร์โทรเธอเบอร์อะไร เดี๋ยวแอดไลน์ไป', en: 'What is your phone number? I will add you on another app.', wth: 'ขอเบอร์โทร = ข้อมูลส่วนตัว', wen: 'A phone number is personal information.' },
+  { who: 'LuckyDraw', s: [3], th: 'ยินดีด้วย! เธอได้สกินหายาก กดลิงก์รับเลย', en: 'Congrats! You won a rare skin. Tap the link to get it.', wth: 'ให้รางวัลจากคนแปลกหน้า อาจเป็นกับดัก', wen: 'A prize from a stranger can be a trap.' },
+  { who: 'FunCam', s: [2, 3], th: 'ถ่ายรูปตัวเองส่งมา เดี๋ยวให้ตัวละครพิเศษ', en: 'Send me a selfie and I will give you a special character.', wth: 'ขอรูป แล้วล่อด้วยของรางวัล', wen: 'Asks for a photo and offers a prize.' },
+  { who: 'TrustMe', s: [3, 4], th: 'ของที่พี่ให้ ห้ามเล่าให้ใครฟังนะ', en: 'The gift I gave you, don’t tell anyone about it.', wth: 'ให้ของ แล้วให้เก็บเป็นความลับ', wen: 'Gives a gift and asks you to keep it secret.' },
+  { who: 'Hero_X', s: [1], th: 'บ้านเธออยู่แถวไหน', en: 'Where do you live?', wth: 'ถามที่อยู่ = ข้อมูลส่วนตัว', wen: 'Your address is personal information.' },
+  { who: 'Bestie4ever', s: [2, 4], th: 'ส่งรูปหน้าเธอมา แล้วลบแชทนี้ด้วยนะ', en: 'Send me a photo of your face, then delete this chat.', wth: 'ขอรูป และให้ลบแชทเพื่อไม่ให้ใครเห็น', wen: 'Asks for a photo and to delete the chat so nobody sees.' },
+  { who: 'CoinKing', s: [1, 3], th: 'ให้เหรียญ 5,000 ฟรี แค่บอกว่าเรียนโรงเรียนอะไร', en: 'Free 5,000 coins. Just tell me which school you go to.', wth: 'ล่อด้วยเหรียญ แล้วถามชื่อโรงเรียน', wen: 'Offers coins, then asks for your school.' },
+  { who: 'Shh_Shh', s: [4], th: 'เรื่องที่เราคุยกันเป็นความลับของเราสองคนนะ', en: 'What we talk about is a secret between us two.', wth: 'ให้เก็บความลับกับคนแปลกหน้า', wen: 'Keeping secrets with a stranger is a warning sign.' },
+  { who: 'VideoStar', s: [2], th: 'เปิดกล้องวิดีโอคอลกับพี่หน่อย', en: 'Turn on your camera for a video call with me.', wth: 'ขอเห็นหน้าผ่านกล้อง', wen: 'Asks to see you on camera.' },
+  { who: 'ProCoach', s: [1, 3], th: 'พี่ช่วยเล่นให้ผ่านด่านฟรี ขอรหัสผ่านเข้าไปเล่นแทนนะ', en: 'I will clear the level for you for free. Give me your password.', wth: 'เสนอช่วยฟรี แล้วขอรหัสผ่าน', wen: 'Offers free help, then asks for your password.' },
+  { who: 'NiceGuy', s: [2, 3, 4], th: 'พี่ซื้อบัตรเติมเงินให้ ส่งรูปมาแลก แต่อย่าบอกใครนะ', en: 'I will buy you a top-up card. Send a photo in return, but don’t tell anyone.', wth: 'ให้ของ ขอรูป และให้เก็บเป็นความลับ ครบ 3 สัญญาณ', wen: 'A gift, a photo request and a secret: three signs.' },
+  { who: 'MapQuest', s: [1], th: 'ชื่อจริงเธอชื่ออะไร วันเกิดวันไหน', en: 'What is your real name and birthday?', wth: 'ชื่อจริงและวันเกิดเป็นข้อมูลส่วนตัว', wen: 'Your real name and birthday are personal information.' },
+  { who: 'PrizeBot', s: [1, 3], th: 'เธอได้รางวัลไอแพด ส่งที่อยู่มารับของได้เลย', en: 'You won an iPad! Send your address to get it.', wth: 'ล่อด้วยรางวัลใหญ่ แล้วขอที่อยู่', wen: 'A big prize, then asks for your address.' }
+];
+const UI = {
+  th: { title: 'นักสืบแชท', sub: 'คนแปลกหน้าส่งข้อความมาในเกม! อ่านให้ดี แล้วหาว่ามีสัญญาณอันตรายอะไรซ่อนอยู่',
+        goE: 'ง่าย<small>มีคำใบ้ ไม่จับเวลา</small>', goN: 'ปกติ<small>ไม่มีคำใบ้</small>', goH: 'ยาก<small>ข้อละ 20 วินาที</small>',
+        gback: '↩ กลับ', caseN: n => `คดีที่ ${n} / 3`, msgN: n => `ข้อความ ${n} / 4`, stars: n => `⭐ ${n}`, time: n => `⏱ ${n}`,
+        ask: 'ข้อความนี้มีสัญญาณอันตรายอะไรบ้าง? (เลือกได้หลายข้อ)', safe: '✅ ไม่มีสัญญาณ ข้อความปลอดภัย',
+        hint: n => n ? `🔎 คำใบ้: ข้อความนี้มีสัญญาณซ่อนอยู่ ${n} ข้อ` : '🔎 คำใบ้: ลองดูดี ๆ ข้อความนี้อาจไม่มีสัญญาณเลย',
+        check: 'ตรวจหลักฐาน 🔍', next: 'ข้อความต่อไป ➜', nextCase: 'คดีต่อไป ➜', finish: 'ดูผลนักสืบ ➜',
+        good: 'ถูกต้อง! ⭐⭐', part: 'เกือบแล้ว! ⭐', no: 'ยังไม่ถูก', timeUp: 'หมดเวลา! ',
+        caseDone: n => `ปิดคดีที่ ${n} แล้ว`, total: (a, b) => `ได้ดาว ${a} จาก ${b} ดวง`,
+        ranks: ['นักสืบฝึกหัด', 'นักสืบระดับเงิน', 'นักสืบระดับทอง'], again: 'เล่นอีกครั้ง ↻', toTitle: 'เลือกโหมดใหม่' },
+  en: { title: 'Chat Detective', sub: 'Strangers are sending messages in a game! Read carefully and find the hidden warning signs.',
+        goE: 'Easy<small>Hints, no timer</small>', goN: 'Normal<small>No hints</small>', goH: 'Hard<small>20 seconds each</small>',
+        gback: '↩ Back', caseN: n => `Case ${n} / 3`, msgN: n => `Message ${n} / 4`, stars: n => `⭐ ${n}`, time: n => `⏱ ${n}`,
+        ask: 'Which warning signs are in this message? (choose all that fit)', safe: '✅ No signs, this message is safe',
+        hint: n => n ? `🔎 Hint: this message hides ${n} sign${n > 1 ? 's' : ''}` : '🔎 Hint: look carefully, this message may have no signs at all',
+        check: 'Check the evidence 🔍', next: 'Next message ➜', nextCase: 'Next case ➜', finish: 'See your detective rank ➜',
+        good: 'Correct! ⭐⭐', part: 'Almost! ⭐', no: 'Not quite', timeUp: 'Time is up! ',
+        caseDone: n => `Case ${n} closed`, total: (a, b) => `You got ${a} of ${b} stars`,
+        ranks: ['Trainee detective', 'Silver detective', 'Gold detective'], again: 'Play again ↻', toTitle: 'Choose a mode' }
+};
+const MODES = { easy: { hint: true, time: 0 }, normal: { hint: false, time: 0 }, hard: { hint: false, time: 20 } };
+let L = 'th', mode = null, deck = [], idx = 0, pick = new Set(), checked = false, stars = 0, results = [], timer = null, left = 0;
+const t = o => o[L];
+const U = () => UI[L];
+
+function shuffle(a){ a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+// 12 ข้อความ = 3 คดี × 4 · ง่าย/ปกติ: ปลอดภัย 4 อันตราย 8 · ยาก: ปลอดภัย 3 และเอาข้อความหลายสัญญาณก่อน
+function buildDeck(){
+  const safe = shuffle(MSGS.filter(m => !m.s.length)), multi = shuffle(MSGS.filter(m => m.s.length > 1)), single = shuffle(MSGS.filter(m => m.s.length === 1));
+  const d = mode === 'hard' ? safe.slice(0, 3).concat(multi.slice(0, 7), single.slice(0, 2))
+                            : safe.slice(0, 4).concat(shuffle(multi.concat(single)).slice(0, 8));
+  return shuffle(d);
+}
+function show(id){ ['sTitle', 'sPlay', 'sCase', 'sEnd'].forEach(s => $('#' + s).classList.toggle('hide', s !== id)); $('#hud').classList.toggle('hide', id === 'sTitle'); }
+
+function applyLang(){
+  document.documentElement.lang = L; document.title = U().title;
+  $('#lth').classList.toggle('on', L === 'th'); $('#len').classList.toggle('on', L === 'en');
+  $('#gback').textContent = U().gback;
+  $('#tTitle').textContent = U().title; $('#tSub').textContent = U().sub;
+  $('#tLegend').innerHTML = SIGNS.slice(1).map(s => `<span>${t(s)}</span>`).join('');
+  $('#goE').innerHTML = U().goE; $('#goN').innerHTML = U().goN; $('#goH').innerHTML = U().goH;
+  if (!$('#sPlay').classList.contains('hide')) renderMsg();
+  if (!$('#sCase').classList.contains('hide')) renderCase();
+  if (!$('#sEnd').classList.contains('hide')) renderEnd();
+  hud();
+}
+function hud(){
+  $('#hCase').textContent = U().caseN(Math.min(3, Math.floor(idx / 4) + 1));
+  $('#hStar').textContent = U().stars(stars);
+  $('#hTime').classList.toggle('hide', !(mode === 'hard' && timer));
+  $('#hTime').textContent = U().time(left);
+}
+
+function start(m){ mode = m; deck = buildDeck(); idx = 0; stars = 0; results = []; nextMsg(); }
+function nextMsg(){
+  pick = new Set(); checked = false;
+  show('sPlay'); renderMsg();
+  stopTimer();
+  if (MODES[mode].time) { left = MODES[mode].time; timer = setInterval(() => { left--; hud(); if (left <= 0) { stopTimer(); check(true); } }, 1000); }
+  hud();
+}
+function stopTimer(){ if (timer) clearInterval(timer); timer = null; }
+
+function renderMsg(){
+  const m = deck[idx];
+  $('#pCase').textContent = U().caseN(Math.floor(idx / 4) + 1);
+  $('#pNum').textContent = U().msgN(idx % 4 + 1);
+  $('#pAv').textContent = m.who[0]; $('#pWho').textContent = '💬 ' + m.who; $('#pMsg').textContent = t(m);
+  $('#pHint').classList.toggle('hide', !MODES[mode].hint);
+  $('#pHint').textContent = U().hint(m.s.length);
+  $('#pAsk').textContent = U().ask;
+  const btn = (n, label, cls) => {
+    let st = '';
+    if (checked) { const chosen = pick.has(n), should = n ? m.s.includes(n) : !m.s.length; st = chosen && should ? 'right' : chosen ? 'wrong' : should ? 'miss' : ''; }
+    return `<button type="button" class="sg ${cls} ${st}" data-n="${n}" aria-pressed="${pick.has(n)}" ${checked ? 'disabled' : ''}>${label}</button>`;
+  };
+  $('#pSigns').innerHTML = SIGNS.slice(1).map((s, i) => btn(i + 1, t(s), '')).join('') + btn(0, U().safe, 'safe');
+  $('#pCheck').textContent = U().check; $('#pCheck').disabled = !pick.size; $('#pCheck').classList.toggle('hide', checked);
+  const last = idx === deck.length - 1, endCase = idx % 4 === 3;
+  $('#pNext').textContent = endCase ? (last ? U().finish : U().nextCase) : U().next;
+  $('#pNext').classList.toggle('hide', !checked);
+  const r = results[idx];
+  $('#pRes').classList.toggle('hide', !checked);
+  if (checked) { $('#pRes').className = 'res ' + r.k; $('#pRes').innerHTML = `<b>${r.timeUp ? U().timeUp : ''}${U()[r.k]}</b><br>${L === 'en' ? m.wen : m.wth}`; }
+}
+$('#pSigns').addEventListener('click', e => {
+  const b = e.target.closest('.sg'); if (!b || checked) return;
+  const n = +b.dataset.n;
+  if (n === 0) pick = pick.has(0) ? new Set() : new Set([0]);           // ปลอดภัย = เลือกได้อย่างเดียว
+  else { pick.delete(0); pick.has(n) ? pick.delete(n) : pick.add(n); }
+  renderMsg();
+});
+
+// ⭐⭐ ตรงเป๊ะ · ⭐ เจอสัญญาณที่ถูกอย่างน้อย 1 ข้อ
+function check(timeUp){
+  stopTimer();
+  const m = deck[idx], want = m.s.length ? m.s : [0];
+  const exact = want.length === pick.size && want.every(n => pick.has(n));
+  const some = m.s.some(n => pick.has(n));
+  const k = exact ? 'good' : some ? 'part' : 'no';
+  const got = exact ? 2 : some ? 1 : 0;
+  stars += got; results[idx] = { k, got, timeUp: !!timeUp && !exact };
+  checked = true; renderMsg(); hud();
+}
+$('#pCheck').onclick = () => check(false);
+$('#pNext').onclick = () => { if (idx % 4 === 3) { show('sCase'); renderCase(); } else { idx++; nextMsg(); } };
+
+function renderCase(){
+  const c = Math.floor(idx / 4), rs = results.slice(c * 4, c * 4 + 4);
+  $('#cTitle').textContent = U().caseDone(c + 1);
+  $('#cStars').textContent = U().stars(rs.reduce((a, r) => a + r.got, 0)) + ' / 8';
+  $('#cSum').innerHTML = deck.slice(c * 4, c * 4 + 4).map((m, i) => `<div><span>💬 ${m.who}: ${t(m)}</span><b>${'⭐'.repeat(rs[i].got) || '—'}</b></div>`).join('');
+  $('#cNext').textContent = idx === deck.length - 1 ? U().finish : U().nextCase;
+}
+$('#cNext').onclick = () => { if (idx === deck.length - 1) { show('sEnd'); renderEnd(); } else { idx++; nextMsg(); } };
+
+function renderEnd(){
+  const max = deck.length * 2, r = stars >= 20 ? 2 : stars >= 14 ? 1 : 0;
+  $('#eBadge').textContent = ['🔍', '🥈', '🥇'][r];
+  $('#eRank').textContent = U().ranks[r];
+  $('#eStars').textContent = U().total(stars, max);
+  $('#eAgain').textContent = U().again; $('#eTitle').textContent = U().toTitle;
+  hud();
+}
+$('#eAgain').onclick = () => start(mode);
+function toTitle(){ stopTimer(); mode = null; show('sTitle'); }
+$('#eTitle').onclick = toTitle;
+
+$('#goE').onclick = () => start('easy'); $('#goN').onclick = () => start('normal'); $('#goH').onclick = () => start('hard');
+$('#lth').onclick = () => { L = 'th'; applyLang(); }; $('#len').onclick = () => { L = 'en'; applyLang(); };
+// เปิดใน iframe (Hub/ใบงาน): ปุ่มกลับส่ง 'closeGame' · รับภาษาจาก postMessage({lang})
+if (window.parent !== window) { $('#gback').classList.remove('hide'); $('#gback').onclick = () => { toTitle(); parent.postMessage('closeGame', '*'); }; }
+addEventListener('message', e => { if (e.data && e.data.lang) { L = e.data.lang === 'en' ? 'en' : 'th'; applyLang(); } });
+applyLang();
+</script>
+</body></html>

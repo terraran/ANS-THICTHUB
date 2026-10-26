@@ -91,7 +91,7 @@ test('Y3: เลือกห้อง → ชื่อ → ทำใบงาน
   expect(errs).toEqual([]);
 });
 
-test('Y4: ข้าม FoR แล้วส่ง · ภาษาอังกฤษ · ไม่มีปุ่มเกม', async ({ page }) => {
+test('Y4: ข้าม FoR แล้วส่ง · ภาษาอังกฤษ · เกมนักสืบหลังส่ง', async ({ page }) => {
   const api = mockApi(page);
   await page.goto('/#/lib/Y4.1/' + encodeURIComponent('เมษา'));
   await page.click('[data-lang="en"]');
@@ -103,7 +103,11 @@ test('Y4: ข้าม FoR แล้วส่ง · ภาษาอังกฤ�
   expect(d.fr).toBe('');
   expect(api.posts[0].row[5]).toBe('EN');
   expect(api.posts[0].row[13]).toBe('-');
-  await expect(page.locator('#play')).toBeHidden();
+  await expect(page.locator('#play')).toHaveText('🎮 Play Chat Detective');
+  await page.click('#play');
+  await expect(page.frameLocator('#gameFrame').locator('#tTitle')).toHaveText('Chat Detective');
+  await page.frameLocator('#gameFrame').locator('#gback').click();
+  await expect(page.locator('#gameWrap')).toBeHidden();
   // แก้แล้วส่งใหม่ → รอบ 2
   await page.click('#edit');
   await expect(page.locator('#task')).toContainText('Step 1');
@@ -115,7 +119,7 @@ test('การ์ดที่ครูยังไม่เปิดถูก�
   await expect(page.locator('.card[data-act="y3w1"] .lockbox')).toBeVisible();
   await expect(page.locator('.card[data-act="y3w1"] a')).toHaveCount(0);
   await page.click('[data-tab="game"]');
-  await expect(page.locator('.card[data-act="popup60"] .lockbox')).toBeVisible();
+  await expect(page.locator('.card')).toHaveCount(1);   // Y3 เห็นแค่เกมผจญภัย
   await page.click('.card[data-act="adventure"] button');
   await expect(page.locator('#gameWrap')).toBeVisible();
   await page.frameLocator('#gameFrame').locator('#gback').click();
@@ -135,4 +139,36 @@ test('มือถือ: หน้าเลือกชื่อไม่ล้
     await page.goto(h); await page.waitForTimeout(200);
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
   }
+});
+
+test('Y4: เกมนักสืบล็อกถ้าครูยังไม่เปิด', async ({ page }) => {
+  mockApi(page, { open: { y4w1: true } });
+  await page.goto('/#/lib/Y4.2/' + encodeURIComponent('UNO'));
+  await page.click('[data-tab="game"]');
+  await expect(page.locator('.card[data-act="detective"] .lockbox')).toBeVisible();
+});
+
+test('เกมนักสืบแชท: เล่นจบ 3 คดี ได้ดาวเต็มเมื่อตอบถูกทุกข้อ', async ({ page }) => {
+  const errs = []; page.on('pageerror', e => errs.push(e.message));
+  await page.route('**/fonts.googleapis.com/**', r => r.abort());
+  await page.goto('/games/detective.html');
+  await expect(page.locator('#gback')).toBeHidden();
+  await page.click('#goE');
+  for (let i = 0; i < 12; i++) {
+    await expect(page.locator('#pHint')).toBeVisible();
+    const want = await page.evaluate(() => deck[idx].s);
+    for (const n of (want.length ? want : [0])) await page.click(`.sg[data-n="${n}"]`);
+    await page.click('#pCheck');
+    await expect(page.locator('#pRes')).toHaveClass(/good/);
+    await page.click('#pNext');
+    if (i % 4 === 3) await page.click('#cNext');
+  }
+  await expect(page.locator('#eStars')).toHaveText('ได้ดาว 24 จาก 24 ดวง');
+  await expect(page.locator('#eRank')).toHaveText('นักสืบระดับทอง');
+  // เลือก "ปลอดภัย" แล้วเลือกสัญญาณ → ปลอดภัยหลุด
+  await page.click('#eTitle'); await page.click('#goN');
+  await page.click('.sg[data-n="0"]'); await page.click('.sg[data-n="2"]');
+  expect(await page.evaluate(() => [...pick])).toEqual([2]);
+  await expect(page.locator('#pHint')).toBeHidden();
+  expect(errs).toEqual([]);
 });

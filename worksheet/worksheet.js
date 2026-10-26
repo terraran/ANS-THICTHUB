@@ -9,14 +9,14 @@ const UI = {
         pickHint: '👆 กดเลือกการ์ดที่เราลังเลมากที่สุดบนใบงาน', picked: 'การ์ดที่เราลังเลที่สุด:', reason: 'อะไรทำให้เราคิดแบบนั้น?', reasonPh: 'พิมพ์เหตุผลของเรา...',
         task4: '<b>ขั้นที่ 4</b> คิดย้อนกลับ: ตอบคำถามในกรอบ หรือกดข้ามได้ถ้าเวลาไม่พอ', frOpt: '· ไม่บังคับ', frPh: 'เรารู้เพราะ...',
         doneTask: 'ดูผลการตรวจ การ์ด ✗ มีคำอธิบายบอกไว้ ส่วนการ์ด ✓ เอาเมาส์ชี้เพื่อดูคำอธิบาย', should: 'ควรอยู่ใน', result: (a, n) => `ถูก ${a}/${n} ใบ`, round: n => `รอบที่ ${n}`,
-        wait: 'กำลังส่งคำตอบให้ครู...', ok: 'ส่งคำตอบให้ครูแล้ว ✓', err: 'ส่งไม่สำเร็จ ลองกดส่งอีกครั้ง หรือบอกครู', play: '🎮 เล่นเกมผจญภัย',
+        wait: 'กำลังส่งคำตอบให้ครู...', ok: 'ส่งคำตอบให้ครูแล้ว ✓', err: 'ส่งไม่สำเร็จ ลองกดส่งอีกครั้ง หรือบอกครู', play: n => `🎮 เล่นเกม${n}`,
         noMe: 'ยังไม่ได้เลือกห้องและชื่อ เข้าใบงานจากคลังกิจกรรมนะ', noAct: 'ไม่พบใบงานนี้', goLib: 'ไปที่คลังกิจกรรม', leave: 'งานที่ทำอยู่ยังไม่ได้ส่ง ออกจากใบงานเลยไหม?' },
   en: { steps: ['1 Sort', '2 Find signs', '3 Explain', '4 Look back'], stepTag: n => `Step ${n} / 4`, lib: 'Activities', week: n => `Week ${n}`,
         next: 'Next step ➜', back: '◀ Back', check: 'Check and send to teacher ✔', skip: 'Skip and send', edit: '✏️ Fix and send again', lib2: 'Back to activities',
         pickHint: '👆 Tap the card you were least sure about', picked: 'The card we were least sure about:', reason: 'What makes you think that?', reasonPh: 'Type your reason...',
         task4: '<b>Step 4</b> Look back: answer the question in the frame, or skip if there is no time.', frOpt: '· optional', frPh: 'We know because...',
         doneTask: 'Here are your results. ✗ cards show why. Point at a ✓ card to see why it is right.', should: 'Belongs in', result: (a, n) => `${a}/${n} correct`, round: n => `Round ${n}`,
-        wait: 'Sending to your teacher...', ok: 'Sent to your teacher ✓', err: 'Could not send. Try sending again or tell your teacher.', play: '🎮 Play the adventure game',
+        wait: 'Sending to your teacher...', ok: 'Sent to your teacher ✓', err: 'Could not send. Try sending again or tell your teacher.', play: n => `🎮 Play ${n}`,
         noMe: 'Pick your class and name first. Open worksheets from the activity page.', noAct: 'Worksheet not found', goLib: 'Go to activities', leave: 'Your work is not sent yet. Leave anyway?' }
 };
 
@@ -25,7 +25,7 @@ const me = { room: H.get('room') || '', name: H.get('name') || '' };
 if (!me.room || !me.name) { const s = store.get('me'); if (s) Object.assign(me, s); }
 const actId = new URLSearchParams(location.search).get('act') || '';
 let L = (H.get('lang') || store.get('lang')) === 'en' ? 'en' : 'th';
-let C = null, A = null;   // เนื้อหาใบงาน · ข้อมูลการ์ดในคลัง
+let C = null, A = null, game = null;   // เนื้อหาใบงาน · ข้อมูลการ์ดในคลัง · เกมหลังส่ง
 let step = 1, placed = {}, signs = {}, hes = '', sel = null, round = Math.max(1, parseInt(H.get('round'), 10) || 1);
 let checked = false, sendState = '', scale = 1, sending = false, dirty = false;
 const app = $('#app'), pool = $('#pool'), stage = $('#stage');
@@ -78,7 +78,7 @@ function applyLang(){
   $('#task').innerHTML = task;
   $('#root').textContent = t(C.root); $('#binA').textContent = t(C.binA); $('#binB').textContent = t(C.binB);
   $('#back').textContent = U.back; $('#next').textContent = U.next; $('#toFor').textContent = U.next;
-  $('#edit').textContent = U.edit; $('#lib2').textContent = U.lib2; $('#play').textContent = U.play;
+  $('#edit').textContent = U.edit; $('#lib2').textContent = U.lib2; $('#play').textContent = U.play(t(game && game.title));
   const hc = C.cards.find(c => c.id === hes); $('#hesTxt').innerHTML = `${U.picked} <b>${hc ? esc(plain(t(hc.text))) : ''}</b>`;
   $('#lReason').textContent = U.reason; $('#reason').placeholder = U.reasonPh;
   $('#frq').textContent = t(frq()); $('#frOpt').textContent = U.frOpt; $('#fr').placeholder = t(A && A.frPh) || U.frPh;
@@ -157,7 +157,7 @@ $('#forBack').onclick = () => setStep(3);
 const score = () => C.cards.filter(c => placed[c.id] === c.bin).length;
 function showSent(){ const U = UI[L], s = $('#sent'); s.className = 'sent ' + sendState;
   s.textContent = sendState === 'ok' ? U.ok : sendState === 'err' ? U.err : sendState === 'wait' ? U.wait : '';
-  $('#play').classList.toggle('hide', !(A && A.afterGame && sendState === 'ok')); }
+  $('#play').classList.toggle('hide', !(game && sendState === 'ok')); }
 
 // แถวที่ส่ง: รูปแบบเดิม 15 ช่อง (Script เติมเวลาไว้หน้าสุด) · JSON v3 = v2 + frq
 function buildRow(fr){
@@ -210,7 +210,7 @@ const wrap = $('#gameWrap'), gfr = $('#gameFrame');
 $('#play').onclick = () => {
   wrap.style.display = 'block';
   const sendLang = () => { gfr.contentWindow.postMessage({ lang: L }, '*'); gfr.contentWindow.focus(); };
-  if (!gfr.getAttribute('src')) { gfr.onload = sendLang; gfr.src = '../games/' + A.afterGame + '.html'; } else sendLang();
+  if (!gfr.getAttribute('src')) { gfr.onload = sendLang; gfr.src = '../' + game.path; } else sendLang();
 };
 addEventListener('message', e => { if (e.data === 'closeGame') wrap.style.display = 'none'; });
 
@@ -225,6 +225,7 @@ async function boot(){
     const [c, acts] = await Promise.all([fetch(`content/${actId}.json`).then(r => { if (!r.ok) throw new Error('act'); return r.json(); }),
                                          fetch('../data/activities.json').then(r => r.json())]);
     C = c; A = acts.activities.find(a => a.id === actId) || null;
+    game = A && A.afterGame ? acts.activities.find(a => a.id === A.afterGame) || null : null;
   } catch (e) { return showMsg(UI[L].noAct); }
   shuffle(C.cards).forEach(c => pool.appendChild(cardEl(c)));
   setStep(1);
