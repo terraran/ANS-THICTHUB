@@ -1,0 +1,312 @@
+{
+ "level": "Y3",
+ "week": 1,
+ "style": "button",
+ "title": {
+  "th": "กดได้ หรือ หยุดถามผู้ใหญ่?",
+  "en": "Tap it, or stop and ask?"
+ },
+ "root": {
+  "th": "สิ่งที่เด้งขึ้นบนจอ",
+  "en": "Things that pop up on screen"
+ },
+ "binA": {
+  "th": "✅ กดได้",
+  "en": "✅ OK to tap"
+ },
+ "binB": {
+  "th": "✋ หยุด ถามผู้ใหญ่ก่อน",
+  "en": "✋ Stop and ask an adult"
+ },
+ "signTitle": {
+  "th": "สัญญาณหลอก 3 ข้อ",
+  "en": "3 trick signs"
+ },
+ "signs": [
+  {
+   "short": {
+    "th": "🎁 ได้รางวัล/ของฟรี",
+    "en": "🎁 Prize / free stuff"
+   },
+   "long": {
+    "th": "🎁 บอกว่าได้รางวัลหรือของฟรี",
+    "en": "🎁 Says you won a prize or something free"
+   }
+  },
+  {
+   "short": {
+    "th": "⏰ เร่งให้รีบกด",
+    "en": "⏰ Hurry up!"
+   },
+   "long": {
+    "th": "⏰ เร่งให้รีบกด",
+    "en": "⏰ Rushes you to tap quickly"
+   }
+  },
+  {
+   "short": {
+    "th": "📥 ขอข้อมูล/ให้ดาวน์โหลด",
+    "en": "📥 Info / download"
+   },
+   "long": {
+    "th": "📥 ขอข้อมูลส่วนตัว หรือให้ดาวน์โหลด",
+    "en": "📥 Asks for personal info or tells you to download"
+   }
+  }
+ ],
+ "task1": {
+  "th": "<b>ขั้นที่ 1</b> ลากการ์ดไปวางใน Tree Map ว่าสิ่งที่เห็นบนจอ <b>กดได้</b> หรือต้อง <b>หยุด ถามผู้ใหญ่ก่อน</b> (แตะการ์ดแล้วแตะกล่องก็ได้)",
+  "en": "<b>Step 1</b> Drag each card into the Tree Map: is it <b>OK to tap</b>, or should you <b>stop and ask an adult</b>? (You can also tap a card, then tap a box.)"
+ },
+ "task2": {
+  "th": "<b>ขั้นที่ 2</b> การ์ดฝั่ง \"หยุด ถามผู้ใหญ่ก่อน\" มีสัญญาณหลอกอะไรบ้าง? กดปุ่มใต้การ์ด เลือกได้มากกว่า 1 อัน",
+  "en": "<b>Step 2</b> Which trick signs are on each \"Stop and ask\" card? Tap the buttons under the card. You can choose more than one."
+ },
+ "task3": {
+  "th": "<b>ขั้นที่ 3</b> กดการ์ดที่เราลังเลที่สุดบนใบงาน แล้วเขียนเหตุผล",
+  "en": "<b>Step 3</b> Tap the card you were least sure about, then write your reason."
+ },
+ "think": {
+  "th": "🤔 ถ้าเจอป้ายแบบนี้ที่บ้าน แต่ไม่แน่ใจว่ากดได้ไหม เราควรทำอย่างไร?",
+  "en": "🤔 If you see a pop-up like this at home and you are not sure, what should you do?"
+ },
+ "cards": [
+  {
+   "id": "a1",
+   "icon": "▶️",
+   "text": {
+    "th": "เล่นต่อ",
+    "en": "Continue"
+   },
+   "bin": "a",
+   "why": {
+    "th": "ปุ่มของเกมที่เรากดเองเพื่อเล่นต่อ",
+    "en": "A normal game button you press to keep playing."
+   }
+  },
+  {
+   "id": "a2",
+   "icon": "⏸️",
+   "text": {
+    "th": "หยุดชั่วคราว",
+    "en": "Pause"
+   },
+   "bin": "a",
+   "why": {
+    "th": "ปุ่มควบคุมเกมปกติ",
+    "en": "A normal game control."
+   }
+  },
+  {
+   "id": "a3",
+   "icon": "🏁",
+   "text": {
+    "th": "ด่านถัดไป ➜",
+    "en": "Next level ➜"
+   },
+   "bin": "a",
+   "why": {
+    "th": "ขึ้นหลังเราเล่นผ่านด่าน เป็นปุ่มปกติของเกม",
+    "en": "It appears after you finish a level. It is part of the game."
+   }
+  },
+  {
+   "id": "a4",
+   "icon": "🔇",
+   "text": {
+    "th": "ปิดเสียง",
+    "en": "Mute"
+   },
+   "bin": "a",
+   "why": {
+    "th": "ปุ่มตั้งค่าเสียง ไม่ได้ขอข้อมูลหรือให้รางวัล",
+    "en": "A sound setting. It does not ask for anything."
+   }
+  },
+  {
+   "id": "a5",
+   "icon": "🏠",
+   "text": {
+    "th": "กลับหน้าหลัก",
+    "en": "Home"
+   },
+   "bin": "a",
+   "why": {
+    "th": "พากลับไปหน้าแรกของเกม",
+    "en": "Takes you back to the game menu."
+   }
+  },
+  {
+   "id": "a6",
+   "icon": "🔁",
+   "text": {
+    "th": "เล่นอีกครั้ง",
+    "en": "Play again"
+   },
+   "bin": "a",
+   "why": {
+    "th": "ปุ่มเริ่มด่านใหม่ของเกม",
+    "en": "A normal button to replay the level."
+   }
+  },
+  {
+   "id": "a7",
+   "icon": "⚙️",
+   "text": {
+    "th": "ตั้งค่า",
+    "en": "Settings"
+   },
+   "bin": "a",
+   "why": {
+    "th": "ปุ่มตั้งค่าของเกม",
+    "en": "The game’s own settings button."
+   }
+  },
+  {
+   "id": "a8",
+   "icon": "❓",
+   "text": {
+    "th": "วิธีเล่น",
+    "en": "How to play"
+   },
+   "bin": "a",
+   "why": {
+    "th": "บอกวิธีเล่นเกม ไม่ได้ขออะไร",
+    "en": "Explains the game. It does not ask for anything."
+   }
+  },
+  {
+   "id": "b1",
+   "icon": "🎁",
+   "text": {
+    "th": "ยินดีด้วย! คุณได้แท็บเล็ตฟรี กดเลย",
+    "en": "Congratulations! You won a free tablet. Tap now!"
+   },
+   "bin": "b",
+   "signs": [
+    1
+   ],
+   "why": {
+    "th": "บอกว่าได้ของฟรีทั้งที่เราไม่ได้ทำอะไร",
+    "en": "It says you won something free when you did nothing."
+   }
+  },
+  {
+   "id": "b2",
+   "icon": "⏰",
+   "text": {
+    "th": "รีบกด! เหลือเวลา 5 วินาที",
+    "en": "Hurry! Only 5 seconds left!"
+   },
+   "bin": "b",
+   "signs": [
+    2
+   ],
+   "why": {
+    "th": "เร่งให้รีบกดจนไม่มีเวลาคิด",
+    "en": "It rushes you so you do not have time to think."
+   }
+  },
+  {
+   "id": "b3",
+   "icon": "📝",
+   "text": {
+    "th": "ใส่ชื่อและเบอร์โทร เพื่อรับเพชร",
+    "en": "Type your name and phone number to get gems"
+   },
+   "bin": "b",
+   "signs": [
+    1,
+    3
+   ],
+   "why": {
+    "th": "ขอข้อมูลส่วนตัว และล่อด้วยรางวัล",
+    "en": "It asks for personal info and uses a prize to tempt you."
+   }
+  },
+  {
+   "id": "b4",
+   "icon": "📥",
+   "text": {
+    "th": "ดาวน์โหลดแอปนี้ รับสกินฟรี",
+    "en": "Download this app to get a free skin"
+   },
+   "bin": "b",
+   "signs": [
+    1,
+    3
+   ],
+   "why": {
+    "th": "ให้ดาวน์โหลด และล่อด้วยของฟรี",
+    "en": "It tells you to download and offers something free."
+   }
+  },
+  {
+   "id": "b5",
+   "icon": "🎡",
+   "text": {
+    "th": "หมุนวงล้อ ลุ้นรับมือถือฟรี!",
+    "en": "Spin the wheel to win a free phone!"
+   },
+   "bin": "b",
+   "signs": [
+    1
+   ],
+   "why": {
+    "th": "ล่อด้วยรางวัลใหญ่ที่ไม่น่าเป็นจริง",
+    "en": "It uses a big prize that is too good to be true."
+   }
+  },
+  {
+   "id": "b6",
+   "icon": "⚠️",
+   "text": {
+    "th": "เครื่องของคุณติดไวรัส! กดแก้ทันที",
+    "en": "Your device has a virus! Tap to fix it now!"
+   },
+   "bin": "b",
+   "signs": [
+    2,
+    3
+   ],
+   "why": {
+    "th": "ทำให้ตกใจ เร่งให้กด และมักให้ดาวน์โหลดโปรแกรม",
+    "en": "It scares you, rushes you and usually makes you download something."
+   }
+  },
+  {
+   "id": "b7",
+   "icon": "🔥",
+   "text": {
+    "th": "ลดราคา 99% เหลือเวลา 1 ชั่วโมง",
+    "en": "99% off! Only 1 hour left!"
+   },
+   "bin": "b",
+   "signs": [
+    2
+   ],
+   "why": {
+    "th": "เร่งให้รีบตัดสินใจ",
+    "en": "It pushes you to decide quickly."
+   }
+  },
+  {
+   "id": "b8",
+   "icon": "🔑",
+   "text": {
+    "th": "ใส่รหัสผ่าน รับเหรียญ 1,000 เหรียญ",
+    "en": "Enter your password to get 1,000 coins"
+   },
+   "bin": "b",
+   "signs": [
+    1,
+    3
+   ],
+   "why": {
+    "th": "ขอรหัสผ่านและล่อด้วยรางวัล ห้ามบอกรหัสผ่านใคร",
+    "en": "It asks for your password and offers a prize. Never share your password."
+   }
+  }
+ ],
+ "act": "y3w1"
+}

@@ -1,0 +1,22 @@
+{
+  "activities": [
+    { "id": "y3w1", "level": "Y3", "week": 1, "kind": "sheet",
+      "title": { "th": "กดได้ หรือ หยุดถามผู้ใหญ่?", "en": "Tap it, or stop and ask?" },
+      "path": "worksheet/?act=y3w1", "afterGame": "adventure",
+      "frq": { "th": "เรารู้ได้อย่างไรว่าการ์ดไหนอยู่กลุ่มไหน?", "en": "How do we know which group each card belongs to?" },
+      "frPh": { "th": "เรารู้เพราะ...", "en": "We know because..." } },
+    { "id": "y4w1", "level": "Y4", "week": 1, "kind": "sheet",
+      "title": { "th": "ข้อความนี้ ปลอดภัย หรือ อันตราย?", "en": "Is this message safe or dangerous?" },
+      "path": "worksheet/?act=y4w1",
+      "frq": { "th": "เรารู้ได้อย่างไรว่าการ์ดไหนอยู่กลุ่มไหน?", "en": "How do we know which group each card belongs to?" },
+      "frPh": { "th": "เรารู้เพราะ...", "en": "We know because..." } },
+    { "id": "adventure", "level": "Y3", "kind": "game",
+      "tag": { "th": "ป๊อปอัปหลอก", "en": "Trick pop-ups" },
+      "title": { "th": "ผจญภัยป่ามหัศจรรย์", "en": "Magic Forest Adventure" },
+      "path": "games/adventure.html", "ownBack": true },
+    { "id": "popup60", "level": "Y3", "kind": "game",
+      "tag": { "th": "ป๊อปอัปหลอก", "en": "Trick pop-ups" },
+      "title": { "th": "ปิดป๊อปอัปให้ทัน 60 วินาที", "en": "Close the pop-ups in 60 seconds" },
+      "path": "games/popup_game.html" }
+  ]
+}

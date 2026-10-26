@@ -1,0 +1,22 @@
+const { chromium } = require('../stim/node_modules/playwright');
+(async () => {
+  const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const p = await b.newPage({ viewport: { width: 1366, height: 768 } });
+  const errs = []; p.on('pageerror', e => errs.push(e.message));
+  await p.route('**/fonts.googleapis.com/**', r => r.abort());
+  await p.goto('file://' + __dirname + '/test_Y3_สัปดาห์1_กดได้หรือหยุดถามผู้ใหญ่.html');
+  console.log('play hidden before send:', await p.evaluate(() => document.getElementById('play').classList.contains('hide')));
+  await p.click('#len');
+  await p.evaluate(() => { checked = true; app.classList.add('checked'); setStep(3); sendState = 'ok'; showSent(); });
+  console.log('play visible after send:', await p.evaluate(() => !document.getElementById('play').classList.contains('hide')), await p.textContent('#play'));
+  await p.screenshot({ path: '../emb_ws.png' });
+  await p.click('#play'); await p.waitForTimeout(800);
+  const f = p.frame({ url: /about:srcdoc/ }) || p.frames()[1];
+  console.log('game lang:', await f.evaluate(() => L), await f.textContent('#goE'));
+  await f.click('#goE'); await p.waitForTimeout(3500);
+  await p.screenshot({ path: '../emb_game.png' });
+  await f.click('#gback'); await p.waitForTimeout(300);
+  console.log('wrap hidden:', await p.evaluate(() => document.getElementById('gameWrap').style.display), 'game state:', await f.evaluate(() => state));
+  await p.click('#edit'); console.log('play hidden after edit:', await p.evaluate(() => document.getElementById('play').classList.contains('hide')));
+  console.log('errors', errs); await b.close();
+})();

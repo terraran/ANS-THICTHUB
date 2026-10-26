@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<title>เลือกชื่อ</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;600;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:Kanit,Tahoma,sans-serif}
+a{color:#fde68a}a:hover{color:#fff}
+</style>
+</helmet>
+<div style="min-height: 800px; background: #0b2545; color: #ffffff; font-family: Kanit, Tahoma, sans-serif; padding: 28px 24px 40px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; gap: 24px">
+  <div style="width: 100%; max-width: 1180px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px">
+    <a href="Rooms.dc.html" style="display: flex; align-items: center; gap: 6px; min-height: 44px; font-size: 20px">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg>
+      เปลี่ยนห้อง
+    </a>
+    <div style="display: flex; align-items: center; gap: 12px">
+      <span style="background: #0284c7; border-radius: 16px; padding: 4px 18px; font-size: 30px; font-weight: 800">Y3.2</span>
+      <h1 style="margin: 0; font-size: 36px; font-weight: 800">เราคือใคร? กดชื่อของเรา</h1>
+    </div>
+    <span style="font-size: 18px; color: #bfdbfe">กดชื่อตัวเองเท่านั้นนะ</span>
+  </div>
+
+  <div style="width: 100%; max-width: 1180px; display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 14px">
+    <sc-for list="{{names}}" as="n" hint-placeholder-count="24">
+      <a href="Home.dc.html" style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 16px 8px 14px; border-radius: 20px; background: #ffffff; color: #0f172a; text-decoration: none; box-shadow: 0 6px 0 #94a3b8">
+        <span style="width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; font-weight: 800; color: #ffffff; background: {{n.bg}}">{{n.ch}}</span>
+        <span style="font-size: 24px; font-weight: 600; line-height: 1.1">{{n.name}}</span>
+      </a>
+    </sc-for>
+  </div>
+
+  <p style="margin: 0; font-size: 17px; color: #93c5fd">ไม่เจอชื่อตัวเอง? บอกครูได้เลย ครูเพิ่มชื่อให้ในมุมครู</p>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const list = ['กาย','ขิม','ข้าวหอม','จีน','ชิน','ซัน','ญาญ่า','ต้นกล้า','ใบเตย','ปลื้ม','พีพี','ฟ้าใส','ภูมิ','มายด์ ก','มายด์ ข','เมษา','ยิ้ม','ริว','ลูกน้ำ','วิน','อันนา','ไอซ์','ฮาร์ท','เอิร์ธ'];
+    const bgs = ['#0284c7','#4f46e5','#15803d','#c2410c'];
+    const ch = s => { const c = [...s]; return /[เแโใไ]/.test(c[0]) ? c[1] : c[0]; };
+    return { names: list.map((name, i) => ({ name, ch: ch(name), bg: bgs[i % bgs.length] })) };
+  }
+}
+</script>
+</body>
+</html>

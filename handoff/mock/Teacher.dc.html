@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<title>มุมครู</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;600;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:Kanit,Tahoma,sans-serif}
+a{color:#1d4ed8}a:hover{color:#1e3a8a}
+</style>
+</helmet>
+<div style="min-height: 800px; background: #f1f5f9; color: #0f172a; font-family: Kanit, Tahoma, sans-serif; display: flex; flex-wrap: wrap">
+
+  <nav style="flex: 1 1 220px; max-width: 260px; background: #0b2545; color: #ffffff; padding: 22px 14px; box-sizing: border-box; display: flex; flex-direction: column; gap: 6px">
+    <div style="font-size: 26px; font-weight: 800; padding: 0 10px 2px">มุมครู</div>
+    <div style="font-size: 15px; color: #bfdbfe; padding: 0 10px 14px">ANS ICT Hub</div>
+    <sc-for list="{{tabs}}" as="t" hint-placeholder-count="4">
+      <button onClick="{{t.pick}}" aria-pressed="{{t.sel}}" style="font-family: inherit; text-align: left; font-size: 19px; min-height: 48px; padding: 6px 14px; border-radius: 12px; border: none; cursor: pointer; {{t.style}}">{{t.label}}</button>
+    </sc-for>
+    <div style="flex: 1"></div>
+    <a href="Main.dc.html" style="color: #fde68a; padding: 10px; font-size: 16px">ออกจากมุมครู</a>
+  </nav>
+
+  <main style="flex: 999 1 560px; min-width: 0; padding: 24px; box-sizing: border-box; display: flex; flex-direction: column; gap: 16px">
+    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap">
+      <span style="font-size: 17px; color: #475569; margin-right: 4px">ห้อง</span>
+      <sc-for list="{{rooms}}" as="r" hint-placeholder-count="8">
+        <button onClick="{{r.pick}}" style="font-family: inherit; font-size: 17px; min-height: 44px; padding: 4px 14px; border-radius: 22px; cursor: pointer; {{r.style}}">{{r.name}}</button>
+      </sc-for>
+    </div>
+
+    <sc-if value="{{isMatrix}}" hint-placeholder-val="{{true}}">
+      <div style="display: flex; gap: 12px; flex-wrap: wrap">
+        <div style="background: #dcfce7; color: #166534; border-radius: 14px; padding: 8px 18px; font-size: 18px"><b style="font-size: 26px">14</b> ส่งแล้ว</div>
+        <div style="background: #fef3c7; color: #92400e; border-radius: 14px; padding: 8px 18px; font-size: 18px"><b style="font-size: 26px">5</b> ทำค้าง</div>
+        <div style="background: #e2e8f0; color: #334155; border-radius: 14px; padding: 8px 18px; font-size: 18px"><b style="font-size: 26px">8</b> ยังไม่เริ่ม</div>
+        <div style="align-self: center; font-size: 15px; color: #475569">นับจากใบงานสัปดาห์ 2 · ห้อง {{room}}</div>
+      </div>
+      <div style="background: #ffffff; border-radius: 16px; overflow-x: auto; border: 1px solid #cbd5e1">
+        <table style="width: 100%; border-collapse: collapse; font-size: 17px; min-width: 560px">
+          <thead>
+            <tr style="background: #f8fafc; color: #334155; text-align: left">
+              <th style="padding: 10px 16px; font-weight: 600">ชื่อเล่น</th>
+              <th style="padding: 10px 16px; font-weight: 600">สัปดาห์ 1</th>
+              <th style="padding: 10px 16px; font-weight: 600">สัปดาห์ 2</th>
+              <th style="padding: 10px 16px; font-weight: 600">ทำคู่กับ</th>
+            </tr>
+          </thead>
+          <tbody>
+            <sc-for list="{{rows}}" as="w" hint-placeholder-count="8">
+              <tr style="border-top: 1px solid #e2e8f0">
+                <td style="padding: 9px 16px; font-weight: 600">{{w.name}}</td>
+                <td style="padding: 9px 16px"><span style="border-radius: 14px; padding: 2px 12px; {{w.s1.style}}">{{w.s1.t}}</span></td>
+                <td style="padding: 9px 16px"><span style="border-radius: 14px; padding: 2px 12px; {{w.s2.style}}">{{w.s2.t}}</span></td>
+                <td style="padding: 9px 16px; color: #475569">{{w.pair}}</td>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{isOpen}}" hint-placeholder-val="{{false}}">
+      <div style="font-size: 17px; color: #475569">เปิดกิจกรรมที่สอนแล้วให้ห้อง {{room}} เด็กจะเห็นการ์ดที่ยังปิดเป็นรูปกุญแจ</div>
+      <div style="background: #ffffff; border-radius: 16px; border: 1px solid #cbd5e1; display: flex; flex-direction: column">
+        <sc-for list="{{acts}}" as="a" hint-placeholder-count="6">
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 18px; border-top: 1px solid #e2e8f0">
+            <div style="display: flex; flex-direction: column">
+              <span style="font-size: 19px; font-weight: 600">{{a.title}}</span>
+              <span style="font-size: 15px; color: #475569">{{a.kind}}</span>
+            </div>
+            <button onClick="{{a.toggle}}" aria-pressed="{{a.on}}" style="font-family: inherit; font-size: 17px; min-width: 120px; min-height: 44px; border-radius: 22px; border: none; cursor: pointer; {{a.style}}">{{a.label}}</button>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{isShare}}" hint-placeholder-val="{{false}}">
+      <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center">
+        <span style="font-size: 17px; color: #475569">ใบงาน</span>
+        <span style="background: #0284c7; color: #ffffff; border-radius: 20px; padding: 4px 16px; font-size: 17px">สัปดาห์ 1 · กดได้หรือหยุดถามผู้ใหญ่</span>
+        <span style="flex: 1"></span>
+        <button style="font-family: inherit; font-size: 17px; min-height: 44px; padding: 4px 16px; border-radius: 12px; border: 2px solid #0f172a; background: #ffffff; cursor: pointer">ซ่อนชื่อ</button>
+        <button style="font-family: inherit; font-size: 17px; min-height: 44px; padding: 4px 16px; border-radius: 12px; border: none; background: #0f172a; color: #ffffff; cursor: pointer">บันทึก PNG</button>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px">
+        <sc-for list="{{subs}}" as="s" hint-placeholder-count="6">
+          <button style="font-family: inherit; text-align: left; background: #ffffff; border: 2px solid #cbd5e1; border-radius: 14px; padding: 12px 14px; cursor: pointer; display: flex; flex-direction: column; gap: 4px">
+            <span style="font-size: 19px; font-weight: 600; color: #0f172a">{{s.name}}</span>
+            <span style="font-size: 15px; color: #475569">{{s.info}}</span>
+          </button>
+        </sc-for>
+      </div>
+      <div style="font-size: 15px; color: #475569">[กดผลงานเพื่อเปิดใบงานเต็มจอ ดูทีละรอบ เทียบ 2 ชิ้น และดูการ์ดที่ผิดบ่อย เหมือนหน้าแชร์เดิม]</div>
+    </sc-if>
+
+    <sc-if value="{{isRoster}}" hint-placeholder-val="{{false}}">
+      <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end">
+        <label style="display: flex; flex-direction: column; gap: 4px; font-size: 16px; color: #334155">เพิ่มชื่อเล่น (ห้อง {{room}})
+          <input placeholder="เช่น มายด์ ค" style="font-family: inherit; font-size: 19px; min-height: 44px; padding: 4px 14px; border-radius: 12px; border: 2px solid #cbd5e1; width: 260px">
+        </label>
+        <button style="font-family: inherit; font-size: 18px; min-height: 48px; padding: 4px 20px; border-radius: 12px; border: none; background: #16a34a; color: #ffffff; cursor: pointer">+ เพิ่ม</button>
+        <button style="font-family: inherit; font-size: 17px; min-height: 48px; padding: 4px 16px; border-radius: 12px; border: 2px solid #0f172a; background: #ffffff; cursor: pointer">วางหลายชื่อทีเดียว</button>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px">
+        <sc-for list="{{roster}}" as="n" hint-placeholder-count="12">
+          <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 12px; padding: 6px 8px 6px 14px; display: flex; align-items: center; justify-content: space-between; gap: 8px">
+            <span style="font-size: 18px">{{n}}</span>
+            <span style="display: flex; gap: 4px">
+              <button aria-label="แก้ชื่อ" style="width: 44px; height: 44px; border-radius: 10px; border: none; background: #f1f5f9; cursor: pointer; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#334155" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"></path></svg></button>
+              <button aria-label="ซ่อนชื่อ" style="width: 44px; height: 44px; border-radius: 10px; border: none; background: #f1f5f9; cursor: pointer; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#334155" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"></path></svg></button>
+            </span>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { tab: 'matrix', room: 'Y3.2', open: { w1: true, w2: true, w3: false, w4: false, g1: true, g2: true } }; }
+  renderVals() {
+    const S = this.state;
+    const T = { matrix: 'ตารางส่งงาน', open: 'เปิด/ปิดกิจกรรม', share: 'แชร์ผลงาน', roster: 'รายชื่อนักเรียน' };
+    const tabs = Object.keys(T).map(k => ({ label: T[k], sel: k === S.tab ? 'true' : 'false',
+      style: k === S.tab ? 'background:#facc15;color:#0b2545;font-weight:600' : 'background:transparent;color:#ffffff',
+      pick: () => this.setState({ tab: k }) }));
+    const rooms = ['Y3.1','Y3.2','Y3.3','Y3.4','Y4.1','Y4.2','Y4.3','Y4.4'].map(name => ({ name,
+      style: name === S.room ? 'border:2px solid #0b2545;background:#0b2545;color:#ffffff' : 'border:2px solid #cbd5e1;background:#ffffff;color:#0f172a',
+      pick: () => this.setState({ room: name }) }));
+    const D = { t: 'ส่งแล้ว', style: 'background:#dcfce7;color:#166534' }, P = { t: 'ทำค้าง', style: 'background:#fef3c7;color:#92400e' }, N = { t: 'ยังไม่เริ่ม', style: 'background:#e2e8f0;color:#334155' };
+    const rows = [
+      { name: 'กาย', s1: D, s2: D, pair: 'จีน' }, { name: 'ขิม', s1: D, s2: P, pair: '-' }, { name: 'ข้าวหอม', s1: D, s2: N, pair: '-' },
+      { name: 'จีน', s1: D, s2: D, pair: 'กาย' }, { name: 'ชิน', s1: P, s2: N, pair: '-' }, { name: 'ซัน', s1: D, s2: P, pair: '-' },
+      { name: 'ญาญ่า', s1: N, s2: N, pair: '-' }, { name: 'ต้นกล้า', s1: D, s2: D, pair: 'ใบเตย' },
+    ];
+    const A = [
+      ['w1', 'ใบงานสัปดาห์ 1 · กดได้หรือหยุดถามผู้ใหญ่', 'ใบงาน'], ['w2', 'ใบงานสัปดาห์ 2 · ใครถามข้อมูลส่วนตัว?', 'ใบงาน'],
+      ['w3', 'ใบงานสัปดาห์ 3', 'ใบงาน'], ['w4', 'ใบงานสัปดาห์ 4', 'ใบงาน'],
+      ['g1', 'ผจญภัยป่ามหัศจรรย์', 'เกม'], ['g2', 'ปิดป๊อปอัปให้ทัน 60 วินาที', 'เกม'],
+    ];
+    const acts = A.map(([id, title, kind]) => { const on = !!S.open[id]; return { title, kind, on: on ? 'true' : 'false',
+      label: on ? 'เปิดอยู่' : 'ปิดอยู่', style: on ? 'background:#16a34a;color:#ffffff' : 'background:#e2e8f0;color:#334155',
+      toggle: () => this.setState({ open: { ...S.open, [id]: !on } }) }; });
+    const subs = [
+      { name: 'กาย + จีน', info: 'จัดถูก 15/16 · รอบที่ 2' }, { name: 'ขิม', info: 'จัดถูก 13/16 · รอบที่ 1' }, { name: 'ข้าวหอม', info: 'จัดถูก 12/16 · รอบที่ 1' },
+      { name: 'ซัน', info: 'จัดถูก 16/16 · รอบที่ 1' }, { name: 'ต้นกล้า + ใบเตย', info: 'จัดถูก 14/16 · รอบที่ 3' }, { name: 'ภูมิ', info: 'จัดถูก 11/16 · รอบที่ 1' },
+    ];
+    const roster = ['กาย','ขิม','ข้าวหอม','จีน','ชิน','ซัน','ญาญ่า','ต้นกล้า','ใบเตย','ปลื้ม','มายด์ ก','มายด์ ข'];
+    return { tabs, rooms, room: S.room, rows, acts, subs, roster,
+      isMatrix: S.tab === 'matrix', isOpen: S.tab === 'open', isShare: S.tab === 'share', isRoster: S.tab === 'roster' };
+  }
+}
+</script>
+</body>
+</html>

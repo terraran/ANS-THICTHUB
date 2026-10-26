@@ -1,0 +1,15 @@
+{"v":3,"createdOnFiles":{"v":1,"at":"2026-10-26T14:50:00Z"},"title":"ANS ICT Hub Mock","launch":{"view":"canvas"},"pages":[],
+"boards":{
+"Main.dc.html":{"x":0,"y":0,"w":1280,"h":800,"title":"0 หน้าแรก: เลือก THAI ICT หรือ พิมพ์ไทย","expand":"fill","is_interactive":true},
+"Rooms.dc.html":{"x":1360,"y":0,"w":1280,"h":800,"title":"1 เลือกห้อง","expand":"fill","is_interactive":true},
+"Names.dc.html":{"x":2720,"y":0,"w":1280,"h":800,"title":"2 เลือกชื่อ","expand":"fill","is_interactive":true},
+"Home.dc.html":{"x":4080,"y":0,"w":1280,"h":800,"title":"3 คลังกิจกรรม","expand":"fill","is_interactive":true},
+"Worksheet.dc.html":{"x":5440,"y":0,"w":1280,"h":800,"title":"4 ในใบงาน","expand":"fill","is_interactive":true},
+"Teacher.dc.html":{"x":0,"y":1220,"w":1280,"h":800,"title":"5 มุมครู","expand":"fill","is_interactive":true}
+},
+"order":["Main.dc.html","Rooms.dc.html","Names.dc.html","Home.dc.html","Worksheet.dc.html","Teacher.dc.html"],
+"notes":{
+"tStudent":{"x":0,"y":-300,"text":"ฝั่งนักเรียน: หน้าแรก → เลือกห้อง → เลือกชื่อ → คลังกิจกรรม → ทำงาน","kind":"title1","maxW":6720},
+"tTeacher":{"x":0,"y":920,"text":"มุมครู (ต้องใส่รหัสครู)","kind":"title1","maxW":2640}
+},
+"designSystems":[]}

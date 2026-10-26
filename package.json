@@ -1,0 +1,12 @@
+{
+  "name": "ans-ict-hub",
+  "private": true,
+  "description": "ANS ICT Hub · ใช้ npm เฉพาะตอนทดสอบ เว็บจริงไม่มีขั้น build",
+  "scripts": {
+    "serve": "node tests/serve.js",
+    "test": "node tests/apps-script.test.js && playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.56.1"
+  }
+}

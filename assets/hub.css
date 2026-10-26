@@ -1,0 +1,112 @@
+/* ชุดสี ANS ICT Hub (SCOPE ข้อ 8) */
+:root{
+  --navy:#0b2545;--navy-2:#13315c;--ground:#f1f5f9;--select:#facc15;
+  --action:#0284c7;--y4:#4f46e5;--game:#15803d;--typing:#ea580c;--send:#16a34a;
+  --done-bg:#dcfce7;--done-fg:#166534;--doing-bg:#fef3c7;--doing-fg:#92400e;--todo-bg:#e2e8f0;--todo-fg:#334155;
+  --ink:#0f172a;--muted:#475569;--link:#fde68a
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{background:var(--navy);color:#fff;font-family:Kanit,Tahoma,sans-serif}
+a{color:var(--link)}a:hover{color:#fff}
+button{font-family:inherit;cursor:pointer}
+.hide{display:none!important}
+.page{min-height:100vh;display:flex;flex-direction:column;align-items:center;gap:26px;padding:28px 16px 40px}
+.wrap{width:100%;max-width:1180px}
+.bar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.back{display:inline-flex;align-items:center;gap:6px;min-height:44px;font-size:20px;background:none;border:none;color:var(--link);padding:0;text-decoration:underline}
+.back:hover{color:#fff}
+.tag{background:var(--select);color:var(--navy);border-radius:14px;padding:2px 16px;font-size:20px;font-weight:800}
+h1{margin:0;font-weight:800}
+.msg{font-size:20px;color:#bfdbfe;text-align:center}
+.msg button{margin-top:10px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;border-radius:14px;font-size:21px;font-weight:600;border:none;color:#fff;background:var(--action);text-decoration:none;padding:4px 20px}
+.btn:hover{color:#fff;filter:brightness(1.08)}
+
+/* หน้าแรก */
+.hero{text-align:center;display:flex;flex-direction:column;gap:4px}
+.hero h1{font-size:60px;line-height:1}
+.hero p{margin:0;font-size:24px;color:#bfdbfe}
+.big{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(320px,100%),1fr));gap:32px}
+.bigcard{display:flex;flex-direction:column;border-radius:28px;overflow:hidden;background:#fff;color:var(--ink);text-decoration:none;box-shadow:0 10px 0 #020617;border:5px solid #fff;text-align:left;padding:0;font-size:inherit}
+.bigcard:hover{color:var(--ink);transform:translateY(-2px)}
+.bigcard:focus-visible{outline:5px solid var(--select);outline-offset:3px}
+.art{aspect-ratio:16/9;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.art .blob{position:absolute;border-radius:50%}
+.art .lbl{position:absolute;left:18px;top:16px;background:var(--select);color:var(--navy);border-radius:12px;padding:2px 14px;font-size:17px;font-weight:600}
+.minis{position:relative;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;width:76%}
+.mini{background:#fff;border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:6px}
+.mini .ico{height:56px;border-radius:10px;display:flex;align-items:center;justify-content:center}
+.mini .ln{height:8px;border-radius:4px;background:#cbd5e1}
+.kb{position:relative;background:#431407;border-radius:18px;padding:14px;display:flex;flex-direction:column;gap:8px;width:74%;box-shadow:0 10px 0 #1c0a03}
+.kb .row{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:6px}
+.kb span{height:34px;border-radius:7px;background:#ffedd5;color:#431407;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:600}
+.kb span.hl{background:var(--select);font-weight:800}
+.kb .space{height:30px;width:60%;align-self:center;border-radius:7px;background:#ffedd5}
+.foot{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 24px 22px}
+.foot .t{display:flex;flex-direction:column;gap:2px}
+.foot .t b{font-size:38px;font-weight:800;line-height:1.1}
+.foot .t span{font-size:18px;color:var(--muted)}
+.round{flex:none;width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.langs{display:flex;gap:8px}
+.langs button{font-size:18px;padding:8px 18px;min-height:44px;border-radius:30px;border:2px solid #fff;background:transparent;color:#fff}
+.langs button[aria-pressed="true"]{background:#fff;color:var(--navy);font-weight:600}
+.teacher{display:inline-flex;align-items:center;gap:8px;min-height:44px;font-size:18px}
+
+/* เลือกห้อง */
+.levels{display:flex;flex-direction:column;gap:28px}
+.lvname{font-size:22px;font-weight:600;margin-bottom:12px}
+.rooms{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(200px,100%),1fr));gap:16px}
+.room{height:130px;border-radius:22px;color:#fff;border:none;font-size:44px;font-weight:800}
+.room:hover{filter:brightness(1.1)}
+
+/* เลือกชื่อ */
+.namehead{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.chip-room{border-radius:16px;padding:4px 18px;font-size:30px;font-weight:800}
+.names{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}
+.name{display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px 8px 14px;border-radius:20px;background:#fff;color:var(--ink);border:none;box-shadow:0 6px 0 #94a3b8;font-size:24px;font-weight:600;line-height:1.1}
+.name:hover{transform:translateY(-2px)}
+.av{width:64px;height:64px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:30px;font-weight:800;color:#fff;flex:none}
+
+/* คลังกิจกรรม */
+.me{display:flex;align-items:center;gap:14px}
+.me .av{width:60px;height:60px;border:3px solid #fff}
+.me b{font-size:30px;font-weight:800;line-height:1.1;display:block}
+.me small{font-size:17px;color:#bfdbfe}
+.me small button{font-size:17px;min-height:0;display:inline;text-decoration:underline}
+.prog{display:flex;align-items:center;gap:12px;background:var(--navy-2);border-radius:40px;padding:8px 20px}
+.prog span{font-size:18px;color:#bfdbfe}
+.prog .track{width:160px;max-width:30vw;height:14px;border-radius:10px;background:var(--navy);overflow:hidden}
+.prog .fill{height:100%;background:#22c55e}
+.prog b{font-size:22px}
+.tabs{display:flex;gap:10px;flex-wrap:wrap}
+.tabs button{font-size:24px;font-weight:600;min-height:52px;padding:6px 26px;border-radius:16px;border:none;background:var(--navy-2);color:#fff;display:flex;align-items:center;gap:10px}
+.tabs button[aria-selected="true"]{background:var(--select);color:var(--navy)}
+.tabs small{font-size:16px;font-weight:400;opacity:.8}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px}
+.card{border-radius:24px;background:#fff;color:var(--ink);overflow:hidden;display:flex;flex-direction:column;box-shadow:0 8px 0 #475569}
+.card.locked{opacity:.75}
+.card .pic{height:130px;display:flex;align-items:center;justify-content:center;position:relative}
+.card .pic span{position:absolute;left:14px;top:12px;background:#00000040;border-radius:12px;padding:2px 12px;font-size:16px;color:#fff}
+.card .bd{padding:14px 18px 18px;display:flex;flex-direction:column;gap:10px;flex:1}
+.card .ttl{font-size:23px;font-weight:600;line-height:1.2}
+.card .st{align-self:flex-start;border-radius:20px;padding:2px 12px;font-size:16px;font-weight:600}
+.st.done{background:var(--done-bg);color:var(--done-fg)}
+.st.doing{background:var(--doing-bg);color:var(--doing-fg)}
+.st.todo,.st.lock{background:var(--todo-bg);color:var(--todo-fg)}
+.card .sp{flex:1}
+.card .btn{width:100%}
+.card .lockbox{display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px;border-radius:14px;font-size:19px;color:var(--muted);background:var(--todo-bg)}
+
+/* เกมเต็มจอ */
+#gameWrap{position:fixed;inset:0;z-index:100;background:#0c4a6e}
+#gameFrame{width:100%;height:100%;border:0;display:block}
+#gameClose{position:fixed;right:16px;bottom:16px;z-index:101;min-height:48px;font-size:19px;font-weight:600;padding:4px 18px;border-radius:14px;border:3px solid #fff;background:var(--navy);color:#fff;box-shadow:0 4px 0 #0006}
+
+@media (max-width:640px){
+  .hero h1{font-size:42px}
+  .foot .t b{font-size:30px}
+  .room{height:100px;font-size:36px}
+  .chip-room{font-size:24px}
+  .names{grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}
+}

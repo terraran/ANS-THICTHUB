@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>หน้าแชร์ผลงาน ICT</title>
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;600;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+:root{--ink:#1e293b;--muted:#64748b;--bg:#eef2f7;--line:#cbd5e1;--a:#16a34a;--b:#dc2626;--accent:#334155}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--ink);font-family:Kanit,'Noto Sans Thai',Tahoma,sans-serif}
+#stage{position:absolute;left:0;top:0;width:1600px;height:900px;transform-origin:0 0;display:grid;grid-template-rows:64px 1fr}
+header{background:var(--accent);color:#fff;display:flex;align-items:center;gap:10px;padding:0 16px}
+header h1{font-size:24px;margin:0 8px 0 0;white-space:nowrap}
+select,button{font-family:inherit;font-size:18px;border-radius:10px;padding:6px 12px;border:none}
+select{background:#fff;color:var(--ink)}
+button{background:#fff;color:var(--ink);font-weight:600;cursor:pointer}
+button.on{background:#fbbf24}
+button.primary{background:#22c55e;color:#fff}
+.sp{flex:1}
+.body{display:grid;grid-template-columns:310px 1fr;min-height:0}
+aside{background:#fff;border-right:3px solid var(--line);display:flex;flex-direction:column;min-height:0}
+.miss{padding:10px 12px;border-bottom:3px solid var(--line);font-size:15px}
+.miss b{font-size:16px}
+.miss div{display:flex;justify-content:space-between;gap:6px;margin-top:3px}
+.miss span.p{font-weight:800;color:var(--b);flex:none}
+.list{flex:1;overflow:auto;padding:8px}
+.item{border:2px solid var(--line);border-radius:12px;padding:6px 10px;margin-bottom:6px;cursor:pointer;font-size:16px;line-height:1.3}
+.item.sel{border-color:#f59e0b;background:#fef3c7}
+.item.sel2{border-color:#6366f1;background:#e0e7ff}
+.item small{color:var(--muted)}
+.item .sc{float:right;font-weight:800}
+.msg{padding:20px;color:var(--muted);font-size:18px;text-align:center}
+main{padding:14px;min-height:0;display:flex;gap:14px;justify-content:center;align-items:flex-start}
+.sheet{background:#fff;border-radius:18px;border:3px solid var(--line);padding:12px;display:flex;flex-direction:column;gap:8px}
+.sheet.wide{width:1250px;height:800px}
+.sheet.narrow{width:620px;height:800px}
+.sh-head{display:flex;align-items:center;gap:12px;background:var(--acc);color:#fff;border-radius:12px;padding:6px 14px}
+.sh-head .t{font-size:20px;font-weight:800}
+.sh-head .w{font-size:17px}
+.sh-head .s{margin-left:auto;font-size:22px;font-weight:800;background:#fff;color:var(--acc);border-radius:10px;padding:0 12px}
+.bins{flex:1;display:grid;gap:10px;min-height:0}
+.wide .bins{grid-template-columns:1fr 1fr}
+.narrow .bins{grid-template-rows:auto auto;align-content:start}
+.narrow .legend{display:none}
+.narrow .c{min-height:36px;font-size:14px;padding:3px 7px}
+.narrow .c .nm{display:none}
+.narrow .ch span{width:18px;height:18px;font-size:11px}
+.narrow .cards{gap:7px 6px}
+.narrow .why{font-size:15px;padding:6px 10px}
+.narrow .bin h3{font-size:17px}
+.narrow .why{margin-top:auto}
+.bin{border:4px solid;border-radius:14px;padding:6px;display:flex;flex-direction:column;min-height:0}
+.bin h3{margin:0 0 6px;text-align:center;color:#fff;border-radius:8px;font-size:19px;padding:2px}
+.bin.a{border-color:var(--a)}.bin.a h3{background:var(--a)}
+.bin.b{border-color:var(--b)}.bin.b h3{background:var(--b)}
+.cards{display:flex;flex-wrap:wrap;gap:8px 6px;align-content:flex-start;padding-top:8px}
+.c{width:calc(50% - 3px);border:2px solid var(--line);border-radius:10px;padding:4px 8px;position:relative;display:flex;gap:6px;align-items:center;font-size:15px;line-height:1.25;min-height:48px}
+.wide .c{font-size:16px;min-height:56px}
+.c .ic{font-size:20px}
+.c .nm{font-size:12px;color:var(--muted)}
+.c .tx{font-weight:600}
+.c.hl{outline:4px solid #fbbf24}
+.c .mk{position:absolute;top:-8px;right:-6px;width:22px;height:22px;border-radius:50%;color:#fff;font-size:14px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.c .mk.ok{background:#16a34a}.c .mk.no{background:#dc2626}
+.ch{display:flex;gap:3px;margin-top:2px}
+.ch span{width:20px;height:20px;border-radius:50%;border:2px solid var(--line);font-size:12px;display:flex;align-items:center;justify-content:center}
+.ch .right{background:#bbf7d0;border-color:#16a34a}.ch .wrong{background:#fecaca;border-color:#dc2626;text-decoration:line-through}.ch .miss{border:2px dashed #16a34a;color:#16a34a}
+.why{background:#fef9c3;border-radius:12px;padding:8px 12px;font-size:17px;line-height:1.35}
+.why b{display:block;font-size:15px;color:#92400e}
+.rb{background:#e0e7ff;color:#4338ca;border-radius:8px;padding:0 6px;font-size:13px}
+.rounds{display:flex;gap:4px}
+.rounds button{font-size:14px;padding:2px 8px;border-radius:8px;background:#ffffff55;color:#fff}
+.rounds button.on{background:#fff;color:var(--acc)}
+.legend{font-size:14px;color:var(--muted)}
+</style></head><body>
+<div id="stage">
+<header>
+ <h1>📋 หน้าแชร์ผลงาน</h1>
+ <select id="act"></select>
+ <select id="room"><option value="">ทุกห้อง</option></select>
+ <button class="primary" id="load">โหลดงาน ↻</button>
+ <span class="sp"></span>
+ <button id="hide">ซ่อนชื่อ</button>
+ <button id="cmp">เทียบ 2 กลุ่ม</button>
+ <button id="png">ดาวน์โหลดภาพ ⬇</button>
+</header>
+<div class="body">
+ <aside><div class="miss" id="miss"></div><div class="list" id="list"><div class="msg">เลือกกิจกรรม แล้วกด "โหลดงาน"</div></div></aside>
+ <main id="main"></main>
+</div>
+</div>
+<script>
+const ENDPOINT = '__ENDPOINT__', KEY = '__KEY__';
+const ACTS = __ACTS__;
+const $ = s => document.querySelector(s);
+const stage = $('#stage');
+let subs = [], groups = [], selA = null, selB = null, hideNames = false, compare = false;
+const th = o => (o && typeof o === 'object') ? o.th : o;
+const plain = h => String(h).replace(/<[^>]+>/g, '');
+function fit(){ const s = Math.min(innerWidth / 1600, innerHeight / 900); stage.style.transform = `scale(${s})`; stage.style.left = ((innerWidth - 1600 * s) / 2) + 'px'; stage.style.top = ((innerHeight - 900 * s) / 2) + 'px'; }
+addEventListener('resize', fit); fit();
+
+$('#act').innerHTML = Object.entries(ACTS).map(([k, a]) => `<option value="${k}">${a.level} สัปดาห์ ${a.week} · ${th(a.title)}</option>`).join('');
+function setRooms(){ const a = ACTS[$('#act').value]; $('#room').innerHTML = '<option value="">ทุกห้อง</option>' + a.rooms.map(r => `<option>${r}</option>`).join(''); }
+$('#act').onchange = () => { setRooms(); subs = []; groups = []; selA = selB = null; draw(); };
+setRooms();
+
+async function load(){
+  const a = ACTS[$('#act').value];
+  $('#list').innerHTML = '<div class="msg">กำลังโหลด...</div>';
+  try {
+    const r = await fetch(`${ENDPOINT}?key=${encodeURIComponent(KEY)}&level=${a.level}&week=${a.week}`);
+    const j = await r.json();
+    if (j.error) throw new Error(j.error);
+    subs = j.rows.map((x, i) => { let d = null; try { d = JSON.parse(x.data); } catch (e) {} return { ...x, d, i }; })
+                 .filter(x => x.d && x.d.act === $('#act').value).reverse();
+  } catch (e) { subs = []; groups = []; $('#list').innerHTML = `<div class="msg">โหลดไม่สำเร็จ<br><small>${e.message}</small><br>ตรวจว่าอัปเดต Apps Script เป็นเวอร์ชันใหม่แล้ว</div>`; drawMiss(); return; }
+  const m = new Map();
+  subs.slice().reverse().forEach(x => { const k = x.room + '|' + x.names; if (!m.has(k)) m.set(k, { key: k, room: x.room, names: x.names, rounds: [] }); m.get(k).rounds.push(x); });
+  groups = [...m.values()].map(g => { g.rounds.sort((a, b) => (a.d.round || 1) - (b.d.round || 1) || new Date(a.time) - new Date(b.time)); g.cur = g.rounds.length - 1; return g; })
+                          .sort((a, b) => new Date(b.rounds[b.rounds.length - 1].time) - new Date(a.rounds[a.rounds.length - 1].time));
+  selA = groups[0] ? groups[0].key : null; selB = null; draw();
+}
+$('#load').onclick = load;
+$('#room').onchange = () => draw();
+$('#hide').onclick = () => { hideNames = !hideNames; $('#hide').classList.toggle('on', hideNames); draw(); };
+$('#cmp').onclick = () => { compare = !compare; $('#cmp').classList.toggle('on', compare); if (!compare) selB = null; draw(); };
+
+const visible = () => groups.filter(g => !$('#room').value || g.room === $('#room').value);
+const label = (g, n) => hideNames ? `กลุ่มที่ ${n}` : g.names;
+const cur = g => g.rounds[g.cur];
+function fmtTime(t){ const d = new Date(t); return isNaN(d) ? '' : d.toLocaleString('th-TH', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }); }
+
+function drawMiss(){
+  const a = ACTS[$('#act').value], v = visible().map(g => g.rounds[g.rounds.length - 1]);
+  if (!v.length) { $('#miss').innerHTML = '<b>การ์ดที่จัดผิดบ่อย</b><div><small>ยังไม่มีข้อมูล</small></div>'; return; }
+  const rows = a.cards.map(c => ({ c, p: v.filter(s => s.d.place[c.id] !== c.bin).length / v.length })).filter(x => x.p > 0).sort((x, y) => y.p - x.p).slice(0, 5);
+  $('#miss').innerHTML = `<b>การ์ดที่จัดผิดบ่อย (${v.length} กลุ่ม, รอบล่าสุด)</b>` + (rows.length ? rows.map(x => `<div><span>${plain(th(x.c.text))}</span><span class="p">${Math.round(x.p * 100)}%</span></div>`).join('') : '<div><small>ทุกกลุ่มจัดถูกหมด 🎉</small></div>');
+}
+function draw(){
+  drawMiss();
+  const v = visible();
+  if (!groups.length) { $('#main').innerHTML = ''; return; }
+  $('#list').innerHTML = v.length ? v.map((g, n) => { const last = g.rounds[g.rounds.length - 1];
+    return `<div class="item ${g.key === selA ? 'sel' : ''} ${g.key === selB ? 'sel2' : ''}" data-k="${g.key}"><span class="sc">${last.score}</span><b>${label(g, n + 1)}</b>${g.rounds.length > 1 ? ` <span class="rb">${g.rounds.length} รอบ</span>` : ''}<br><small>${g.room} · ${fmtTime(last.time)} · ${last.lang}</small></div>`; }).join('') : '<div class="msg">ยังไม่มีงานส่งเข้ามา</div>';
+  document.querySelectorAll('.item').forEach(el => el.onclick = () => {
+    const k = el.dataset.k;
+    if (compare && selA !== null && k !== selA) selB = k; else { selA = k; if (!compare) selB = null; }
+    draw();
+  });
+  const order = v.map(g => g.key), A = groups.find(g => g.key === selA), B = groups.find(g => g.key === selB);
+  $('#main').innerHTML = '';
+  if (A) $('#main').appendChild(sheet(A, order.indexOf(A.key) + 1, compare));
+  if (compare && B) $('#main').appendChild(sheet(B, order.indexOf(B.key) + 1, true));
+  if (compare && !B) $('#main').insertAdjacentHTML('beforeend', '<div class="sheet narrow"><div class="msg">กดเลือกกลุ่มที่ 2 จากรายชื่อด้านซ้าย</div></div>');
+}
+function sheet(g, n, narrow){
+  const s = cur(g), a = ACTS[s.d.act], d = s.d, el = document.createElement('div');
+  el.className = 'sheet ' + (narrow ? 'narrow' : 'wide'); el.style.setProperty('--acc', a.accent);
+  const card = c => {
+    const ok = d.place[c.id] === c.bin, chosen = d.signs[c.id] || [];
+    const chips = d.place[c.id] === 'b' ? `<div class="ch">${a.signs.map((x, k) => { const m = k + 1, ch = chosen.includes(m), sh = (c.signs || []).includes(m); return `<span class="${ch && sh ? 'right' : ch ? 'wrong' : sh ? 'miss' : ''}">${m}</span>`; }).join('')}</div>` : '';
+    return `<div class="c ${c.id === d.hes ? 'hl' : ''}">${c.icon ? `<div class="ic">${c.icon}</div>` : ''}<div>${c.who ? `<div class="nm">💬 ${c.who}</div>` : ''}<div class="tx">${th(c.text)}</div>${chips}</div><div class="mk ${ok ? 'ok' : 'no'}">${ok ? '✓' : '✗'}</div></div>`;
+  };
+  const inBin = b => a.cards.filter(c => d.place[c.id] === b).map(card).join('');
+  const hc = a.cards.find(c => c.id === d.hes);
+  const rbtn = g.rounds.length > 1 ? `<span class="rounds">${g.rounds.map((r, k) => `<button data-r="${k}" class="${k === g.cur ? 'on' : ''}">รอบ ${r.d.round || k + 1} · ${r.score}</button>`).join('')}</span>` : '';
+  el.innerHTML = `<div class="sh-head"><span class="t">${label(g, n)}</span><span class="w">${g.room}</span>${rbtn}<span class="s">${s.score}</span></div>
+   <div class="bins"><div class="bin a"><h3>${th(a.binA)}</h3><div class="cards">${inBin('a')}</div></div><div class="bin b"><h3>${th(a.binB)}</h3><div class="cards">${inBin('b')}</div></div></div>
+   <div class="legend">${th(a.signTitle)}: ${a.signs.map((x, k) => `${k + 1} ${plain(th(x.short))}`).join(' · ')}</div>
+   <div class="why"><b>🤔 การ์ดที่ลังเลที่สุด (กรอบสีเหลือง): ${hc ? plain(th(hc.text)) : '-'}</b>${d.reason || '-'}${d.fr ? `<b style="margin-top:4px">🔍 Frame of Reference</b>${d.fr}` : ''}</div>`;
+  el.querySelectorAll('.rounds button').forEach(bt => bt.onclick = () => { g.cur = +bt.dataset.r; draw(); });
+  return el;
+}
+$('#png').onclick = async () => {
+  const m = $('#main'); if (!m.children.length || !window.html2canvas) return;
+  const prev = stage.style.transform; stage.style.transform = 'none';
+  const cv = await html2canvas(m, { backgroundColor: '#eef2f7', scale: 2 });
+  stage.style.transform = prev;
+  const A = groups.find(g => g.key === selA); const a = ACTS[$('#act').value];
+  const link = document.createElement('a'); link.download = `${a.level}_สัปดาห์${a.week}_${hideNames ? 'กลุ่ม' : (A ? A.names : '')}.png`; link.href = cv.toDataURL('image/png'); link.click();
+};
+draw();
+</script>
+</body></html>

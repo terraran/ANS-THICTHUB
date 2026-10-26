@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ใบงาน · ANS ICT Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="worksheet.css">
+</head><body>
+<div id="stage">
+<header>
+ <a id="toLib" class="hlink" href="../">◀ <span id="lLib"></span></a>
+ <h1 id="ttl"></h1>
+ <div class="steps"><span class="st" id="s1"></span><span class="st" id="s2"></span><span class="st" id="s3"></span><span class="st" id="s4"></span></div>
+ <span class="who"><span class="av" id="meAv"></span><span id="meName"></span></span>
+ <div class="lang"><button id="lth" class="on">TH</button><button id="len">EN</button></div>
+</header>
+<div class="body" id="app">
+ <div id="poolWrap"><div class="pool" id="pool"></div></div>
+ <main>
+  <div class="topbar"><span class="stag" id="stag"></span><div class="task" id="task"></div>
+   <div class="btns"><button id="back" class="ghost"></button><button id="next" disabled></button></div>
+  </div>
+  <div class="tree"><div class="root" id="root"></div>
+   <div class="bin a" data-bin="a"><h2 id="binA"></h2><div class="list"></div></div>
+   <div class="bin b" data-bin="b"><h2 id="binB"></h2><div class="list"></div></div>
+  </div>
+  <div class="drawer hide" id="drawer">
+   <div class="hd" id="hesTxt"></div>
+   <div><label id="lReason" for="reason"></label><textarea id="reason"></textarea></div>
+   <button class="go" id="toFor" disabled></button>
+  </div>
+  <div class="res hide" id="res">
+   <div class="r" id="result"></div>
+   <div><div class="k" id="think"></div><div class="sent" id="sent"></div></div>
+   <div class="btns"><button id="play" class="hide game"></button><button id="edit"></button><button id="lib2" class="ghost"></button></div>
+  </div>
+ </main>
+</div>
+<div id="forPanel" class="hide">
+ <div class="forbox">
+  <span class="forlbl">FRAME OF REFERENCE <small id="frOpt"></small></span>
+  <h2 id="frq"></h2>
+  <textarea id="fr" aria-labelledby="frq"></textarea>
+ </div>
+ <div class="forbtns"><button id="forBack" class="ghost"></button><span><button id="skip" class="ghost"></button><button id="check" class="send"></button></span></div>
+</div>
+<div id="msg" class="hide"><div class="msgbox"><p id="msgTxt"></p><a class="btn" href="../" id="msgBtn"></a></div></div>
+</div>
+<div id="gameWrap" style="display:none"><iframe id="gameFrame" title="game"></iframe></div>
+<script src="../config.js"></script>
+<script src="../assets/api.js"></script>
+<script src="worksheet.js"></script>
+</body></html>

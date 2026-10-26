@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>__TITLE__</title>
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#1e293b;--muted:#64748b;--bg:#f0f9ff;--line:#cbd5e1;--a:#16a34a;--b:#dc2626;--accent:__ACCENT__}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Kanit,'Noto Sans Thai',Tahoma,sans-serif;font-size:20px}
+body{min-height:100vh;user-select:none;-webkit-user-select:none}
+header{background:var(--accent);color:#fff;padding:12px 24px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;position:sticky;top:0;z-index:20}
+header h1{margin:0;font-size:30px;font-weight:800}
+.steps{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+.st{background:#ffffff33;border-radius:30px;padding:4px 14px;font-size:17px}
+.st.on{background:#fff;color:var(--accent);font-weight:800}
+.lang{display:flex;border:2px solid #fff;border-radius:30px;overflow:hidden}
+.lang button{background:transparent;box-shadow:none;border-radius:0;padding:4px 14px;font-size:18px;color:#fff}
+.lang button.on{background:#fff;color:var(--accent)}
+main{max-width:1320px;margin:0 auto;padding:16px 20px 40px}
+.panel{background:#fff;border-radius:18px;padding:16px 22px;border:3px solid var(--line);margin-bottom:16px}
+.task{font-size:23px}
+.task b{color:var(--accent)}
+.who{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:10px}
+.who label{font-size:18px;color:var(--muted)}
+input,select,textarea{font-family:inherit;font-size:22px;width:100%;padding:8px 12px;border:2px solid var(--line);border-radius:12px;user-select:text;-webkit-user-select:text;background:#fff}
+textarea{height:90px;resize:vertical}
+.pool{display:flex;flex-wrap:wrap;gap:12px;min-height:110px;padding:12px;border:3px dashed var(--line);border-radius:18px;background:#fff8;margin-bottom:16px;justify-content:center}
+.cardx{background:#fff;border:3px solid var(--line);border-radius:16px;padding:10px 14px;width:230px;cursor:grab;touch-action:none;box-shadow:0 4px 0 #cbd5e1;position:relative;line-height:1.3}
+.cardx.sel{outline:5px solid #fbbf24}
+.cardx.drag{position:fixed;z-index:50;cursor:grabbing;box-shadow:0 14px 30px #0004;pointer-events:none}
+.cardx .ic{font-size:30px;line-height:1}
+.cardx .tx{font-size:20px;font-weight:600}
+.cardx .nm{font-size:15px;color:var(--muted)}
+.btnlike{text-align:center}
+.btnlike .tx{display:inline-block;margin-top:6px;padding:6px 14px;border-radius:12px;background:#e2e8f0}
+.tree{display:grid;grid-template-columns:1fr 1fr;gap:18px;position:relative;padding-top:84px}
+.root{position:absolute;top:0;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;font-weight:800;font-size:24px;padding:10px 28px;border-radius:16px;white-space:nowrap}
+.tree:before{content:'';position:absolute;top:50px;left:25%;right:25%;height:24px;border:4px solid var(--ink);border-bottom:none;border-radius:14px 14px 0 0}
+.bin{border-radius:20px;min-height:320px;padding:12px;border:4px solid;background:#fff}
+.bin h2{margin:0 0 10px;text-align:center;font-size:26px;color:#fff;border-radius:12px;padding:6px}
+.bin.a{border-color:var(--a)}.bin.a h2{background:var(--a)}
+.bin.b{border-color:var(--b)}.bin.b h2{background:var(--b)}
+.bin.hover{box-shadow:0 0 0 6px #fbbf24}
+.bin .list{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
+.bin .cardx{width:calc(50% - 8px);min-width:200px}
+.chips{display:none;flex-wrap:wrap;gap:6px;margin-top:8px}
+.show-signs .bin.b .chips{display:flex}
+.chip{border:2px solid var(--line);background:#f8fafc;border-radius:30px;padding:2px 10px;font-size:15px;cursor:pointer}
+.chip.on{background:#fde68a;border-color:#f59e0b;font-weight:600}
+.chip.right{background:#bbf7d0;border-color:#16a34a}
+.chip.wrong{background:#fecaca;border-color:#dc2626;text-decoration:line-through}
+.chip.miss{border:2px dashed #16a34a;background:#f0fdf4}
+.legend{display:none;border-color:#fde68a}
+.show-signs .legend{display:block}
+.bar{display:flex;gap:12px;justify-content:center;margin-top:18px;flex-wrap:wrap}
+button{font-family:inherit;font-size:23px;font-weight:600;border:none;border-radius:16px;padding:12px 26px;cursor:pointer;background:var(--accent);color:#fff;box-shadow:0 5px 0 #0003}
+button:disabled{background:#cbd5e1;box-shadow:none;cursor:not-allowed}
+button.ghost{background:#fff;color:var(--ink);border:3px solid var(--line)}
+.why{display:none}.why.on{display:block}
+.mark{position:absolute;top:-14px;right:-12px;width:36px;height:36px;border-radius:50%;color:#fff;font-weight:800;font-size:22px;display:flex;align-items:center;justify-content:center}
+.mark.ok{background:#16a34a}.mark.no{background:#dc2626}
+.exp{display:none;font-size:16px;color:#334155;margin-top:8px;background:#f1f5f9;border-radius:10px;padding:6px 10px}
+.checked .exp{display:block}
+.result{display:none;text-align:center;font-size:28px;font-weight:800;margin-top:16px}
+.checked .result{display:block}
+.think{display:none;margin-top:10px;font-size:22px;background:#fef9c3;border-radius:14px;padding:10px 16px;text-align:center}
+.checked .think{display:block}
+.sent{display:none;margin-top:10px;text-align:center;font-size:22px;font-weight:600;border-radius:14px;padding:8px}
+.sent.ok{display:block;background:#dcfce7;color:#166534}.sent.err{display:block;background:#fee2e2;color:#991b1b}.sent.wait{display:block;background:#e0f2fe;color:#075985}
+.hide{display:none!important}
+@media (max-width:820px){.tree{grid-template-columns:1fr}.tree:before{display:none}.cardx,.bin .cardx{width:100%}}
+</style></head><body>
+<header><h1 id="ttl"></h1>
+ <div class="steps"><span class="st on" id="s0"></span><span class="st" id="s1"></span><span class="st" id="s2"></span><span class="st" id="s3"></span></div>
+ <div class="lang"><button id="lth" class="on">TH</button><button id="len">EN</button></div>
+</header>
+<main id="app">
+ <div class="panel task" id="task"></div>
+ <div class="panel" id="whoBox">
+  <div class="who">
+   <div><label id="lRoom"></label><select id="room"><option value=""></option></select></div>
+   <div><label id="lN1"></label><input id="n1" autocomplete="off"></div>
+   <div><label id="lN2"></label><input id="n2" autocomplete="off"></div>
+  </div>
+ </div>
+ <div id="game" class="hide">
+  <div class="pool" id="pool"></div>
+  <div class="tree"><div class="root" id="root"></div>
+   <div class="bin a" data-bin="a"><h2 id="binA"></h2><div class="list"></div></div>
+   <div class="bin b" data-bin="b"><h2 id="binB"></h2><div class="list"></div></div>
+  </div>
+  <div class="panel legend" id="legend" style="margin-top:16px"></div>
+  <div class="panel why" id="why">
+   <b id="lHes"></b><select id="hes"></select>
+   <div style="margin-top:10px"><b id="lReason"></b></div>
+   <textarea id="reason"></textarea>
+  </div>
+  <div class="result" id="result"></div>
+  <div class="think" id="think"></div>
+  <div class="sent" id="sent"></div>
+ </div>
+ <div class="bar">
+  <button id="next" disabled></button>
+  <button id="check" class="hide" disabled></button>
+  <button id="reset" class="ghost"></button>
+ </div>
+</main>
+<script>
+const C = __CONFIG__;
+const ENDPOINT = '__ENDPOINT__';
+const UI = {
+  th: { steps: ['0 ลงชื่อ', '1 จัดกลุ่ม', '2 หาสัญญาณ', '3 ให้เหตุผล'], room: 'ห้อง', n1: 'ชื่อเล่น คนที่ 1', n2: 'ชื่อเล่น คนที่ 2 (ถ้าทำเป็นคู่)',
+        task0: '<b>ก่อนเริ่ม</b> เลือกห้อง แล้วกรอกชื่อเล่นของเรา (ทำเป็นคู่ให้กรอกทั้ง 2 คน)', start: 'เริ่มกิจกรรม ➜', next: 'ไปขั้นต่อไป ➜', check: 'ตรวจคำตอบและส่งให้ครู ✔', reset: 'เริ่มใหม่ ↺',
+        hes: 'การ์ดใบไหนที่เราลังเลมากที่สุด?', reason: 'อะไรทำให้เราคิดแบบนั้น?', reasonPh: 'พิมพ์เหตุผลของเรา...', pick: '— เลือกการ์ด —', should: 'ควรอยู่ฝั่ง', result: (a, n) => `จัดกลุ่มถูก ${a} จาก ${n} ใบ`,
+        wait: 'กำลังส่งคำตอบให้ครู...', ok: 'ส่งคำตอบให้ครูแล้ว ✓', err: 'ส่งคำตอบไม่สำเร็จ ลองกดปุ่มส่งอีกครั้ง หรือบอกครู', retry: 'ส่งอีกครั้ง ↻', noEnd: '(ไฟล์นี้ยังไม่ได้ตั้งค่าการส่งคำตอบ)', confirmReset: 'เริ่มใหม่ใช่ไหม? คำตอบบนจอจะหายไป' },
+  en: { steps: ['0 Sign in', '1 Sort', '2 Find signs', '3 Explain'], room: 'Class', n1: 'Nickname (student 1)', n2: 'Nickname (student 2, if in pairs)',
+        task0: '<b>Before you start</b> choose your class, then type your nickname (pairs: fill in both students).', start: 'Start ➜', next: 'Next step ➜', check: 'Check and send to teacher ✔', reset: 'Start again ↺',
+        hes: 'Which card were you least sure about?', reason: 'What makes you think that?', reasonPh: 'Type your reason...', pick: '— Choose a card —', should: 'Belongs in', result: (a, n) => `You sorted ${a} out of ${n} cards correctly`,
+        wait: 'Sending your answers to the teacher...', ok: 'Answers sent to the teacher ✓', err: 'Could not send. Press send again or tell your teacher.', retry: 'Send again ↻', noEnd: '(Sending is not set up in this file yet)', confirmReset: 'Start again? Your answers on screen will be cleared.' },
+};
+const $ = s => document.querySelector(s);
+const app = $('#app'), pool = $('#pool');
+let L = 'th', step = 0, placed = {}, signs = {}, sel = null, sentOnce = false;
+const t = o => (o && typeof o === 'object') ? (o[L] || o.th) : o;
+const plain = h => h.replace(/<[^>]+>/g, '');
+
+function shuffle(a){ a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+
+function cardEl(c){
+  const d = document.createElement('div');
+  d.className = 'cardx' + (C.style === 'button' ? ' btnlike' : ''); d.dataset.id = c.id;
+  d.innerHTML = (c.icon ? `<div class="ic">${c.icon}</div>` : '') + (c.who ? `<div class="nm">💬 ${c.who}</div>` : '') +
+    `<div class="tx"></div><div class="chips">${C.signs.map((s, i) => `<span class="chip" data-s="${i + 1}"></span>`).join('')}</div><div class="exp"></div>`;
+  d.querySelectorAll('.chip').forEach(ch => ch.addEventListener('click', e => {
+    if (step < 2 || app.classList.contains('checked')) return;
+    e.stopPropagation(); const set = signs[c.id] || (signs[c.id] = new Set()); const n = +ch.dataset.s;
+    set.has(n) ? set.delete(n) : set.add(n); ch.classList.toggle('on'); update();
+  }));
+  d.addEventListener('pointerdown', e => startDrag(e, d));
+  return d;
+}
+
+function applyLang(){
+  const U = UI[L]; document.documentElement.lang = L;
+  $('#lth').classList.toggle('on', L === 'th'); $('#len').classList.toggle('on', L === 'en');
+  $('#ttl').textContent = t(C.title); document.title = t(C.title);
+  U.steps.forEach((s, i) => $('#s' + i).textContent = s);
+  ['room', 'n1', 'n2'].forEach(k => $('#l' + k[0].toUpperCase() + k.slice(1)).textContent = U[k]);
+  $('#task').innerHTML = step === 0 ? U.task0 : t(C['task' + step]);
+  $('#root').textContent = t(C.root); $('#binA').textContent = t(C.binA); $('#binB').textContent = t(C.binB);
+  $('#legend').innerHTML = '<b>' + t(C.signTitle) + '</b>' + C.signs.map((s, i) => `<div>${i + 1}. ${t(s.long)}</div>`).join('');
+  $('#lHes').textContent = U.hes; $('#lReason').textContent = U.reason; $('#reason').placeholder = U.reasonPh;
+  const hv = $('#hes').value;
+  $('#hes').innerHTML = `<option value="">${U.pick}</option>` + C.cards.map(c => `<option value="${c.id}">${plain(t(c.text))}</option>`).join(''); $('#hes').value = hv;
+  $('#next').textContent = step === 0 ? U.start : U.next; $('#check').textContent = U.check; $('#reset').textContent = U.reset;
+  C.cards.forEach(c => {
+    const el = document.querySelector(`.cardx[data-id="${c.id}"]`); if (!el) return;
+    el.querySelector('.tx').innerHTML = t(c.text);
+    el.querySelectorAll('.chip').forEach(ch => ch.textContent = t(C.signs[ch.dataset.s - 1].short));
+    if (app.classList.contains('checked')) el.querySelector('.exp').innerHTML = (placed[c.id] === c.bin ? '' : `<b>${U.should} "${t(c.bin === 'a' ? C.binA : C.binB)}"</b> · `) + t(c.why);
+  });
+  if (app.classList.contains('checked')) { $('#result').textContent = U.result(score(), C.cards.length); $('#think').innerHTML = t(C.think); showSent(); }
+}
+$('#lth').onclick = () => { L = 'th'; applyLang(); }; $('#len').onclick = () => { L = 'en'; applyLang(); };
+
+// ---- drag (mouse + touch) and tap-to-place ----
+let drag = null;
+function startDrag(e, el){
+  if (step !== 1 || e.target.classList.contains('chip')) return;
+  const r = el.getBoundingClientRect();
+  drag = { el, ox: e.clientX - r.left, oy: e.clientY - r.top, sx: e.clientX, sy: e.clientY, moved: false, w: r.width };
+  el.setPointerCapture(e.pointerId); el.addEventListener('pointermove', onMove); el.addEventListener('pointerup', onUp, { once: true });
+}
+function binAt(x, y){ return [...document.querySelectorAll('.bin')].find(b => { const r = b.getBoundingClientRect(); return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom; }); }
+function onMove(e){
+  if (!drag) return;
+  if (!drag.moved && Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) < 8) return;
+  if (!drag.moved) { drag.moved = true; drag.el.classList.add('drag'); drag.el.style.width = drag.w + 'px'; }
+  drag.el.style.left = (e.clientX - drag.ox) + 'px'; drag.el.style.top = (e.clientY - drag.oy) + 'px';
+  if (e.clientY > innerHeight - 60) scrollBy(0, 18); else if (e.clientY < 90) scrollBy(0, -18);
+  document.querySelectorAll('.bin').forEach(b => b.classList.toggle('hover', b === binAt(e.clientX, e.clientY)));
+}
+function onUp(e){
+  const d = drag; drag = null; d.el.removeEventListener('pointermove', onMove);
+  document.querySelectorAll('.bin').forEach(b => b.classList.remove('hover'));
+  if (!d.moved) { document.querySelectorAll('.cardx.sel').forEach(x => x !== d.el && x.classList.remove('sel')); d.el.classList.toggle('sel'); sel = d.el.classList.contains('sel') ? d.el : null; return; }
+  d.el.classList.remove('drag'); d.el.style.cssText = '';
+  const b = binAt(e.clientX, e.clientY);
+  b ? place(d.el, b) : (pool.appendChild(d.el), delete placed[d.el.dataset.id], update());
+}
+document.querySelectorAll('.bin').forEach(b => b.addEventListener('click', () => { if (sel && step === 1) { place(sel, b); sel.classList.remove('sel'); sel = null; } }));
+pool.addEventListener('click', e => { if (sel && e.target === pool) { pool.appendChild(sel); delete placed[sel.dataset.id]; sel.classList.remove('sel'); sel = null; update(); } });
+function place(el, bin){ bin.querySelector('.list').appendChild(el); placed[el.dataset.id] = bin.dataset.bin; update(); }
+
+function update(){
+  if (step === 0) $('#next').disabled = !($('#room').value && $('#n1').value.trim());
+  if (step === 1) $('#next').disabled = Object.keys(placed).length !== C.cards.length;
+  if (step === 2) $('#next').disabled = !C.cards.filter(c => placed[c.id] === 'b').every(c => signs[c.id] && signs[c.id].size);
+  if (step === 3) $('#check').disabled = sentOnce || !($('#hes').value && $('#reason').value.trim().length >= 5);
+}
+['#room', '#n1', '#hes'].forEach(s => $(s).addEventListener('change', update));
+['#n1', '#reason'].forEach(s => $(s).addEventListener('input', update));
+
+function setStep(n){
+  step = n; [0, 1, 2, 3].forEach(i => $('#s' + i).classList.toggle('on', i === n));
+  if (n === 1) { $('#whoBox').classList.add('hide'); $('#game').classList.remove('hide'); ['#room', '#n1', '#n2'].forEach(s => $(s).disabled = true); }
+  if (n === 2) { pool.classList.add('hide'); app.classList.add('show-signs'); }
+  if (n === 3) { $('#why').classList.add('on'); $('#next').classList.add('hide'); $('#check').classList.remove('hide'); }
+  applyLang(); update(); scrollTo(0, 0);
+}
+$('#next').addEventListener('click', () => setStep(step + 1));
+
+const score = () => C.cards.filter(c => placed[c.id] === c.bin).length;
+let sendState = '';
+function showSent(){ const U = UI[L], s = $('#sent'); s.className = 'sent ' + sendState; s.textContent = sendState === 'ok' ? U.ok + (ENDPOINT.startsWith('http') ? '' : ' ' + U.noEnd) : sendState === 'err' ? U.err : sendState === 'wait' ? U.wait : '';
+  if (sendState === 'err') { $('#check').disabled = false; $('#check').textContent = U.retry; } }
+
+function buildRow(){
+  const th = o => (o && typeof o === 'object') ? o.th : o;
+  const wrong = C.cards.filter(c => placed[c.id] !== c.bin).map(c => plain(th(c.text)));
+  const inB = C.cards.filter(c => placed[c.id] === 'b');
+  const exact = inB.filter(c => c.bin === 'b' && [...(signs[c.id] || [])].sort().join() === (c.signs || []).slice().sort().join()).length;
+  const chosen = inB.map(c => plain(th(c.text)) + ' = ' + [...(signs[c.id] || [])].sort().join(',')).join(' | ');
+  const hc = C.cards.find(c => c.id === $('#hes').value);
+  const names = [$('#n1').value.trim(), $('#n2').value.trim()].filter(Boolean).join(' + ');
+  return [C.level, C.week, th(C.title), $('#room').value, names, L.toUpperCase(), `${score()}/${C.cards.length}`,
+          wrong.join(' | ') || '-', `${exact}/${C.cards.filter(c => c.bin === 'b').length}`, chosen, hc ? plain(th(hc.text)) : '', $('#reason').value.trim()];
+}
+async function send(){
+  sentOnce = true; $('#check').disabled = true; sendState = 'wait'; showSent();
+  if (!ENDPOINT.startsWith('http')) { sendState = 'ok'; showSent(); return; }
+  try {
+    await fetch(ENDPOINT, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ row: buildRow() }) });
+    sendState = 'ok';
+  } catch (e) { sendState = 'err'; sentOnce = false; }
+  showSent();
+}
+$('#check').addEventListener('click', () => {
+  if (!app.classList.contains('checked')) {
+    app.classList.add('checked');
+    C.cards.forEach(c => {
+      const el = document.querySelector(`.cardx[data-id="${c.id}"]`), right = placed[c.id] === c.bin;
+      el.insertAdjacentHTML('beforeend', `<div class="mark ${right ? 'ok' : 'no'}">${right ? '✓' : '✗'}</div>`);
+      if (placed[c.id] === 'b') el.querySelectorAll('.chip').forEach(ch => {
+        const n = +ch.dataset.s, chosen = signs[c.id] && signs[c.id].has(n), should = (c.signs || []).includes(n);
+        if (chosen && should) ch.classList.add('right'); else if (chosen) ch.classList.add('wrong'); else if (should) ch.classList.add('miss');
+      });
+    });
+    $('#hes').disabled = true; $('#reason').disabled = true;
+  }
+  applyLang(); send();
+});
+$('#reset').addEventListener('click', () => { if (step === 0 || confirm(UI[L].confirmReset)) location.reload(); });
+
+$('#room').innerHTML = '<option value=""></option>' + C.rooms.map(r => `<option>${r}</option>`).join('');
+shuffle(C.cards).forEach(c => pool.appendChild(cardEl(c)));
+applyLang(); update();
+</script>
+</body></html>

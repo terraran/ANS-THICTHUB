@@ -1,0 +1,7 @@
+node_modules/
+test-results/
+playwright-report/
+*.local.*
+# รหัสครูห้ามเข้า repo
+handoff/legacy/worksheet/key.txt
+key.txt

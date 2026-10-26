@@ -1,0 +1,373 @@
+<!doctype html>
+<html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ผจญภัยป่ามหัศจรรย์: ปิดป๊อปอัปให้ทัน!</title>
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:#0c4a6e;font-family:Kanit,'Noto Sans Thai',Tahoma,sans-serif;user-select:none;-webkit-user-select:none}
+#stage{position:absolute;left:0;top:0;width:1600px;height:900px;transform-origin:0 0;overflow:hidden;background:#7dd3fc}
+canvas{position:absolute;left:0;top:0;width:1600px;height:900px;touch-action:none}
+.hud{position:absolute;top:16px;left:20px;right:20px;display:flex;align-items:center;gap:12px;z-index:50}
+.pill{background:#000a;color:#fff;font-weight:800;font-size:30px;padding:3px 20px;border-radius:40px;white-space:nowrap}
+.prog{flex:1;height:34px;background:#000a;border-radius:20px;position:relative;margin:0 6px}
+.prog .fill{position:absolute;left:0;top:0;bottom:0;border-radius:20px;background:linear-gradient(90deg,#22c55e,#a855f7,#f59e0b);opacity:.85}
+.prog .ic{position:absolute;top:0;font-size:24px;line-height:34px;transform:translateX(-50%)}
+.prog .me{position:absolute;top:-6px;font-size:30px;transform:translateX(-50%)}
+.ctl{background:#000a;color:#fff;border:none;border-radius:30px;font-family:inherit;font-size:20px;padding:6px 14px;cursor:pointer}
+.ctl.on{background:#fff;color:#0c4a6e}
+#jump{position:absolute;right:30px;bottom:30px;z-index:20;font-family:inherit;font-size:34px;font-weight:800;color:#fff;border:6px solid #fff;border-radius:50%;width:150px;height:150px;background:radial-gradient(circle at 40% 35%,#60a5fa,#1d4ed8);box-shadow:0 8px 0 #1e3a8a;cursor:pointer;line-height:1.05}
+#jump:active{transform:translateY(5px);box-shadow:0 3px 0 #1e3a8a}
+.zoneTag{position:absolute;left:50%;top:120px;transform:translateX(-50%);z-index:15;font-size:52px;font-weight:800;color:#fff;text-shadow:0 5px 0 #0007;pointer-events:none;animation:zt 2.4s ease-out forwards}
+@keyframes zt{0%{opacity:0;transform:translate(-50%,20px)}15%{opacity:1;transform:translate(-50%,0)}80%{opacity:1}100%{opacity:0}}
+/* popups */
+.pop{position:absolute;width:420px;border-radius:22px;overflow:hidden;box-shadow:0 18px 40px #0008;z-index:10;animation:popin .25s ease-out}
+@keyframes popin{from{transform:scale(.3);opacity:0}to{transform:scale(1);opacity:1}}
+.pop.out{animation:popout .2s ease-in forwards}
+@keyframes popout{to{transform:scale(.2);opacity:0}}
+.pop .bar{display:flex;align-items:center;justify-content:space-between;padding:5px 10px 5px 16px;font-size:16px}
+.pop .realx{font-family:inherit;border:none;background:#ffffff33;color:inherit;opacity:.9;font-size:17px;cursor:pointer;padding:2px 8px;border-radius:8px}
+.pop.tiny .realx{font-size:13px;padding:0 5px;opacity:.7}
+.pop .content{padding:14px 22px 16px;text-align:center;position:relative}
+.trick{background:linear-gradient(160deg,#fde047,#f97316 70%,#ec4899);color:#fff;border:6px solid #fff}
+.trick .bar{background:#0002;color:#fff}
+.trick .ic{font-size:64px;line-height:1;animation:wig 1s ease-in-out infinite}
+@keyframes wig{25%{transform:rotate(-8deg)}75%{transform:rotate(8deg)}}
+.trick h3{margin:6px 0 2px;font-size:28px;font-weight:800;text-shadow:0 3px 0 #9a341288;line-height:1.2}
+.bait{margin-top:10px;font-family:inherit;font-size:28px;font-weight:800;color:#fff;border:5px solid #fff;border-radius:18px;padding:6px 28px;background:linear-gradient(#4ade80,#16a34a);box-shadow:0 7px 0 #14532d;cursor:pointer;animation:pulse .8s ease-in-out infinite}
+@keyframes pulse{50%{transform:scale(1.07)}}
+.fakex{position:absolute;width:50px;height:50px;border-radius:50%;background:#ef4444;color:#fff;border:4px solid #fff;font-size:26px;font-weight:800;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 0 #7f1d1d}
+.nothanks{display:block;margin:10px auto 0;font-family:inherit;border:none;background:none;color:#fff;opacity:.85;font-size:16px;text-decoration:underline;cursor:pointer}
+.pop.tiny .nothanks{font-size:13px;opacity:.7}
+.safe{background:#fff;color:#1e293b;border:5px solid #334155}
+.safe .bar{background:#334155;color:#fff}
+.safe .ic{font-size:50px;line-height:1}
+.safe h3{margin:8px 0 4px;font-size:26px;font-weight:600}
+.ok{margin-top:8px;font-family:inherit;font-size:24px;font-weight:600;border:none;border-radius:14px;padding:6px 32px;background:#334155;color:#fff;cursor:pointer;box-shadow:0 5px 0 #0f172a}
+.toast{position:absolute;z-index:30;font-size:28px;font-weight:800;padding:8px 22px;border-radius:18px;pointer-events:none;animation:fly 1.4s ease-out forwards;white-space:nowrap}
+.toast.good{background:#16a34a;color:#fff}.toast.bad{background:#dc2626;color:#fff}
+@keyframes fly{0%{transform:translate(-50%,0) scale(.6);opacity:0}15%{transform:translate(-50%,-10px) scale(1.05);opacity:1}100%{transform:translate(-50%,-90px);opacity:0}}
+.shake{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-12px)}75%{transform:translateX(12px)}}
+/* screens */
+.screen{position:absolute;inset:0;background:#0c4a6ecc;z-index:40;display:flex;align-items:center;justify-content:center}
+.box{width:1080px;background:#fff;border-radius:32px;padding:30px 46px;text-align:center;box-shadow:0 30px 70px #0008;border:6px solid #f59e0b}
+.box h1{margin:0;font-size:56px;color:#ea580c;line-height:1.1}
+.box p{font-size:22px;color:#334155;margin:8px 0}
+.rules{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:16px 0;text-align:left}
+.rule{border-radius:18px;padding:10px 14px;font-size:18px;line-height:1.35}
+.rule b{display:block;font-size:20px}
+.r0{background:#e0f2fe}.r1{background:#dcfce7}.r2{background:#fee2e2}.r3{background:#fef3c7}
+.modes{display:flex;gap:16px;justify-content:center;margin-top:8px}
+.big.hard{background:linear-gradient(#f87171,#b91c1c);box-shadow:0 7px 0 #7f1d1d}
+.ready{position:absolute;left:50%;top:330px;transform:translateX(-50%);z-index:16;font-size:90px;font-weight:800;color:#fff;text-shadow:0 6px 0 #0008;pointer-events:none}
+.pausedim{position:absolute;inset:0;background:#0003;z-index:9;pointer-events:none}
+.pop .barfake{font-family:inherit;border:none;background:#ffffff33;color:inherit;font-size:17px;cursor:pointer;padding:2px 8px;border-radius:8px}
+.big{font-family:inherit;font-size:30px;font-weight:800;border:none;border-radius:20px;padding:12px 34px;background:linear-gradient(#fb923c,#ea580c);color:#fff;box-shadow:0 7px 0 #9a3412;cursor:pointer;line-height:1.2}
+.big small{display:block;font-size:17px;font-weight:400}
+.big.alt{background:linear-gradient(#60a5fa,#2563eb);box-shadow:0 7px 0 #1e3a8a}
+.stats{display:flex;gap:14px;justify-content:center;margin:14px 0}
+.stat{background:#f1f5f9;border-radius:18px;padding:8px 20px;min-width:170px}
+.stat .n{font-size:44px;font-weight:800;color:#0c4a6e;line-height:1.1}
+.stat .l{font-size:17px;color:#64748b}
+.most{font-size:22px;background:#fef9c3;border-radius:16px;padding:8px 14px;margin:8px 0}
+.signs{font-size:19px;color:#334155;margin:6px 0 12px}
+.chest{font-size:90px;line-height:1;animation:wig 1s ease-in-out infinite}
+.hide{display:none!important}
+</style></head><body>
+<div id="stage">
+ <canvas id="cv" width="1600" height="900"></canvas>
+ <div class="hud">
+  <div class="pill" id="hearts"></div><div class="pill" id="coins">🪙 0</div>
+  <div class="prog"><div class="fill" id="pfill"></div><span class="ic" style="left:2%">🏁</span><span class="ic" style="left:33.3%">🪨</span><span class="ic" style="left:66.6%">🏰</span><span class="ic" style="left:98%">💰</span><span class="me" id="pme">🧢</span></div>
+  <button class="ctl hide" id="gback"></button><button class="ctl" id="snd">🔊</button><button class="ctl on" id="lth">TH</button><button class="ctl" id="len">EN</button>
+ </div>
+ <div class="pausedim hide" id="dim"></div><div class="ready hide" id="ready"></div>
+ <div id="layer"></div>
+ <button id="jump"></button>
+ <div class="screen" id="title"><div class="box">
+  <h1 id="tTitle"></h1><p id="tSub"></p>
+  <div class="rules"><div class="rule r0" id="rule0"></div><div class="rule r1" id="rule1"></div><div class="rule r2" id="rule2"></div><div class="rule r3" id="rule3"></div></div>
+  <div class="modes"><button class="big alt" id="goE"></button><button class="big" id="goN"></button><button class="big hard" id="goH"></button></div>
+ </div></div>
+ <div class="screen hide" id="end"><div class="box">
+  <div class="chest" id="eChest">💰</div>
+  <h1 id="eTitle"></h1>
+  <div class="stats">
+   <div class="stat"><div class="n" id="eCoins"></div><div class="l" id="lCoins"></div></div>
+   <div class="stat"><div class="n" id="eClosed"></div><div class="l" id="lClosed"></div></div>
+   <div class="stat"><div class="n" id="eFooled"></div><div class="l" id="lFooled"></div></div>
+  </div>
+  <div class="most" id="eMost"></div>
+  <div class="signs" id="eSigns"></div>
+  <div class="modes"><button class="big" id="retry"></button><button class="big alt" id="again"></button></div>
+ </div></div>
+</div>
+<script>
+const $ = s => document.querySelector(s);
+const stage = $('#stage'), layer = $('#layer'), cv = $('#cv'), g = cv.getContext('2d');
+let L = 'th', sound = true, scale = 1;
+function fit(){ scale = Math.min(innerWidth / 1600, innerHeight / 900); stage.style.transform = `scale(${scale})`; stage.style.left = ((innerWidth - 1600 * scale) / 2) + 'px'; stage.style.top = ((innerHeight - 900 * scale) / 2) + 'px'; }
+addEventListener('resize', fit); fit();
+const T = o => o[L] || o.th;
+
+// ---------- content ----------
+const SIGNS = [
+  { th: '🎁 ล่อด้วยรางวัลหรือของฟรี', en: '🎁 Tempts you with a prize or free stuff' },
+  { th: '⏰ เร่งให้รีบกด', en: '⏰ Rushes you to tap' },
+  { th: '📥 ขอข้อมูลหรือให้ดาวน์โหลด', en: '📥 Asks for info or a download' },
+];
+const TRICKS = [
+  { ic: '🎁', h: { th: 'ยินดีด้วย! คุณชนะรางวัลใหญ่', en: 'Congrats! You won a big prize!' }, b: { th: 'รับรางวัล', en: 'Get prize' }, s: [0] },
+  { ic: '🎡', h: { th: 'หมุนวงล้อ ลุ้นมือถือฟรี!', en: 'Spin to win a free phone!' }, b: { th: 'หมุนเลย!', en: 'Spin now!' }, s: [0] },
+  { ic: '💎', h: { th: 'เพชรฟรี 9,999 เม็ด!', en: '9,999 free gems!' }, b: { th: 'รับฟรี', en: 'Get free' }, s: [0] },
+  { ic: '⏰', h: { th: 'รีบกด! เหลือ 5 วินาที', en: 'Hurry! 5 seconds left!' }, b: { th: 'กดเลย!', en: 'Tap now!' }, s: [1] },
+  { ic: '🔥', h: { th: 'ลด 99% วันนี้วันเดียว!', en: '99% off, today only!' }, b: { th: 'ซื้อเลย', en: 'Buy now' }, s: [1] },
+  { ic: '⚠️', h: { th: 'เครื่องติดไวรัส! กดแก้ทันที', en: 'Virus found! Fix it now!' }, b: { th: 'แก้เลย', en: 'Fix now' }, s: [1, 2] },
+  { ic: '📥', h: { th: 'ดาวน์โหลดแอปนี้ รับสกินฟรี', en: 'Download this app for a free skin' }, b: { th: 'ดาวน์โหลด', en: 'Download' }, s: [2, 0] },
+  { ic: '🔑', h: { th: 'ใส่รหัสผ่าน รับเหรียญ 1,000', en: 'Enter your password for 1,000 coins' }, b: { th: 'ใส่รหัส', en: 'Enter' }, s: [2, 0] },
+  { ic: '📝', h: { th: 'กรอกชื่อและเบอร์โทร รับเพชร', en: 'Type your name and phone for gems' }, b: { th: 'กรอกเลย', en: 'Fill in' }, s: [2, 0] },
+];
+const SAFES = [
+  { ic: '💾', h: { th: 'บันทึกเกมเรียบร้อย', en: 'Game saved' }, b: { th: 'ตกลง', en: 'OK' } },
+  { ic: '⭐', h: { th: 'เก็บเหรียญครบ 10 เหรียญแล้ว', en: 'You collected 10 coins' }, b: { th: 'ตกลง', en: 'OK' } },
+  { ic: '🗺️', h: { th: 'เส้นทางข้างหน้าเปิดแล้ว', en: 'The path ahead is open' }, b: { th: 'ตกลง', en: 'OK' } },
+  { ic: '🔇', h: { th: 'ปิดเสียงเพลงประกอบแล้ว', en: 'Music turned off' }, b: { th: 'ตกลง', en: 'OK' } },
+];
+const ZONES = [
+  { name: { th: '🌳 ด่าน 1: ป่ามหัศจรรย์', en: '🌳 Stage 1: Magic Forest' }, gap: 7.0, tiny: 0 },
+  { name: { th: '🪨 ด่าน 2: ถ้ำมืด', en: '🪨 Stage 2: Dark Cave' }, gap: 6.0, tiny: .3 },
+  { name: { th: '🏰 ด่าน 3: ปราสาทสมบัติ', en: '🏰 Stage 3: Treasure Castle' }, gap: 5.0, tiny: .6 },
+];
+const UI = {
+  th: { title: 'ผจญภัยป่ามหัศจรรย์', sub: 'พาเด็กหมวกแดงวิ่งไปเอาสมบัติที่ปราสาท ระวังป๊อปอัปหลอกที่เด้งมาบังทาง!',
+        r0: '<b>⬆ กระโดด</b>กด Spacebar หรือปุ่มกระโดด เพื่อข้ามหินและเก็บเหรียญ ป๊อปอัปขึ้นเมื่อไร เกมจะหยุดรอให้ปิดก่อน', r1: '<b>✅ ปุ่มปิดจริง</b>ตัวเล็กหรือสีจาง เช่น "✕ ปิด" ที่แถบบนสุด หรือ "ไม่ล่ะ ขอบคุณ"',
+        r2: '<b>❌ ปุ่มหลอก</b>ปุ่มสีสด ปุ่มใหญ่ หรือ X สีแดงในรูป กดแล้วเสียหัวใจ และโฆษณาจะเด้งเพิ่ม! (โหมดยาก: X ที่มุมก็อาจหลอก)', r3: '<b>👌 ป๊อปอัปของเกม</b>สีขาวเรียบ ๆ ไม่ได้ขออะไร กด "ตกลง" ได้เลย',
+        goN: 'ปกติ ▶<small>กระโดดเอง · ป๊อปอัป 1–2</small>', goE: 'ง่าย ▶<small>กระโดดอัตโนมัติ · ป๊อปอัป 1</small>', goH: 'ยาก ▶<small>เร็ว · ป๊อปอัป 2–3 · ❤️ 3</small>', ready: 'พร้อม…', go: 'ไป!', jump: '⬆<br>กระโดด',
+        closed: 'ปิดได้! +5 🪙', okd: 'ตกลง +5 🪙', fooled: 'โดนหลอก!', fakex: 'X ปลอม!', more: 'โฆษณาเพิ่ม!', ouch: 'โอ๊ย!', ad: 'โฆษณา', close: '✕ ปิด', nothanks: 'ไม่ล่ะ ขอบคุณ', wait: 'ปิดป๊อปอัปก่อนนะ!',
+        win: 'ได้สมบัติแล้ว! 🎉', lose: 'หัวใจหมดแล้ว 💔', lCoins: 'เหรียญ', lClosed: 'ปิดป๊อปอัปถูก', lFooled: 'โดนหลอก', most: 'สัญญาณที่หลอกเราได้บ่อยที่สุด:', noFool: 'ไม่โดนหลอกเลย สุดยอด! 🏆', signs: 'จำไว้! สัญญาณหลอก 3 ข้อ:',
+        retry: 'เล่นต่อจากด่านนี้ ↻', gback: '↩ กลับใบงาน', again: 'เริ่มใหม่ทั้งหมด ↺' },
+  en: { title: 'Magic Forest Adventure', sub: 'Help the red-cap kid run to the castle treasure. Watch out for trick pop-ups that block the way!',
+        r0: '<b>⬆ Jump</b>Press Spacebar or the jump button to hop over rocks and grab coins. When a pop-up appears, the game pauses until you close it.', r1: '<b>✅ Real close buttons</b>are small or faint, like "✕ Close" on the top bar or "No thanks".',
+        r2: '<b>❌ Trick buttons</b>are bright, big, or a red X in the picture. Tapping one costs a heart and opens more ads! (Hard: even a corner X can be fake)', r3: '<b>👌 Game messages</b>are plain white and ask for nothing. Just tap "OK".',
+        goN: 'Normal ▶<small>you jump · 1–2 pop-ups</small>', goE: 'Easy ▶<small>auto jump · 1 pop-up</small>', goH: 'Hard ▶<small>fast · 2–3 pop-ups · ❤️ 3</small>', ready: 'Ready…', go: 'Go!', jump: '⬆<br>Jump',
+        closed: 'Closed! +5 🪙', okd: 'OK +5 🪙', fooled: 'Tricked!', fakex: 'Fake X!', more: 'More ads!', ouch: 'Ouch!', ad: 'Ad', close: '✕ Close', nothanks: 'No thanks', wait: 'Close the pop-ups first!',
+        win: 'You found the treasure! 🎉', lose: 'Out of hearts 💔', lCoins: 'Coins', lClosed: 'Pop-ups closed', lFooled: 'Tricked', most: 'The sign that tricked you most:', noFool: 'Never tricked. Amazing! 🏆', signs: 'Remember the 3 trick signs:',
+        retry: 'Continue from this stage ↻', gback: '↩ Back to worksheet', again: 'Start over ↺' },
+};
+
+// ---------- sound ----------
+let ac = null;
+function beep(seq){ if (!sound) return; try { ac = ac || new (window.AudioContext || window.webkitAudioContext)(); let t = ac.currentTime;
+  seq.forEach(([f, d, type]) => { const o = ac.createOscillator(), gn = ac.createGain(); o.type = type || 'square'; o.frequency.value = f; gn.gain.setValueAtTime(.07, t); gn.gain.exponentialRampToValueAtTime(.001, t + d); o.connect(gn); gn.connect(ac.destination); o.start(t); o.stop(t + d); t += d * .9; }); } catch (e) {} }
+const sCoin = () => beep([[988, .05], [1319, .09]]), sJump = () => beep([[400, .06, 'triangle'], [600, .06, 'triangle']]), sGood = () => beep([[660, .08], [880, .12]]),
+      sBad = () => beep([[220, .15, 'sawtooth'], [150, .25, 'sawtooth']]), sPop = () => beep([[520, .05, 'triangle']]), sWin = () => beep([[523, .12], [659, .12], [784, .12], [1047, .3]]);
+
+// ---------- world ----------
+const ZLEN = 3000, GROUND = 720, HX = 320, GRAV = 2400, JV = -1150;
+const MODES = {
+  easy:   { speed: 210, burst: [1, 1], hearts: 5, auto: true,  tinyAdd: -1, fakeCorner: 0,  obMul: 1.1, gapMul: 1.15 },
+  normal: { speed: 240, burst: [1, 2], hearts: 5, auto: false, tinyAdd: 0,  fakeCorner: 0,  obMul: 1,   gapMul: 1 },
+  hard:   { speed: 310, burst: [2, 3], hearts: 3, auto: false, tinyAdd: .4, fakeCorner: .7, obMul: .85, gapMul: .85 },
+};
+let M = MODES.normal, SPEED = 240, maxHearts = 5, resumeT = 0, wasPaused = false;
+let world = [], camX = 0, hero, zoneIdx = 0, hearts = 5, coins = 0, closed = 0, fooled = 0, fooledBy = [0, 0, 0], state = 'title', easy = false, lastT = 0, spawnT = 0, inv = 0, raf = 0, bag = [], zoneShown = -1, coinsAtZone = 0;
+function rng(seed){ return () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }; }
+function buildWorld(){
+  world = [];
+  for (let z = 0; z < 3; z++) {
+    const r = rng(101 + z * 7), base = z * ZLEN; let x = base + 900;
+    while (x < base + ZLEN - 500) {
+      const kind = r() < .5 ? 'rock' : 'stump';
+      world.push({ t: 'ob', kind, z, x, w: 46, h: 36 + Math.floor(r() * 22) });
+      const nc = 2 + Math.floor(r() * 3), air = r() < .5;
+      for (let i = 0; i < nc; i++) world.push({ t: 'coin', x: x + (air ? -40 + i * 50 : 180 + i * 60), y: air ? GROUND - 170 : GROUND - 40, z });
+      x += (560 + r() * (480 - z * 90)) * M.obMul;
+    }
+  }
+}
+function resetHero(){ hero = { y: GROUND, vy: 0, onGround: true, run: 0 }; }
+function zoneOf(x){ return Math.max(0, Math.min(2, Math.floor(x / ZLEN))); }
+
+// ---------- drawing ----------
+function drawBG(z){
+  const W = 1600;
+  if (z === 0) {
+    const sky = g.createLinearGradient(0, 0, 0, GROUND); sky.addColorStop(0, '#7dd3fc'); sky.addColorStop(1, '#bae6fd'); g.fillStyle = sky; g.fillRect(0, 0, W, 900);
+    g.fillStyle = '#fde047'; g.beginPath(); g.arc(180, 190, 70, 0, 7); g.fill();
+    g.fillStyle = '#fff'; for (let i = 0; i < 4; i++) { const cx = ((i * 520 - camX * .1) % 2100 + 2100) % 2100 - 250; g.beginPath(); g.ellipse(cx, 200 + (i % 2) * 70, 140, 40, 0, 0, 7); g.fill(); }
+    hills('#4ade80', .3, 330, 260); hills('#22c55e', .5, 260, 200);
+    for (let i = 0; i < 6; i++) { const tx = ((i * 330 - camX * .7) % 1980 + 1980) % 1980 - 150; g.fillStyle = '#92400e'; g.fillRect(tx + 52, GROUND - 120, 26, 120); g.fillStyle = '#15803d'; g.beginPath(); g.arc(tx + 65, GROUND - 150, 70, 0, 7); g.fill(); }
+    ground('#d6a85a', '#b7843a');
+  } else if (z === 1) {
+    g.fillStyle = '#2e1065'; g.fillRect(0, 0, W, 900);
+    g.fillStyle = '#4c1d95'; for (let i = 0; i < 14; i++) { const sx = ((i * 140 - camX * .4) % 1960 + 1960) % 1960 - 180; g.beginPath(); g.moveTo(sx, 90); g.lineTo(sx + 50, 90); g.lineTo(sx + 25, 90 + 60 + (i % 3) * 40); g.fill(); }
+    g.fillStyle = '#a78bfa55'; for (let i = 0; i < 8; i++) { const cx = ((i * 260 - camX * .6) % 2080 + 2080) % 2080 - 240; g.beginPath(); g.moveTo(cx, GROUND); g.lineTo(cx + 30, GROUND - 80); g.lineTo(cx + 60, GROUND); g.fill(); }
+    hills('#3b0764', .5, 220, 160);
+    ground('#57534e', '#44403c');
+  } else {
+    const sky = g.createLinearGradient(0, 0, 0, GROUND); sky.addColorStop(0, '#fb923c'); sky.addColorStop(1, '#fde68a'); g.fillStyle = sky; g.fillRect(0, 0, W, 900);
+    g.fillStyle = '#7c2d12aa'; for (let i = 0; i < 5; i++) { const bx = ((i * 420 - camX * .3) % 2100 + 2100) % 2100 - 250; g.fillRect(bx, 330, 120, GROUND - 330); for (let k = 0; k < 4; k++) g.fillRect(bx + k * 32, 300, 22, 30); }
+    ground('#a8a29e', '#78716c');
+  }
+}
+function hills(col, par, h, amp){ g.fillStyle = col; g.beginPath(); g.moveTo(0, GROUND); for (let x = 0; x <= 1600; x += 20) g.lineTo(x, GROUND - h + Math.sin((x + camX * par) / 260) * amp * .3 - amp * .2); g.lineTo(1600, GROUND); g.fill(); }
+function ground(c1, c2){ g.fillStyle = c2; g.fillRect(0, GROUND, 1600, 12); g.fillStyle = c1; g.fillRect(0, GROUND + 12, 1600, 900 - GROUND); g.fillStyle = c2; for (let x = -((camX) % 80); x < 1600; x += 80) g.fillRect(x, GROUND + 40, 40, 8); }
+function drawOb(o){
+  const sx = o.x - camX + HX; if (sx < -100 || sx > 1700) return;
+  const z = o.z;
+  if (z === 1) { g.fillStyle = '#c4b5fd'; g.beginPath(); g.moveTo(sx, GROUND); g.lineTo(sx + o.w / 2, GROUND - o.h - 10); g.lineTo(sx + o.w, GROUND); g.fill(); g.fillStyle = '#8b5cf6'; g.beginPath(); g.moveTo(sx + o.w / 2, GROUND); g.lineTo(sx + o.w / 2, GROUND - o.h - 10); g.lineTo(sx + o.w, GROUND); g.fill(); return; }
+  if (z === 2) { g.fillStyle = '#92400e'; g.fillRect(sx, GROUND - o.h, o.w, o.h); g.fillStyle = '#78350f'; g.fillRect(sx, GROUND - o.h + 10, o.w, 6); g.fillRect(sx, GROUND - 16, o.w, 6); return; }
+  if (o.kind === 'rock') { g.fillStyle = '#6b7280'; g.beginPath(); g.ellipse(sx + o.w / 2, GROUND - o.h / 2, o.w / 2 + 6, o.h / 2 + 2, 0, 0, 7); g.fill(); g.fillStyle = '#9ca3af'; g.beginPath(); g.ellipse(sx + o.w / 2 - 10, GROUND - o.h / 2 - 8, 14, 8, 0, 0, 7); g.fill(); }
+  else { g.fillStyle = '#92400e'; g.fillRect(sx, GROUND - o.h, o.w, o.h); g.fillStyle = '#d6a85a'; g.beginPath(); g.ellipse(sx + o.w / 2, GROUND - o.h, o.w / 2, 10, 0, 0, 7); g.fill(); g.strokeStyle = '#92400e'; g.beginPath(); g.ellipse(sx + o.w / 2, GROUND - o.h, o.w / 4, 5, 0, 0, 7); g.stroke(); }
+}
+function drawCoin(c, t){ const sx = c.x - camX + HX; if (sx < -60 || sx > 1660) return; const w = Math.abs(Math.cos(t / 250 + c.x)) * 22 + 4;
+  g.fillStyle = '#ca8a04'; g.beginPath(); g.ellipse(sx, c.y, w + 4, 26, 0, 0, 7); g.fill(); g.fillStyle = '#facc15'; g.beginPath(); g.ellipse(sx, c.y, w, 22, 0, 0, 7); g.fill(); }
+function drawCastle(){ const end = 3 * ZLEN, sx = end - camX + HX; if (sx > 1800) return;
+  g.fillStyle = '#e7e5e4'; g.fillRect(sx, GROUND - 330, 360, 330); for (let k = 0; k < 6; k++) g.fillRect(sx + k * 64, GROUND - 370, 40, 40);
+  g.fillStyle = '#78350f'; g.beginPath(); g.moveTo(sx + 130, GROUND); g.lineTo(sx + 130, GROUND - 130); g.arc(sx + 180, GROUND - 130, 50, Math.PI, 0); g.lineTo(sx + 230, GROUND); g.fill();
+  g.fillStyle = '#dc2626'; g.beginPath(); g.moveTo(sx + 180, GROUND - 470); g.lineTo(sx + 250, GROUND - 445); g.lineTo(sx + 180, GROUND - 420); g.fill(); g.fillStyle = '#57534e'; g.fillRect(sx + 176, GROUND - 470, 6, 100); }
+function drawHero(t){
+  const x = HX, y = hero.y, blink = inv > 0 && Math.floor(t / 100) % 2;
+  if (blink) return;
+  const leg = hero.onGround && state === 'play' && !paused() ? Math.sin(hero.run * 18) * 14 : 6;
+  g.fillStyle = '#1e3a8a'; g.fillRect(x - 22 + leg / 2, y - 34, 16, 34); g.fillRect(x + 6 - leg / 2, y - 34, 16, 34);
+  g.fillStyle = '#3b82f6'; roundRect(x - 34, y - 104, 68, 74, 18);
+  g.fillStyle = '#fcd9b8'; g.beginPath(); g.arc(x, y - 138, 42, 0, 7); g.fill(); g.strokeStyle = '#7c2d12'; g.lineWidth = 5; g.stroke();
+  g.fillStyle = '#1f2937'; g.beginPath(); g.ellipse(x - 12, y - 140, 5, 7, 0, 0, 7); g.ellipse(x + 16, y - 140, 5, 7, 0, 0, 7); g.fill();
+  g.fillStyle = '#ef4444'; g.beginPath(); g.arc(x, y - 150, 46, Math.PI, 0); g.fill(); g.fillRect(x, y - 156, 60, 12);
+}
+function roundRect(x, y, w, h, r){ g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.fill(); }
+
+// ---------- popups ----------
+const openPops = () => [...layer.children].filter(p => !p._done).length;
+const blocked = () => openPops() > 0 || (spawn._pending > 0);
+const paused = () => blocked() || resumeT > 0;
+function pick(){ if (!bag.length) bag = [...TRICKS, ...TRICKS, ...SAFES].map(x => ({ x, k: x.s ? 't' : 's' })).sort(() => Math.random() - .5); return bag.pop(); }
+function freeSpot(){
+  for (let i = 0; i < 30; i++) { const x = 380 + Math.random() * (1600 - 380 - 450 - 180), y = 100 + Math.random() * 360;
+    if (![...layer.children].some(p => Math.abs(p.offsetLeft - x) < 400 && Math.abs(p.offsetTop - y) < 240)) return [x, y]; }
+  return [380 + Math.random() * 600, 100 + Math.random() * 360];
+}
+function toast(x, y, txt, good){ const d = document.createElement('div'); d.className = 'toast ' + (good ? 'good' : 'bad'); d.textContent = txt; d.style.left = Math.min(1600 - 320, Math.max(320, x)) + 'px'; d.style.top = Math.max(100, y) + 'px'; stage.appendChild(d); setTimeout(() => d.remove(), 1400); }
+function removePop(p){ p._done = true; p.classList.add('out'); setTimeout(() => p.remove(), 200); }
+function hud(){
+  $('#hearts').textContent = '❤️'.repeat(Math.max(0, hearts)) + '🤍'.repeat(Math.max(0, maxHearts - hearts)); $('#coins').textContent = '🪙 ' + coins;
+  const p = Math.min(1, camX / (3 * ZLEN)); $('#pfill').style.width = (p * 100) + '%'; $('#pme').style.left = (p * 96 + 2) + '%';
+}
+function hurt(){ hearts--; inv = 1.2; sBad(); cv.classList.remove('shake'); void cv.offsetWidth; cv.classList.add('shake'); hud(); if (hearts <= 0) lose(); }
+function popHit(p, good, msg){
+  if (state !== 'play' || p._done) return;
+  const cx = p.offsetLeft + 210, cy = p.offsetTop + 50; removePop(p);
+  if (good) { coins += 5; closed++; sGood(); toast(cx, cy, msg, true); hud(); return; }
+  fooled++; (p._signs || []).forEach(s => fooledBy[s]++);
+  toast(cx, cy, msg + (p._signs ? ' ' + T(SIGNS[p._signs[0]]) : ''), false); hurt();
+  if (state === 'play') { spawn._pending = (spawn._pending || 0) + 2; setTimeout(() => { if (state !== 'play') { spawn._pending = 0; return; } toast(800, 420, UI[L].more, false); spawn(true); spawn(true); }, 500); }
+}
+function spawn(forceTrick){
+  const U = UI[L], z = ZONES[zoneIdx]; let it = pick(); if (forceTrick && it.k !== 't') it = { k: 't', x: TRICKS[Math.floor(Math.random() * TRICKS.length)] };
+  const p = document.createElement('div'), [x, y] = freeSpot(); p.style.left = x + 'px'; p.style.top = y + 'px';
+  if (it.k === 't') {
+    const t = it.x, useBar = Math.random() < .55, fx = [['8px', 'left'], ['8px', 'right']][Math.floor(Math.random() * 2)];
+    p.className = 'pop trick' + (Math.random() < z.tiny + M.tinyAdd ? ' tiny' : ''); p._signs = t.s;
+    const cornerFake = useBar ? false : Math.random() < M.fakeCorner;
+    p.innerHTML = `<div class="bar"><span>${U.ad}</span>${useBar ? `<button class="realx">${U.close}</button>` : (cornerFake ? '<button class="barfake">✕</button>' : '<span></span>')}</div>
+      <div class="content"><div class="fakex" style="top:${fx[0]};${fx[1]}:8px">✕</div><div class="ic">${t.ic}</div><h3>${T(t.h)}</h3><button class="bait">${T(t.b)}</button>${useBar ? '' : `<button class="nothanks">${U.nothanks}</button>`}</div>`;
+    p.querySelector('.bait').onclick = e => { e.stopPropagation(); popHit(p, false, U.fooled); };
+    p.querySelector('.fakex').onclick = e => { e.stopPropagation(); popHit(p, false, U.fakex); };
+    if (cornerFake) p.querySelector('.barfake').onclick = e => { e.stopPropagation(); popHit(p, false, U.fakex); };
+    p.querySelector(useBar ? '.realx' : '.nothanks').onclick = e => { e.stopPropagation(); popHit(p, true, U.closed); };
+  } else {
+    const t = it.x; p.className = 'pop safe';
+    p.innerHTML = `<div class="bar"><span>🎮</span><button class="realx">✕</button></div><div class="content"><div class="ic">${t.ic}</div><h3>${T(t.h)}</h3><button class="ok">${T(t.b)}</button></div>`;
+    p.querySelector('.ok').onclick = e => { e.stopPropagation(); popHit(p, true, U.okd); };
+    p.querySelector('.realx').onclick = e => { e.stopPropagation(); popHit(p, true, U.okd); };
+  }
+  p.addEventListener('pointerdown', e => e.stopPropagation());
+  layer.appendChild(p); sPop(); if (spawn._pending > 0) spawn._pending--;
+}
+
+// ---------- loop ----------
+function jump(){ if (state !== 'play' || !hero.onGround) return; hero.vy = JV; hero.onGround = false; sJump(); }
+function step(now){
+  if (state !== 'play') return;
+  const dt = Math.max(0, Math.min(.05, (now - lastT) / 1000)); lastT = Math.max(lastT, now);
+  if (inv > 0) inv -= dt;
+  const z = zoneOf(camX);
+  if (z !== zoneShown) { zoneShown = z; zoneIdx = z; coinsAtZone = coins; const d = document.createElement('div'); d.className = 'zoneTag'; d.textContent = T(ZONES[z].name); stage.appendChild(d); setTimeout(() => d.remove(), 2400); }
+  const pz = blocked();
+  if (pz) { wasPaused = true; $('#dim').classList.remove('hide'); $('#ready').classList.add('hide'); render(now); hud(); raf = requestAnimationFrame(step); return; }
+  if (wasPaused) { wasPaused = false; resumeT = 1.1; $('#dim').classList.add('hide'); }
+  if (resumeT > 0) { resumeT -= dt; const r = $('#ready'); r.classList.remove('hide'); r.textContent = resumeT > .4 ? UI[L].ready : UI[L].go; if (resumeT <= 0) r.classList.add('hide'); render(now); hud(); raf = requestAnimationFrame(step); return; }
+  camX += SPEED * dt; hero.run += dt;
+  // easy mode: auto jump
+  if (M.auto && hero.onGround) { const ahead = world.find(o => o.t === 'ob' && !o.gone && Math.abs(o.x - camX - (SPEED * .48 - 23)) < 22); if (ahead) jump(); }
+  hero.vy += GRAV * dt; hero.y += hero.vy * dt; if (hero.y >= GROUND) { hero.y = GROUND; hero.vy = 0; hero.onGround = true; }
+  // collisions (hero box x: camX-30..camX+30)
+  for (const o of world) {
+    if (o.gone) continue;
+    const rel = o.x - camX;
+    if (o.t === 'ob' && rel < 28 && rel + o.w > -28 && hero.y > GROUND - o.h + 6) { o.gone = true; if (inv <= 0) { toast(HX + 60, GROUND - 260, UI[L].ouch, false); hurt(); if (state !== 'play') return; } }
+    if (o.t === 'coin' && Math.abs(rel) < 40 && Math.abs((hero.y - 80) - o.y) < 90) { o.gone = true; coins++; sCoin(); }
+  }
+  // popups keep coming (no time limit on each one)
+  // popup event: game pauses; only when hero is on the ground and nothing is right in front
+  spawnT -= dt;
+  if (spawnT <= 0 && hero.onGround && camX < 3 * ZLEN - 300 && !world.some(o => o.t === 'ob' && !o.gone && o.x - camX > -60 && o.x - camX < 260)) {
+    const n = M.burst[0] + Math.floor(Math.random() * (M.burst[1] - M.burst[0] + 1));
+    for (let i = 0; i < n; i++) setTimeout(() => { if (state === 'play') spawn(); }, i * 350);
+    spawn._pending = n; wasPaused = true;
+    spawnT = ZONES[zoneIdx].gap * M.gapMul * (.8 + Math.random() * .4);
+  }
+  if (camX >= 3 * ZLEN + 120) return win();
+  render(now); hud();
+  raf = requestAnimationFrame(step);
+}
+function render(now){
+  drawBG(zoneOf(camX)); drawCastle();
+  for (const o of world) if (!o.gone) o.t === 'ob' ? drawOb(o) : drawCoin(o, now);
+  drawHero(now);
+  if (blocked() && state === 'play') { g.fillStyle = '#000a'; g.font = '800 34px Kanit, Tahoma'; g.textAlign = 'center'; roundRect(HX - 170, hero.y - 260, 340, 56, 20); g.fillStyle = '#fff'; g.fillText(UI[L].wait, HX, hero.y - 220); }
+}
+function startZone(z, keepStats){
+  layer.innerHTML = ''; cancelAnimationFrame(raf);
+  if (!keepStats) { coins = 0; closed = 0; fooled = 0; fooledBy = [0, 0, 0]; buildWorld(); }
+  else { coins = coinsAtZone; world.forEach(o => { if (o.z >= z) o.gone = false; }); }
+  hearts = maxHearts; camX = z * ZLEN; zoneShown = -1; zoneIdx = z; resetHero(); inv = 0; bag = []; spawnT = 2.5; resumeT = 0; wasPaused = false; spawn._pending = 0; $('#dim').classList.add('hide'); $('#ready').classList.add('hide');
+  $('#title').classList.add('hide'); $('#end').classList.add('hide');
+  state = 'play'; lastT = performance.now(); hud(); raf = requestAnimationFrame(step);
+}
+function lose(){ $('#dim').classList.add('hide'); $('#ready').classList.add('hide'); state = 'lose'; cancelAnimationFrame(raf); setTimeout(() => showEnd(false), 600); }
+function win(){ $('#dim').classList.add('hide'); state = 'win'; cancelAnimationFrame(raf); [...layer.children].forEach(removePop); sWin(); render(performance.now()); setTimeout(() => showEnd(true), 700); }
+function showEnd(won){
+  const U = UI[L]; $('#end').classList.remove('hide');
+  $('#eChest').textContent = won ? '💰' : '💔'; $('#eTitle').textContent = won ? U.win : U.lose;
+  $('#eCoins').textContent = coins; $('#eClosed').textContent = closed; $('#eFooled').textContent = fooled;
+  $('#lCoins').textContent = U.lCoins; $('#lClosed').textContent = U.lClosed; $('#lFooled').textContent = U.lFooled;
+  const mx = Math.max(...fooledBy); $('#eMost').innerHTML = mx ? `${U.most} <b>${T(SIGNS[fooledBy.indexOf(mx)])}</b>` : U.noFool;
+  $('#eSigns').innerHTML = `<b>${U.signs}</b> ${SIGNS.map(T).join(' · ')}`;
+  $('#retry').textContent = U.retry; $('#again').textContent = U.again; $('#retry').classList.toggle('hide', won);
+}
+function applyLang(){
+  const U = UI[L]; document.documentElement.lang = L; document.title = U.title;
+  $('#lth').classList.toggle('on', L === 'th'); $('#len').classList.toggle('on', L === 'en');
+  $('#tTitle').textContent = U.title; $('#tSub').textContent = U.sub; ['0', '1', '2', '3'].forEach(k => $('#rule' + k).innerHTML = U['r' + k]);
+  $('#gback').textContent = U.gback; $('#goN').innerHTML = U.goN; $('#goE').innerHTML = U.goE; $('#goH').innerHTML = U.goH; $('#jump').innerHTML = U.jump;
+  if (state === 'win' || state === 'lose') showEnd(state === 'win');
+}
+$('#lth').onclick = () => { L = 'th'; applyLang(); }; $('#len').onclick = () => { L = 'en'; applyLang(); };
+$('#snd').onclick = () => { sound = !sound; $('#snd').textContent = sound ? '🔊' : '🔇'; };
+function go(m){ M = MODES[m]; SPEED = M.speed; maxHearts = M.hearts; easy = M.auto; $('#jump').classList.toggle('hide', M.auto); startZone(0, false); }
+$('#goN').onclick = () => go('normal'); $('#goE').onclick = () => go('easy'); $('#goH').onclick = () => go('hard');
+$('#retry').onclick = () => startZone(zoneIdx, true);
+function toTitle(){ cancelAnimationFrame(raf); $('#dim').classList.add('hide'); $('#ready').classList.add('hide'); $('#end').classList.add('hide'); $('#title').classList.remove('hide'); state = 'title'; layer.innerHTML = ''; spawn._pending = 0; camX = 0; resetHero(); render(performance.now()); hud(); }
+const EMB = window.parent !== window;
+if (EMB) { $('#gback').classList.remove('hide'); $('#gback').onclick = () => { toTitle(); parent.postMessage('closeGame', '*'); }; }
+addEventListener('message', e => { if (e.data && e.data.lang) { L = e.data.lang === 'en' ? 'en' : 'th'; applyLang(); } });
+$('#again').onclick = () => { $('#dim').classList.add('hide'); $('#end').classList.add('hide'); $('#title').classList.remove('hide'); state = 'title'; layer.innerHTML = ''; camX = 0; resetHero(); render(performance.now()); };
+$('#jump').addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); jump(); });
+cv.addEventListener('pointerdown', () => jump());
+addEventListener('keydown', e => { if (e.code === 'Space' || e.code === 'ArrowUp') { e.preventDefault(); if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); jump(); } });
+document.addEventListener('click', () => { if (state === 'play' && document.activeElement && document.activeElement.blur) document.activeElement.blur(); });
+buildWorld(); resetHero(); applyLang(); hud(); render(0);
+</script>
+</body></html>

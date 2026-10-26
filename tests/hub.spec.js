@@ -1,0 +1,138 @@
+// ทดสอบ Hub + ใบงาน ทั้งเส้นทาง โดยจำลอง Apps Script (ไม่ต่อ Google จริง)
+const { test, expect } = require('@playwright/test');
+const fs = require('fs'), path = require('path');
+const content = id => JSON.parse(fs.readFileSync(path.join(__dirname, '../worksheet/content', id + '.json'), 'utf8'));
+
+function mockApi(page, { open = { y3w1: true, y4w1: true, adventure: true } } = {}) {
+  const api = { posts: [], done: {} };
+  page.route('**/fonts.googleapis.com/**', r => r.abort());
+  page.route('**/script.google.com/**', async route => {
+    const req = route.request();
+    if (req.method() === 'POST') {
+      const b = JSON.parse(req.postData());
+      api.posts.push(b);
+      for (const m of b.members) api.done[m] = JSON.parse(b.row[12]);
+      return route.fulfill({ body: 'ok' });
+    }
+    const p = new URL(req.url()).searchParams;
+    let body;
+    if (p.get('action') === 'roster') body = { ok: true, names: ['กาย', 'ขิม', 'เมษา'] };
+    else if (p.get('action') === 'state') {
+      const d = api.done[p.get('name')];
+      body = { ok: true, open, status: d ? { [d.act]: 'done' } : {}, rounds: d ? { [d.act]: d.round } : {} };
+    } else body = { ok: false, error: 'action' };
+    route.fulfill({ contentType: 'application/json', body: JSON.stringify(body) });
+  });
+  return api;
+}
+
+async function doWorksheet(page, id, { fr, skip } = {}) {
+  const C = content(id);
+  await expect(page.locator('#pool .cardx')).toHaveCount(16);
+  for (const c of C.cards) {               // แตะการ์ด แล้วแตะกล่อง
+    await page.click(`.cardx[data-id="${c.id}"]`);
+    await page.click(`.bin.${c.bin} h2`);
+  }
+  await page.click('#next');                // ขั้น 2
+  for (const c of C.cards.filter(c => c.bin === 'b'))
+    for (const n of c.signs) await page.click(`.cardx[data-id="${c.id}"] .chip[data-s="${n}"]`);
+  await page.click('#next');                // ขั้น 3
+  await expect(page.locator('#toFor')).toBeDisabled();
+  await page.click(`.cardx[data-id="b1"]`);
+  await page.fill('#reason', 'เพราะมันบอกว่าได้ของฟรี');
+  await page.click('#toFor');               // ขั้น 4
+  await expect(page.locator('#forPanel')).toBeVisible();
+  if (skip) await page.click('#skip');
+  else { await page.fill('#fr', fr); await page.click('#check'); }
+  await expect(page.locator('#sent')).toHaveClass(/ok/);
+}
+
+test('Y3: เลือกห้อง → ชื่อ → ทำใบงาน 4 ขั้น → ส่ง → สถานะส่งแล้ว', async ({ page }) => {
+  const errs = []; page.on('pageerror', e => errs.push(e.message));
+  const api = mockApi(page);
+  await page.goto('/');
+  await expect(page.locator('#goTyping')).toHaveAttribute('href', 'https://terraran.github.io/ANSTH-Typing/');
+  await page.click('#goIct');
+  await page.click('text=Y3.2');
+  await page.click('button.name:has-text("ขิม")');
+  await expect(page.locator('.card[data-act="y3w1"] .st')).toHaveText('ยังไม่เริ่ม');
+  await expect(page.locator('.prog b')).toHaveText('0/1');
+  await expect(page.locator('.card[data-act="y4w1"]')).toHaveCount(0);   // Y3 ไม่เห็นงาน Y4
+  await page.click('.card[data-act="y3w1"] a.btn');
+
+  await expect(page.locator('#meName')).toHaveText('ขิม');
+  await expect(page.locator('#ttl')).toContainText('สัปดาห์ 1');
+  await doWorksheet(page, 'y3w1', { fr: 'เรารู้เพราะครูสอนในห้อง' });
+  await expect(page.locator('#result')).toHaveText('ถูก 16/16 ใบ');
+
+  expect(api.posts).toHaveLength(1);
+  const b = api.posts[0];
+  expect(b.action).toBe('submit');
+  expect(b.members).toEqual(['ขิม']);
+  expect(b.row).toHaveLength(15);
+  expect(b.row.slice(0, 7)).toEqual(['Y3', 1, 'กดได้ หรือ หยุดถามผู้ใหญ่?', 'Y3.2', 'ขิม', 'TH', '16/16']);
+  const d = JSON.parse(b.row[12]);
+  expect(d).toMatchObject({ v: 3, act: 'y3w1', round: 1, hes: 'b1', fr: 'เรารู้เพราะครูสอนในห้อง', frq: 'เรารู้ได้อย่างไรว่าการ์ดไหนอยู่กลุ่มไหน?' });
+  expect(b.row[13]).toBe('เรารู้เพราะครูสอนในห้อง');
+
+  // เกมหลังส่ง (Y3) เปิดใน iframe แล้วกดกลับใบงานได้
+  await expect(page.locator('#play')).toBeVisible();
+  await page.click('#play');
+  await expect(page.locator('#gameWrap')).toBeVisible();
+  await page.frameLocator('#gameFrame').locator('#gback').click();
+  await expect(page.locator('#gameWrap')).toBeHidden();
+
+  await page.click('#lib2');
+  await expect(page.locator('.card[data-act="y3w1"] .st')).toHaveText('ส่งแล้ว ✓');
+  await expect(page.locator('.prog b')).toHaveText('1/1');
+  // เปิดใหม่ = รอบที่ 2
+  await page.click('.card[data-act="y3w1"] a.btn');
+  await expect(page).toHaveURL(/round=2/);
+  expect(errs).toEqual([]);
+});
+
+test('Y4: ข้าม FoR แล้วส่ง · ภาษาอังกฤษ · ไม่มีปุ่มเกม', async ({ page }) => {
+  const api = mockApi(page);
+  await page.goto('/#/lib/Y4.1/' + encodeURIComponent('เมษา'));
+  await page.click('[data-lang="en"]');
+  await expect(page.locator('.card[data-act="y4w1"] .st')).toHaveText('Not started');
+  await page.click('.card[data-act="y4w1"] a.btn');
+  await expect(page.locator('#s1')).toHaveText('1 Sort');
+  await doWorksheet(page, 'y4w1', { skip: true });
+  const d = JSON.parse(api.posts[0].row[12]);
+  expect(d.fr).toBe('');
+  expect(api.posts[0].row[5]).toBe('EN');
+  expect(api.posts[0].row[13]).toBe('-');
+  await expect(page.locator('#play')).toBeHidden();
+  // แก้แล้วส่งใหม่ → รอบ 2
+  await page.click('#edit');
+  await expect(page.locator('#task')).toContainText('Step 1');
+});
+
+test('การ์ดที่ครูยังไม่เปิดถูกล็อก · เกมเปิดเต็มจอและปิดได้', async ({ page }) => {
+  mockApi(page, { open: { adventure: true } });
+  await page.goto('/#/lib/Y3.1/' + encodeURIComponent('กาย'));
+  await expect(page.locator('.card[data-act="y3w1"] .lockbox')).toBeVisible();
+  await expect(page.locator('.card[data-act="y3w1"] a')).toHaveCount(0);
+  await page.click('[data-tab="game"]');
+  await expect(page.locator('.card[data-act="popup60"] .lockbox')).toBeVisible();
+  await page.click('.card[data-act="adventure"] button');
+  await expect(page.locator('#gameWrap')).toBeVisible();
+  await page.frameLocator('#gameFrame').locator('#gback').click();
+  await expect(page.locator('#gameWrap')).toBeHidden();
+});
+
+test('ใบงานที่เปิดตรง ๆ โดยไม่มีห้อง/ชื่อ → พากลับคลัง', async ({ page }) => {
+  mockApi(page);
+  await page.goto('/worksheet/?act=y3w1');
+  await expect(page.locator('#msg')).toBeVisible();
+});
+
+test('มือถือ: หน้าเลือกชื่อไม่ล้นจอแนวนอน', async ({ page }) => {
+  mockApi(page);
+  await page.setViewportSize({ width: 375, height: 812 });
+  for (const h of ['/', '/#/rooms', '/#/names/Y3.2', '/#/lib/Y3.2/' + encodeURIComponent('ขิม')]) {
+    await page.goto(h); await page.waitForTimeout(200);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
+  }
+});

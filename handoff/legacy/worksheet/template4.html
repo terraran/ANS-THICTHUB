@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>__TITLE__</title>
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#1e293b;--muted:#64748b;--bg:#f0f9ff;--line:#cbd5e1;--a:#16a34a;--b:#dc2626;--accent:__ACCENT__}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--ink);font-family:Kanit,'Noto Sans Thai',Tahoma,sans-serif}
+body{user-select:none;-webkit-user-select:none}
+#stage{position:absolute;left:0;top:0;width:1600px;height:900px;transform-origin:0 0;display:grid;grid-template-rows:62px 1fr}
+header{background:var(--accent);color:#fff;padding:0 22px;display:flex;align-items:center;gap:14px}
+header h1{margin:0;font-size:28px;font-weight:800;white-space:nowrap}
+.steps{margin-left:auto;display:flex;gap:6px}
+.st{background:#ffffff33;border-radius:30px;padding:3px 12px;font-size:16px;white-space:nowrap}
+.st.on{background:#fff;color:var(--accent);font-weight:800}
+.lang{display:flex;border:2px solid #fff;border-radius:30px;overflow:hidden}
+.lang button{background:transparent;box-shadow:none;border-radius:0;padding:2px 12px;font-size:16px;color:#fff}
+.lang button.on{background:#fff;color:var(--accent)}
+.body{display:grid;grid-template-columns:560px 1fr;gap:16px;padding:14px 16px;min-height:0}
+.body.full{grid-template-columns:1fr}
+.full #poolWrap{display:none}
+#poolWrap{min-height:0;display:flex}
+.pool{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:8px;align-content:start;background:#fff8;border:3px dashed var(--line);border-radius:14px;padding:10px;overflow:auto}
+main{display:flex;flex-direction:column;gap:10px;min-height:0}
+.topbar{display:flex;gap:12px;align-items:center;background:#fff;border-radius:14px;padding:8px 12px;border:3px solid var(--line)}
+.task{flex:1;font-size:19px;line-height:1.35}
+.task b{color:var(--accent)}
+.btns{display:flex;gap:8px;flex:none}
+button{font-family:inherit;font-size:20px;font-weight:600;border:none;border-radius:14px;padding:8px 20px;cursor:pointer;background:var(--accent);color:#fff;box-shadow:0 4px 0 #0003;white-space:nowrap}
+button:disabled{background:#cbd5e1;box-shadow:none;cursor:not-allowed}
+button.ghost{background:#fff;color:var(--ink);border:3px solid var(--line)}
+.hide{display:none!important}
+/* sign-in screen */
+#signin{position:absolute;inset:62px 0 0 0;display:flex;align-items:center;justify-content:center;background:var(--bg);z-index:30}
+.signbox{width:720px;background:#fff;border-radius:28px;border:4px solid var(--accent);padding:34px 44px;box-shadow:0 20px 50px #0002}
+.signbox h2{margin:0;font-size:40px;color:var(--accent)}
+.signbox p{margin:6px 0 18px;font-size:22px;color:var(--muted)}
+.signbox label{display:block;font-size:20px;margin:14px 0 4px;font-weight:600}
+input,select,textarea{font-family:inherit;font-size:22px;width:100%;padding:8px 12px;border:2px solid var(--line);border-radius:12px;user-select:text;-webkit-user-select:text;background:#fff}
+.signbox button{width:100%;margin-top:26px;font-size:28px;padding:14px}
+/* cards */
+.cardx{background:#fff;border:3px solid var(--line);border-radius:12px;padding:6px 10px;cursor:grab;touch-action:none;box-shadow:0 3px 0 #cbd5e1;position:relative;line-height:1.25;display:flex;gap:8px;align-items:center;min-height:64px}
+.cardx.sel{outline:4px solid #fbbf24}
+.cardx.hes{outline:5px solid #f59e0b;background:#fffbeb}
+.pickmode .cardx{cursor:pointer}
+.pickmode .cardx:hover{outline:4px solid #fde68a}
+.cardx.drag{position:absolute;z-index:50;cursor:grabbing;box-shadow:0 12px 26px #0004;pointer-events:none}
+.cardx .ic{font-size:26px;line-height:1;flex:none}
+.cardx .bd{flex:1;min-width:0}
+.cardx .tx{font-size:17px;font-weight:600}
+.full .cardx .tx{font-size:18px}
+.cardx .nm{font-size:13px;color:var(--muted)}
+.chips{display:none;flex-wrap:wrap;gap:5px;margin-top:5px}
+.full .bin.b .chips{display:flex}
+.chip{border-radius:20px;border:2px solid var(--line);background:#f8fafc;font-size:15px;padding:1px 10px;cursor:pointer;white-space:nowrap}
+.chip.on{background:#fde68a;border-color:#f59e0b;font-weight:600}
+.chip.right{background:#bbf7d0;border-color:#16a34a}
+.chip.wrong{background:#fecaca;border-color:#dc2626;text-decoration:line-through}
+.chip.miss{border:2px dashed #16a34a;background:#f0fdf4;color:#15803d}
+.mark{position:absolute;top:-10px;right:-8px;width:28px;height:28px;border-radius:50%;color:#fff;font-weight:800;font-size:17px;display:flex;align-items:center;justify-content:center}
+.mark.ok{background:#16a34a}.mark.no{background:#dc2626}
+.exp{display:none;font-size:14px;color:#334155;margin-top:4px;background:#f1f5f9;border-radius:8px;padding:3px 8px;line-height:1.3}
+.checked .cardx.bad .exp{display:block}
+.checked .cardx.good:hover .exp{display:block}
+/* tree */
+.tree{flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto 1fr;gap:0 14px;min-height:0;position:relative}
+.root{grid-column:1/3;justify-self:center;background:var(--ink);color:#fff;font-weight:800;font-size:21px;padding:5px 26px;border-radius:14px;margin-bottom:24px;position:relative}
+.root:after{content:'';position:absolute;top:100%;left:50%;width:4px;height:12px;background:var(--ink)}
+.tree:before{content:'';position:absolute;top:52px;left:25%;right:25%;height:14px;border:4px solid var(--ink);border-bottom:none;border-radius:12px 12px 0 0}
+.bin{border-radius:16px;padding:8px;border:4px solid;background:#fff;min-height:0;display:flex;flex-direction:column}
+.bin h2{margin:0 0 8px;text-align:center;font-size:22px;color:#fff;border-radius:10px;padding:3px}
+.bin.a{border-color:var(--a)}.bin.a h2{background:var(--a)}
+.bin.b{border-color:var(--b)}.bin.b h2{background:var(--b)}
+.bin.hover{box-shadow:0 0 0 5px #fbbf24}
+.bin .list{flex:1;display:flex;flex-wrap:wrap;gap:8px;align-content:flex-start;overflow:auto;padding:6px 6px 4px 2px}
+.bin .cardx{width:calc(50% - 4px);flex:none}
+/* bottom drawer (step 3 + results) */
+.drawer{background:#fff;border-radius:14px;border:3px solid #f59e0b;padding:10px 14px;display:grid;grid-template-columns:1fr 1fr auto;gap:10px 16px;align-items:start}
+.drawer .hd{grid-column:1/4;font-size:18px}
+.drawer .hd b{color:#b45309}
+.drawer label{font-size:16px;font-weight:600;display:block;margin-bottom:3px}
+.drawer label small{font-weight:400;color:var(--muted)}
+.drawer textarea{height:72px;resize:none;font-size:19px}
+.drawer .go{align-self:end}
+.res{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;background:#fff;border-radius:14px;border:3px solid var(--line);padding:8px 14px}
+.res .r{font-size:24px;font-weight:800;white-space:nowrap}
+.res .k{font-size:18px;background:#fef9c3;border-radius:10px;padding:6px 12px}
+.res .sent{font-size:16px;font-weight:600;margin-top:4px}
+.sent.ok{color:#166534}.sent.err{color:#991b1b}.sent.wait{color:#075985}
+</style></head><body>
+<div id="stage">
+<header><h1 id="ttl"></h1>
+ <div class="steps"><span class="st on" id="s0"></span><span class="st" id="s1"></span><span class="st" id="s2"></span><span class="st" id="s3"></span></div>
+ <div class="lang"><button id="lth" class="on">TH</button><button id="len">EN</button></div>
+</header>
+<div id="signin"><div class="signbox">
+ <h2 id="sTitle"></h2><p id="sSub"></p>
+ <label id="lRoom"></label><select id="room"></select>
+ <label id="lN1"></label><input id="n1" autocomplete="off">
+ <label id="lN2"></label><input id="n2" autocomplete="off">
+ <button id="start" disabled></button>
+</div></div>
+<div class="body" id="app">
+ <div id="poolWrap"><div class="pool" id="pool"></div></div>
+ <main>
+  <div class="topbar"><div class="task" id="task"></div>
+   <div class="btns"><button id="back" class="ghost"></button><button id="next" disabled></button></div>
+  </div>
+  <div class="tree"><div class="root" id="root"></div>
+   <div class="bin a" data-bin="a"><h2 id="binA"></h2><div class="list"></div></div>
+   <div class="bin b" data-bin="b"><h2 id="binB"></h2><div class="list"></div></div>
+  </div>
+  <div class="drawer hide" id="drawer">
+   <div class="hd" id="hesTxt"></div>
+   <div><label id="lReason"></label><textarea id="reason"></textarea></div>
+   <div><label id="lFr"></label><textarea id="fr"></textarea></div>
+   <button class="go" id="check" disabled></button>
+  </div>
+  <div class="res hide" id="res">
+   <div class="r" id="result"></div>
+   <div><div class="k" id="think"></div><div class="sent" id="sent"></div></div>
+   <div class="btns"><button id="edit"></button><button id="reset" class="ghost"></button></div>
+  </div>
+ </main>
+</div>
+</div>
+<script>
+const C = __CONFIG__;
+const ENDPOINT = '__ENDPOINT__';
+const UI = {
+  th: { steps: ['ลงชื่อ', '1 จัดกลุ่ม', '2 หาสัญญาณ', '3 ให้เหตุผล'], room: 'ห้องของเรา', n1: 'ชื่อเล่นของเรา', n2: 'ชื่อเล่นเพื่อน (ถ้าทำเป็นคู่)', pickRoom: '— เลือกห้อง —',
+        sub: 'เลือกห้อง แล้วพิมพ์ชื่อเล่นก่อนเริ่มนะ', start: 'เริ่มกิจกรรม ➜', next: 'ไปขั้นต่อไป ➜', back: '◀ ย้อนกลับ', check: 'ตรวจคำตอบและส่งให้ครู ✔', reset: 'เริ่มใหม่ทั้งหมด ↺', edit: '✏️ แก้แล้วส่งใหม่',
+        pickHint: '👆 กดเลือกการ์ดที่เราลังเลมากที่สุดบนใบงาน', picked: 'การ์ดที่เราลังเลที่สุด:', reason: 'อะไรทำให้เราคิดแบบนั้น?', reasonPh: 'พิมพ์เหตุผลของเรา...',
+        fr: 'Frame of Reference: อะไรหรือใครที่ทำให้เราคิดแบบนี้?', frOpt: '(ไม่บังคับ)', frPh: 'เช่น เคยเจอเอง ผู้ใหญ่เคยบอก เห็นในคลิป...',
+        doneTask: 'ดูผลการตรวจ การ์ด ✗ มีคำอธิบายบอกไว้ ส่วนการ์ด ✓ เอาเมาส์ชี้เพื่อดูคำอธิบาย', should: 'ควรอยู่ฝั่ง', result: (a, n) => `จัดถูก ${a}/${n} ใบ`, round: n => `รอบที่ ${n}`,
+        wait: 'กำลังส่งคำตอบให้ครู...', ok: 'ส่งคำตอบให้ครูแล้ว ✓', err: 'ส่งไม่สำเร็จ กดตรวจคำตอบอีกครั้ง หรือบอกครู', noEnd: '(ไฟล์นี้ยังไม่ได้ตั้งค่าการส่ง)', confirmReset: 'เริ่มใหม่ทั้งหมดใช่ไหม? คำตอบบนจอจะหายไป' },
+  en: { steps: ['Sign in', '1 Sort', '2 Find signs', '3 Explain'], room: 'Your class', n1: 'Your nickname', n2: 'Partner’s nickname (if in pairs)', pickRoom: '— Choose class —',
+        sub: 'Choose your class and type your nickname to begin.', start: 'Start ➜', next: 'Next step ➜', back: '◀ Back', check: 'Check and send to teacher ✔', reset: 'Start over ↺', edit: '✏️ Fix and send again',
+        pickHint: '👆 Tap the card you were least sure about', picked: 'The card we were least sure about:', reason: 'What makes you think that?', reasonPh: 'Type your reason...',
+        fr: 'Frame of Reference: What or who helped you think this way?', frOpt: '(optional)', frPh: 'e.g. it happened to me, an adult told me, a video...',
+        doneTask: 'Here are your results. ✗ cards show why. Point at a ✓ card to see why it is right.', should: 'Belongs in', result: (a, n) => `${a}/${n} correct`, round: n => `Round ${n}`,
+        wait: 'Sending to your teacher...', ok: 'Sent to your teacher ✓', err: 'Could not send. Press check again or tell your teacher.', noEnd: '(Sending is not set up in this file)', confirmReset: 'Start over? Your answers on screen will be cleared.' },
+};
+const $ = s => document.querySelector(s);
+const app = $('#app'), pool = $('#pool'), stage = $('#stage');
+let L = 'th', step = 0, placed = {}, signs = {}, hes = '', sel = null, round = 1, checked = false, sendState = '', scale = 1, sending = false;
+const t = o => (o && typeof o === 'object') ? (o[L] || o.th) : o;
+const plain = h => String(h).replace(/<[^>]+>/g, '');
+
+function fit(){ scale = Math.min(innerWidth / 1600, innerHeight / 900); stage.style.transform = `scale(${scale})`;
+  stage.style.left = ((innerWidth - 1600 * scale) / 2) + 'px'; stage.style.top = ((innerHeight - 900 * scale) / 2) + 'px'; }
+addEventListener('resize', fit); fit();
+function shuffle(a){ a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+const cardOf = id => document.querySelector(`.cardx[data-id="${id}"]`);
+
+function cardEl(c){
+  const d = document.createElement('div'); d.className = 'cardx'; d.dataset.id = c.id;
+  d.innerHTML = (c.icon ? `<div class="ic">${c.icon}</div>` : '') + `<div class="bd">` + (c.who ? `<div class="nm">💬 ${c.who}</div>` : '') +
+    `<div class="tx"></div><div class="chips">${C.signs.map((s, i) => `<span class="chip" data-s="${i + 1}"></span>`).join('')}</div><div class="exp"></div></div>`;
+  d.querySelectorAll('.chip').forEach(ch => ch.addEventListener('click', e => {
+    if (step !== 2 || checked) return;
+    e.stopPropagation(); const set = signs[c.id] || (signs[c.id] = new Set()); const n = +ch.dataset.s;
+    set.has(n) ? set.delete(n) : set.add(n); ch.classList.toggle('on', set.has(n)); update();
+  }));
+  d.addEventListener('pointerdown', e => startDrag(e, d));
+  d.addEventListener('click', () => { if (step === 3 && !checked) { hes = c.id; document.querySelectorAll('.cardx.hes').forEach(x => x.classList.remove('hes')); d.classList.add('hes'); $('#drawer').classList.remove('hide'); applyLang(); update(); setTimeout(() => $('#reason').focus(), 50); } });
+  return d;
+}
+
+function applyLang(){
+  const U = UI[L]; document.documentElement.lang = L;
+  $('#lth').classList.toggle('on', L === 'th'); $('#len').classList.toggle('on', L === 'en');
+  $('#ttl').textContent = t(C.title); document.title = t(C.title);
+  U.steps.forEach((s, i) => $('#s' + i).textContent = s);
+  $('#sTitle').textContent = t(C.title); $('#sSub').textContent = U.sub; $('#start').textContent = U.start;
+  $('#lRoom').textContent = U.room; $('#lN1').textContent = U.n1; $('#lN2').textContent = U.n2;
+  const rv = $('#room').value; $('#room').innerHTML = `<option value="">${U.pickRoom}</option>` + C.rooms.map(r => `<option>${r}</option>`).join(''); $('#room').value = rv;
+  let task = step ? t(C['task' + step]) : '';
+  if (step === 3) task += hes ? '' : `<br><b>${U.pickHint}</b>`;
+  if (checked) task = `<b>${U.round(round)}</b> · ${U.doneTask}`;
+  $('#task').innerHTML = task;
+  $('#root').textContent = t(C.root); $('#binA').textContent = t(C.binA); $('#binB').textContent = t(C.binB);
+  $('#back').textContent = U.back; $('#next').textContent = U.next; $('#check').textContent = U.check; $('#reset').textContent = U.reset; $('#edit').textContent = U.edit;
+  const hc = C.cards.find(c => c.id === hes); $('#hesTxt').innerHTML = `${U.picked} <b>${hc ? plain(t(hc.text)) : ''}</b>`;
+  $('#lReason').textContent = U.reason; $('#reason').placeholder = U.reasonPh;
+  $('#lFr').innerHTML = `${U.fr} <small>${U.frOpt}</small>`; $('#fr').placeholder = U.frPh;
+  C.cards.forEach(c => {
+    const el = cardOf(c.id); if (!el) return;
+    el.querySelector('.tx').innerHTML = t(c.text);
+    el.querySelectorAll('.chip').forEach(ch => ch.textContent = t(C.signs[ch.dataset.s - 1].short));
+    el.querySelector('.exp').innerHTML = checked ? (placed[c.id] === c.bin ? '' : `<b>${U.should} "${t(c.bin === 'a' ? C.binA : C.binB)}"</b> · `) + t(c.why) : '';
+  });
+  if (checked) { $('#result').textContent = U.result(score(), C.cards.length); $('#think').innerHTML = t(C.think); showSent(); }
+}
+$('#lth').onclick = () => { L = 'th'; applyLang(); }; $('#len').onclick = () => { L = 'en'; applyLang(); };
+
+// ---- drag (mouse + touch, scaled stage) and tap-to-place ----
+let drag = null;
+function startDrag(e, el){
+  if (step !== 1 || e.target.classList.contains('chip')) return;
+  e.preventDefault();
+  const r = el.getBoundingClientRect();
+  drag = { el, ox: (e.clientX - r.left) / scale, oy: (e.clientY - r.top) / scale, sx: e.clientX, sy: e.clientY, moved: false, w: r.width / scale, home: el.parentNode, next: el.nextSibling };
+  addEventListener('pointermove', onMove); addEventListener('pointerup', onUp, { once: true });
+}
+function binAt(x, y){ return [...document.querySelectorAll('.bin')].find(b => { const r = b.getBoundingClientRect(); return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom; }); }
+function onMove(e){
+  if (!drag) return;
+  if (!drag.moved && Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) < 8) return;
+  if (!drag.moved) { drag.moved = true; drag.el.classList.add('drag'); drag.el.style.width = drag.w + 'px'; stage.appendChild(drag.el); }
+  const sr = stage.getBoundingClientRect();
+  drag.el.style.left = ((e.clientX - sr.left) / scale - drag.ox) + 'px'; drag.el.style.top = ((e.clientY - sr.top) / scale - drag.oy) + 'px';
+  document.querySelectorAll('.bin').forEach(b => b.classList.toggle('hover', b === binAt(e.clientX, e.clientY)));
+}
+function onUp(e){
+  removeEventListener('pointermove', onMove);
+  const d = drag; drag = null; if (!d) return;
+  document.querySelectorAll('.bin').forEach(b => b.classList.remove('hover'));
+  if (!d.moved) { document.querySelectorAll('.cardx.sel').forEach(x => x !== d.el && x.classList.remove('sel')); d.el.classList.toggle('sel'); sel = d.el.classList.contains('sel') ? d.el : null; return; }
+  const b = binAt(e.clientX, e.clientY);
+  d.el.classList.remove('drag'); d.el.style.cssText = '';
+  if (b) place(d.el, b);
+  else if (d.home === pool) pool.insertBefore(d.el, d.next && d.next.parentNode === pool ? d.next : null);
+  else { pool.appendChild(d.el); delete placed[d.el.dataset.id]; update(); }
+}
+document.querySelectorAll('.bin').forEach(b => b.addEventListener('click', e => { if (e.target.closest('.cardx')) return; if (sel && step === 1) { place(sel, b); sel.classList.remove('sel'); sel = null; } }));
+pool.addEventListener('click', e => { if (sel && e.target === pool) { pool.appendChild(sel); delete placed[sel.dataset.id]; sel.classList.remove('sel'); sel = null; update(); } });
+function place(el, bin){ bin.querySelector('.list').appendChild(el); placed[el.dataset.id] = bin.dataset.bin; update(); }
+
+function update(){
+  $('#start').disabled = !($('#room').value && $('#n1').value.trim());
+  if (step === 1) $('#next').disabled = Object.keys(placed).length !== C.cards.length;
+  if (step === 2) $('#next').disabled = !C.cards.filter(c => placed[c.id] === 'b').every(c => signs[c.id] && signs[c.id].size);
+  $('#check').disabled = sending || !(hes && $('#reason').value.trim().length >= 5);
+}
+['#room', '#n1'].forEach(s => { $(s).addEventListener('change', update); $(s).addEventListener('input', update); });
+$('#reason').addEventListener('input', update);
+
+function setStep(n){
+  step = n; [0, 1, 2, 3].forEach(i => $('#s' + i).classList.toggle('on', i === n));
+  $('#signin').classList.toggle('hide', n !== 0);
+  app.classList.toggle('full', n >= 2); app.classList.toggle('pickmode', n === 3 && !checked);
+  $('#next').classList.toggle('hide', n === 3); $('#back').classList.toggle('hide', checked);
+  $('#drawer').classList.toggle('hide', !(n === 3 && hes && !checked));
+  $('#res').classList.toggle('hide', !checked);
+  if (n === 2) C.cards.forEach(c => { if (placed[c.id] !== 'b') delete signs[c.id]; const el = cardOf(c.id); el && el.querySelectorAll('.chip').forEach(ch => ch.classList.toggle('on', !!(signs[c.id] && signs[c.id].has(+ch.dataset.s)))); });
+  applyLang(); update();
+}
+$('#start').onclick = () => setStep(1);
+$('#next').onclick = () => setStep(step + 1);
+$('#back').onclick = () => setStep(step - 1);
+
+const score = () => C.cards.filter(c => placed[c.id] === c.bin).length;
+function showSent(){ const U = UI[L], s = $('#sent'); s.className = 'sent ' + sendState;
+  s.textContent = sendState === 'ok' ? U.ok + (ENDPOINT.startsWith('http') ? '' : ' ' + U.noEnd) : sendState === 'err' ? U.err : sendState === 'wait' ? U.wait : ''; }
+
+function buildRow(){
+  const th = o => (o && typeof o === 'object') ? o.th : o;
+  const wrong = C.cards.filter(c => placed[c.id] !== c.bin).map(c => plain(th(c.text)));
+  const inB = C.cards.filter(c => placed[c.id] === 'b');
+  const exact = inB.filter(c => c.bin === 'b' && [...(signs[c.id] || [])].sort().join() === (c.signs || []).slice().sort().join()).length;
+  const chosen = inB.map(c => plain(th(c.text)) + ' = ' + [...(signs[c.id] || [])].sort().map(n => plain(th(C.signs[n - 1].short))).join(', ')).join(' | ');
+  const hc = C.cards.find(c => c.id === hes);
+  const names = [$('#n1').value.trim(), $('#n2').value.trim()].filter(Boolean).join(' + ');
+  const sg = {}; inB.forEach(c => sg[c.id] = [...(signs[c.id] || [])].sort());
+  const fr = $('#fr').value.trim();
+  const data = { v: 2, act: C.act, round, place: placed, signs: sg, hes, reason: $('#reason').value.trim(), fr };
+  return [C.level, C.week, th(C.title), $('#room').value, names, L.toUpperCase(), `${score()}/${C.cards.length}`,
+          wrong.join(' | ') || '-', `${exact}/${C.cards.filter(c => c.bin === 'b').length}`, chosen, hc ? plain(th(hc.text)) : '', $('#reason').value.trim(), JSON.stringify(data), fr || '-', round];
+}
+async function send(){
+  sending = true; update(); sendState = 'wait'; showSent();
+  if (!ENDPOINT.startsWith('http')) { sendState = 'ok'; sending = false; showSent(); return; }
+  try { await fetch(ENDPOINT, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ row: buildRow() }) }); sendState = 'ok'; }
+  catch (e) { sendState = 'err'; }
+  sending = false; showSent();
+  if (sendState === 'err') { checked = false; setStep(3); }
+}
+$('#check').onclick = () => {
+  checked = true;
+  C.cards.forEach(c => {
+    const el = cardOf(c.id), right = placed[c.id] === c.bin;
+    el.classList.add(right ? 'good' : 'bad'); el.insertAdjacentHTML('beforeend', `<div class="mark ${right ? 'ok' : 'no'}">${right ? '✓' : '✗'}</div>`);
+    if (placed[c.id] === 'b') el.querySelectorAll('.chip').forEach(ch => {
+      const n = +ch.dataset.s, chosen = signs[c.id] && signs[c.id].has(n), should = (c.signs || []).includes(n);
+      if (chosen && should) ch.classList.add('right'); else if (chosen) ch.classList.add('wrong'); else if (should) ch.classList.add('miss');
+    });
+  });
+  app.classList.add('checked'); setStep(3); send();
+};
+$('#edit').onclick = () => {
+  checked = false; round++; app.classList.remove('checked'); sendState = '';
+  document.querySelectorAll('.mark').forEach(m => m.remove());
+  document.querySelectorAll('.cardx').forEach(el => el.classList.remove('good', 'bad'));
+  document.querySelectorAll('.chip').forEach(ch => ch.classList.remove('right', 'wrong', 'miss'));
+  setStep(1);
+};
+$('#reset').onclick = () => { if (confirm(UI[L].confirmReset)) location.reload(); };
+
+shuffle(C.cards).forEach(c => pool.appendChild(cardEl(c)));
+setStep(0);
+</script>
+</body></html>

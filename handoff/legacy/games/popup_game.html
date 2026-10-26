@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ปิดป๊อปอัปให้ทัน!</title>
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:#0c4a6e;font-family:Kanit,'Noto Sans Thai',Tahoma,sans-serif;user-select:none;-webkit-user-select:none}
+#stage{position:absolute;left:0;top:0;width:1600px;height:900px;transform-origin:0 0;overflow:hidden;background:linear-gradient(#7dd3fc 0%,#bae6fd 55%,#86efac 55%,#4ade80 100%)}
+.sun{position:absolute;left:120px;top:110px;width:130px;height:130px;border-radius:50%;background:#fde047;box-shadow:0 0 70px #fde68a}
+.cloud{position:absolute;background:#fff;border-radius:100px;opacity:.95;animation:drift 40s linear infinite}
+@keyframes drift{from{transform:translateX(-200px)}to{transform:translateX(1800px)}}
+.hill{position:absolute;border-radius:50%}
+.tree{position:absolute;bottom:270px}.tree .top{width:140px;height:140px;border-radius:50%;background:#15803d}.tree .trunk{width:32px;height:80px;background:#92400e;margin:-10px auto 0;border-radius:6px}
+.path{position:absolute;left:0;right:0;bottom:100px;height:110px;background:#d6a85a;border-top:8px solid #b7843a}
+.hero{position:absolute;left:640px;bottom:190px;width:110px;animation:bob .5s ease-in-out infinite alternate}
+@keyframes bob{to{transform:translateY(-12px)}}
+.hero .head{width:96px;height:96px;border-radius:50%;background:#fcd9b8;border:6px solid #7c2d12;margin:auto;position:relative}
+.hero .head:before,.hero .head:after{content:'';position:absolute;top:36px;width:12px;height:16px;border-radius:50%;background:#1f2937}
+.hero .head:before{left:24px}.hero .head:after{right:24px}
+.hero .cap{position:absolute;top:-20px;left:-8px;width:112px;height:52px;background:#ef4444;border-radius:60px 60px 10px 10px}
+.hero .body{width:84px;height:80px;background:#3b82f6;border-radius:22px 22px 12px 12px;margin:-6px auto 0}
+.coin{position:absolute;bottom:250px;width:50px;height:50px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#fef08a,#eab308);border:5px solid #ca8a04;animation:spin 1s linear infinite}
+@keyframes spin{50%{transform:scaleX(.3)}}
+.hud{position:absolute;top:18px;left:24px;right:24px;display:flex;align-items:center;gap:14px;z-index:50}
+.pill{background:#0008;color:#fff;font-weight:800;font-size:34px;padding:4px 22px;border-radius:40px;white-space:nowrap}
+.hud .sp{flex:1}
+.ctl{background:#0008;color:#fff;border:none;border-radius:30px;font-family:inherit;font-size:22px;padding:6px 16px;cursor:pointer}
+.ctl.on{background:#fff;color:#0c4a6e}
+.timebar{position:absolute;top:84px;left:24px;right:24px;height:14px;background:#0004;border-radius:10px;overflow:hidden;z-index:5}
+.timebar div{height:100%;background:linear-gradient(90deg,#22c55e,#facc15,#ef4444);width:100%}
+/* popups */
+.pop{position:absolute;width:430px;border-radius:22px;overflow:hidden;box-shadow:0 18px 40px #0007;z-index:10;animation:popin .25s ease-out}
+@keyframes popin{from{transform:scale(.3);opacity:0}to{transform:scale(1);opacity:1}}
+.pop.out{animation:popout .2s ease-in forwards}
+@keyframes popout{to{transform:scale(.2);opacity:0}}
+.pop .bar{display:flex;align-items:center;justify-content:space-between;padding:6px 10px 6px 16px;font-size:16px}
+.pop .realx{font-family:inherit;border:none;background:#ffffff33;color:inherit;opacity:.9;font-size:17px;cursor:pointer;padding:2px 8px;border-radius:8px}
+.pop .realx:hover{background:#0002}
+.pop .content{padding:16px 22px 18px;text-align:center;position:relative}
+.trick{background:linear-gradient(160deg,#fde047,#f97316 70%,#ec4899);color:#fff;border:6px solid #fff}
+.trick .bar{background:#0002;color:#fff}
+.trick .ic{font-size:70px;line-height:1;animation:wig 1s ease-in-out infinite}
+@keyframes wig{25%{transform:rotate(-8deg)}75%{transform:rotate(8deg)}}
+.trick h3{margin:6px 0 2px;font-size:30px;font-weight:800;text-shadow:0 3px 0 #9a341288;line-height:1.2}
+.bait{margin-top:12px;font-family:inherit;font-size:30px;font-weight:800;color:#fff;border:5px solid #fff;border-radius:18px;padding:8px 30px;background:linear-gradient(#4ade80,#16a34a);box-shadow:0 7px 0 #14532d;cursor:pointer;animation:pulse .8s ease-in-out infinite}
+@keyframes pulse{50%{transform:scale(1.07)}}
+.fakex{position:absolute;width:52px;height:52px;border-radius:50%;background:#ef4444;color:#fff;border:4px solid #fff;font-size:28px;font-weight:800;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 0 #7f1d1d}
+.nothanks{display:block;margin:12px auto 0;font-family:inherit;border:none;background:none;color:#fff;opacity:.8;font-size:16px;text-decoration:underline;cursor:pointer}
+.safe{background:#fff;color:#1e293b;border:5px solid #334155}
+.safe .bar{background:#334155;color:#fff}
+.safe .ic{font-size:54px;line-height:1}
+.safe h3{margin:8px 0 4px;font-size:27px;font-weight:600}
+.ok{margin-top:10px;font-family:inherit;font-size:26px;font-weight:600;border:none;border-radius:14px;padding:8px 34px;background:#334155;color:#fff;cursor:pointer;box-shadow:0 5px 0 #0f172a}
+.life{position:absolute;bottom:0;left:0;height:6px;background:#fff8;animation:life linear forwards}
+@keyframes life{from{width:100%}to{width:0}}
+/* toast */
+.toast{position:absolute;z-index:30;font-size:30px;font-weight:800;padding:8px 22px;border-radius:18px;pointer-events:none;animation:fly 1.3s ease-out forwards;white-space:nowrap}
+.toast.good{background:#16a34a;color:#fff}.toast.bad{background:#dc2626;color:#fff}
+@keyframes fly{0%{transform:translate(-50%,0) scale(.6);opacity:0}15%{transform:translate(-50%,-10px) scale(1.05);opacity:1}100%{transform:translate(-50%,-90px);opacity:0}}
+.shake{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-12px)}75%{transform:translateX(12px)}}
+/* screens */
+.screen{position:absolute;inset:0;background:#0c4a6ecc;z-index:40;display:flex;align-items:center;justify-content:center}
+.box{width:1040px;background:#fff;border-radius:32px;padding:34px 48px;text-align:center;box-shadow:0 30px 70px #0008;border:6px solid #f59e0b}
+.box h1{margin:0;font-size:64px;color:#ea580c;line-height:1.1}
+.box p{font-size:24px;color:#334155;margin:10px 0}
+.rules{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:18px 0;text-align:left}
+.rule{border-radius:18px;padding:12px 16px;font-size:20px;line-height:1.35}
+.rule b{display:block;font-size:22px}
+.r1{background:#dcfce7}.r2{background:#fee2e2}.r3{background:#fef3c7}
+.big{font-family:inherit;font-size:36px;font-weight:800;border:none;border-radius:20px;padding:12px 60px;background:linear-gradient(#fb923c,#ea580c);color:#fff;box-shadow:0 7px 0 #9a3412;cursor:pointer;margin-top:10px}
+.stats{display:flex;gap:16px;justify-content:center;margin:16px 0}
+.stat{background:#f1f5f9;border-radius:18px;padding:10px 22px;min-width:180px}
+.stat .n{font-size:48px;font-weight:800;color:#0c4a6e;line-height:1.1}
+.stat .l{font-size:18px;color:#64748b}
+.most{font-size:24px;background:#fef9c3;border-radius:16px;padding:10px 16px;margin:8px 0}
+.signs{font-size:20px;color:#334155;margin-top:8px}
+.hide{display:none!important}
+</style></head><body>
+<div id="stage">
+ <div class="sun"></div>
+ <div class="cloud" style="top:140px;width:280px;height:80px"></div>
+ <div class="cloud" style="top:220px;width:360px;height:96px;animation-delay:-20s"></div>
+ <div class="hill" style="left:-200px;bottom:220px;width:900px;height:380px;background:#22c55e"></div>
+ <div class="hill" style="left:1000px;bottom:200px;width:1100px;height:440px;background:#16a34a"></div>
+ <div class="tree" style="left:120px"><div class="top"></div><div class="trunk"></div></div>
+ <div class="tree" style="left:1380px"><div class="top"></div><div class="trunk"></div></div>
+ <div class="path"></div>
+ <div class="coin" style="left:860px"></div><div class="coin" style="left:960px;animation-delay:.2s"></div><div class="coin" style="left:1060px;animation-delay:.4s"></div>
+ <div class="hero"><div class="head"><div class="cap"></div></div><div class="body"></div></div>
+ <div class="hud">
+  <div class="pill" id="hearts">❤️❤️❤️</div><div class="pill" id="score">⭐ 0</div><div class="pill" id="clock">⏱ 60</div>
+  <div class="sp"></div>
+  <button class="ctl" id="snd">🔊</button><button class="ctl on" id="lth">TH</button><button class="ctl" id="len">EN</button>
+ </div>
+ <div class="timebar"><div id="tbar"></div></div>
+ <div id="layer"></div>
+ <div class="screen" id="title"><div class="box">
+  <h1 id="tTitle"></h1><p id="tSub"></p>
+  <div class="rules">
+   <div class="rule r1" id="rule1"></div><div class="rule r2" id="rule2"></div><div class="rule r3" id="rule3"></div>
+  </div>
+  <button class="big" id="go"></button>
+ </div></div>
+ <div class="screen hide" id="end"><div class="box">
+  <h1 id="eTitle"></h1>
+  <div class="stats">
+   <div class="stat"><div class="n" id="eScore"></div><div class="l" id="lScore"></div></div>
+   <div class="stat"><div class="n" id="eClosed"></div><div class="l" id="lClosed"></div></div>
+   <div class="stat"><div class="n" id="eFooled"></div><div class="l" id="lFooled"></div></div>
+  </div>
+  <div class="most" id="eMost"></div>
+  <div class="signs" id="eSigns"></div>
+  <button class="big" id="again"></button>
+ </div></div>
+</div>
+<script>
+const $ = s => document.querySelector(s);
+const stage = $('#stage'), layer = $('#layer');
+let L = 'th', sound = true, scale = 1;
+function fit(){ scale = Math.min(innerWidth / 1600, innerHeight / 900); stage.style.transform = `scale(${scale})`; stage.style.left = ((innerWidth - 1600 * scale) / 2) + 'px'; stage.style.top = ((innerHeight - 900 * scale) / 2) + 'px'; }
+addEventListener('resize', fit); fit();
+const T = o => o[L] || o.th;
+
+const SIGNS = [
+  { th: '🎁 ล่อด้วยรางวัลหรือของฟรี', en: '🎁 Tempts you with a prize or free stuff' },
+  { th: '⏰ เร่งให้รีบกด', en: '⏰ Rushes you to tap' },
+  { th: '📥 ขอข้อมูลหรือให้ดาวน์โหลด', en: '📥 Asks for info or a download' },
+];
+const TRICKS = [
+  { ic: '🎁', h: { th: 'ยินดีด้วย! คุณชนะรางวัลใหญ่', en: 'Congrats! You won a big prize!' }, b: { th: 'รับรางวัล', en: 'Get prize' }, s: [0] },
+  { ic: '🎡', h: { th: 'หมุนวงล้อ ลุ้นมือถือฟรี!', en: 'Spin to win a free phone!' }, b: { th: 'หมุนเลย!', en: 'Spin now!' }, s: [0] },
+  { ic: '💎', h: { th: 'เพชรฟรี 9,999 เม็ด!', en: '9,999 free gems!' }, b: { th: 'รับฟรี', en: 'Get free' }, s: [0] },
+  { ic: '⏰', h: { th: 'รีบกด! เหลือ 5 วินาที', en: 'Hurry! 5 seconds left!' }, b: { th: 'กดเลย!', en: 'Tap now!' }, s: [1] },
+  { ic: '🔥', h: { th: 'ลด 99% วันนี้วันเดียว!', en: '99% off, today only!' }, b: { th: 'ซื้อเลย', en: 'Buy now' }, s: [1] },
+  { ic: '⚠️', h: { th: 'เครื่องติดไวรัส! กดแก้ทันที', en: 'Virus found! Fix it now!' }, b: { th: 'แก้เลย', en: 'Fix now' }, s: [1, 2] },
+  { ic: '📥', h: { th: 'ดาวน์โหลดแอปนี้ รับสกินฟรี', en: 'Download this app for a free skin' }, b: { th: 'ดาวน์โหลด', en: 'Download' }, s: [2, 0] },
+  { ic: '🔑', h: { th: 'ใส่รหัสผ่าน รับเหรียญ 1,000', en: 'Enter your password for 1,000 coins' }, b: { th: 'ใส่รหัส', en: 'Enter' }, s: [2, 0] },
+  { ic: '📝', h: { th: 'กรอกชื่อและเบอร์โทร รับเพชร', en: 'Type your name and phone for gems' }, b: { th: 'กรอกเลย', en: 'Fill in' }, s: [2, 0] },
+];
+const SAFES = [
+  { ic: '🏁', h: { th: 'ด่าน 2 เริ่มแล้ว!', en: 'Level 2 starts now!' }, b: { th: 'ตกลง', en: 'OK' } },
+  { ic: '💾', h: { th: 'บันทึกเกมเรียบร้อย', en: 'Game saved' }, b: { th: 'ตกลง', en: 'OK' } },
+  { ic: '⭐', h: { th: 'เก็บดาวครบ 3 ดวงในด่านนี้', en: 'You found all 3 stars in this level' }, b: { th: 'ตกลง', en: 'OK' } },
+  { ic: '⏸️', h: { th: 'หยุดเกมชั่วคราว', en: 'Game paused' }, b: { th: 'เล่นต่อ', en: 'Resume' } },
+  { ic: '🗺️', h: { th: 'ปลดล็อกแผนที่ใหม่จากการเล่น', en: 'New map unlocked by playing' }, b: { th: 'ตกลง', en: 'OK' } },
+];
+const UI = {
+  th: { title: 'ปิดป๊อปอัปให้ทัน!', sub: 'ป๊อปอัปจะเด้งขึ้นมาเรื่อย ๆ ปิดให้ถูกปุ่มก่อนหมดเวลา 60 วินาที', go: 'เริ่มเล่น ▶', again: 'เล่นอีกครั้ง ↺',
+        r1: '<b>✅ ปุ่มปิดจริง</b>มักตัวเล็กหรือสีจาง เช่น "✕ ปิด" ที่แถบบนสุด หรือ "ไม่ล่ะ ขอบคุณ"', r2: '<b>❌ ปุ่มหลอก</b>ปุ่มสีสด ปุ่มใหญ่ หรือปุ่ม X สีแดงในรูป กดแล้วเสียหัวใจ ❤️', r3: '<b>👌 ป๊อปอัปปกติของเกม</b>สีขาวเรียบ ๆ ไม่ได้ขออะไร กด "ตกลง" ได้เลย',
+        closed: 'ปิดได้! +10', okd: 'ตกลง +5', fooled: 'โดนหลอก!', fakex: 'นั่นปุ่ม X ปลอม!', safex: 'ปิดได้ +5', missed: 'ปล่อยไว้ไม่ปิด', close: '✕ ปิด', nothanks: 'ไม่ล่ะ ขอบคุณ', ad: 'โฆษณา',
+        end: h => h > 0 ? 'เก่งมาก! 🎉' : 'หัวใจหมดแล้ว 💔', lScore: 'คะแนน', lClosed: 'ปิดถูก', lFooled: 'โดนหลอก', most: 'สัญญาณที่หลอกเราได้บ่อยที่สุด:', noFool: 'ไม่โดนหลอกเลย สุดยอด! 🏆', signs: 'จำไว้! สัญญาณหลอก 3 ข้อ:' },
+  en: { title: 'Close the Pop-ups!', sub: 'Pop-ups keep appearing. Close them with the right button before the 60 seconds are up.', go: 'Play ▶', again: 'Play again ↺',
+        r1: '<b>✅ Real close buttons</b>are usually small or faint, like "✕ Close" on the top bar or "No thanks".', r2: '<b>❌ Trick buttons</b>are bright, big, or a red X inside the picture. Tapping one costs a heart ❤️.', r3: '<b>👌 Normal game messages</b>are plain white and don’t ask for anything. Just tap "OK".',
+        closed: 'Closed! +10', okd: 'OK +5', fooled: 'Tricked!', fakex: 'That X was fake!', safex: 'Closed +5', missed: 'Left open', close: '✕ Close', nothanks: 'No thanks', ad: 'Ad',
+        end: h => h > 0 ? 'Great job! 🎉' : 'Out of hearts 💔', lScore: 'Score', lClosed: 'Closed', lFooled: 'Tricked', most: 'The sign that tricked you most:', noFool: 'Never tricked. Amazing! 🏆', signs: 'Remember the 3 trick signs:' },
+};
+
+// ---- sound (8-bit beeps, no files) ----
+let ac = null;
+function beep(seq){ if (!sound) return; try { ac = ac || new (window.AudioContext || window.webkitAudioContext)(); let t = ac.currentTime;
+  seq.forEach(([f, d, type]) => { const o = ac.createOscillator(), g = ac.createGain(); o.type = type || 'square'; o.frequency.value = f; g.gain.setValueAtTime(.08, t); g.gain.exponentialRampToValueAtTime(.001, t + d); o.connect(g); g.connect(ac.destination); o.start(t); o.stop(t + d); t += d * .9; }); } catch (e) {} }
+const sGood = () => beep([[660, .08], [880, .12]]), sBad = () => beep([[220, .15, 'sawtooth'], [150, .25, 'sawtooth']]), sPop = () => beep([[520, .05, 'triangle']]), sEnd = () => beep([[523, .12], [659, .12], [784, .2]]);
+
+// ---- game ----
+let state = 'title', hearts = 3, score = 0, closed = 0, fooledBy = [0, 0, 0], fooled = 0, tLeft = 60, lastSpawn = 0, startAt = 0, raf = 0, bag = [];
+function phase(){ const e = 60 - tLeft; return e < 20 ? { gap: 3.0, max: 2, life: 9 } : e < 40 ? { gap: 2.2, max: 3, life: 8 } : { gap: 1.6, max: 4, life: 7 }; }
+function pick(){ if (!bag.length) bag = [...TRICKS.map(x => ({ k: 't', x })), ...TRICKS.map(x => ({ k: 't', x })), ...SAFES.map(x => ({ k: 's', x }))].sort(() => Math.random() - .5); return bag.pop(); }
+function freeSpot(){
+  for (let i = 0; i < 30; i++) {
+    const x = 40 + Math.random() * (1600 - 470 - 80), y = 120 + Math.random() * (900 - 120 - 380);
+    const clash = [...layer.children].some(p => Math.abs(p.offsetLeft - x) < 300 && Math.abs(p.offsetTop - y) < 230);
+    if (!clash) return [x, y];
+  }
+  return [40 + Math.random() * 1050, 120 + Math.random() * 380];
+}
+function toast(x, y, txt, good){ const d = document.createElement('div'); d.className = 'toast ' + (good ? 'good' : 'bad'); d.textContent = txt; d.style.left = Math.min(1600 - 330, Math.max(330, x)) + 'px'; d.style.top = Math.max(110, y) + 'px'; stage.appendChild(d); setTimeout(() => d.remove(), 1300); }
+function remove(p){ p.classList.add('out'); clearTimeout(p._timer); setTimeout(() => p.remove(), 200); }
+function hudUpdate(){ $('#hearts').textContent = '❤️'.repeat(hearts) + '🤍'.repeat(3 - hearts); $('#score').textContent = '⭐ ' + score; $('#clock').textContent = '⏱ ' + Math.ceil(tLeft); $('#tbar').style.width = (tLeft / 60 * 100) + '%'; }
+function hit(p, good, pts, msg){
+  if (state !== 'play' || p._done) return; p._done = true;
+  const cx = p.offsetLeft + 215, cy = p.offsetTop + 60;
+  if (good) { score += pts; closed++; sGood(); toast(cx, cy, msg, true); }
+  else { hearts--; fooled++; (p._signs || []).forEach(s => fooledBy[s]++); sBad(); stage.classList.remove('shake'); void stage.offsetWidth; stage.classList.add('shake');
+    toast(cx, cy, msg + (p._signs ? ' ' + T(SIGNS[p._signs[0]]) : ''), false); }
+  remove(p); hudUpdate(); if (hearts <= 0) finish();
+}
+function spawn(){
+  const it = pick(), U = UI[L], ph = phase(), p = document.createElement('div'), [x, y] = freeSpot();
+  p.style.left = x + 'px'; p.style.top = y + 'px';
+  if (it.k === 't') {
+    const t = it.x; p.className = 'pop trick'; p._signs = t.s;
+    const useBar = Math.random() < .55;                       // real close: on the top bar, or a "no thanks" link
+    const fx = [['8px', '8px'], ['8px', 'auto'], ['auto', '8px']][Math.floor(Math.random() * 3)];
+    p.innerHTML = `<div class="bar"><span>${U.ad}</span>${useBar ? `<button class="realx">${U.close}</button>` : '<span></span>'}</div>
+      <div class="content"><div class="fakex" style="top:${fx[0]};${fx[1] === 'auto' ? 'right:8px' : 'left:8px'}">✕</div>
+      <div class="ic">${t.ic}</div><h3>${T(t.h)}</h3><button class="bait">${T(t.b)}</button>${useBar ? '' : `<button class="nothanks">${U.nothanks}</button>`}</div><div class="life" style="animation-duration:${ph.life}s"></div>`;
+    p.querySelector('.bait').onclick = () => hit(p, false, 0, U.fooled);
+    p.querySelector('.fakex').onclick = () => hit(p, false, 0, U.fakex);
+    p.querySelector(useBar ? '.realx' : '.nothanks').onclick = () => hit(p, true, 10, U.closed);
+  } else {
+    const t = it.x; p.className = 'pop safe';
+    p.innerHTML = `<div class="bar"><span>🎮</span><button class="realx">✕</button></div><div class="content"><div class="ic">${t.ic}</div><h3>${T(t.h)}</h3><button class="ok">${T(t.b)}</button></div><div class="life" style="animation-duration:${ph.life}s;background:#3341"></div>`;
+    p.querySelector('.ok').onclick = () => hit(p, true, 5, U.okd);
+    p.querySelector('.realx').onclick = () => hit(p, true, 5, U.safex);
+  }
+  p._timer = setTimeout(() => { if (!p._done && state === 'play') { p._done = true; remove(p); } }, ph.life * 1000);
+  layer.appendChild(p); sPop();
+}
+function loop(now){
+  if (state !== 'play') return;
+  tLeft = Math.max(0, 60 - (now - startAt) / 1000);
+  const ph = phase();
+  if ((now - lastSpawn) / 1000 > ph.gap && layer.children.length < ph.max) { spawn(); lastSpawn = now; }
+  hudUpdate();
+  if (tLeft <= 0) return finish();
+  raf = requestAnimationFrame(loop);
+}
+function start(){
+  layer.innerHTML = ''; hearts = 3; score = 0; closed = 0; fooled = 0; fooledBy = [0, 0, 0]; bag = []; tLeft = 60;
+  $('#title').classList.add('hide'); $('#end').classList.add('hide');
+  state = 'play'; startAt = performance.now(); lastSpawn = startAt - 2500; hudUpdate(); raf = requestAnimationFrame(loop);
+}
+function finish(){
+  state = 'end'; cancelAnimationFrame(raf); [...layer.children].forEach(p => clearTimeout(p._timer)); sEnd();
+  setTimeout(() => { drawEnd(); $('#end').classList.remove('hide'); }, 500);
+}
+function drawEnd(){
+  const U = UI[L];
+  $('#eTitle').textContent = U.end(hearts); $('#eScore').textContent = score; $('#eClosed').textContent = closed; $('#eFooled').textContent = fooled;
+  $('#lScore').textContent = U.lScore; $('#lClosed').textContent = U.lClosed; $('#lFooled').textContent = U.lFooled;
+  const mx = Math.max(...fooledBy);
+  $('#eMost').innerHTML = mx ? `${U.most} <b>${T(SIGNS[fooledBy.indexOf(mx)])}</b>` : U.noFool;
+  $('#eSigns').innerHTML = `<b>${U.signs}</b> ${SIGNS.map(T).join(' · ')}`;
+  $('#again').textContent = U.again;
+}
+function applyLang(){
+  const U = UI[L]; document.documentElement.lang = L; document.title = U.title;
+  $('#lth').classList.toggle('on', L === 'th'); $('#len').classList.toggle('on', L === 'en');
+  $('#tTitle').textContent = U.title; $('#tSub').textContent = U.sub; $('#go').textContent = U.go;
+  $('#rule1').innerHTML = U.r1; $('#rule2').innerHTML = U.r2; $('#rule3').innerHTML = U.r3;
+  if (state === 'end') drawEnd();
+}
+$('#lth').onclick = () => { L = 'th'; applyLang(); }; $('#len').onclick = () => { L = 'en'; applyLang(); };
+$('#snd').onclick = () => { sound = !sound; $('#snd').textContent = sound ? '🔊' : '🔇'; };
+$('#go').onclick = start; $('#again').onclick = start;
+applyLang(); hudUpdate();
+</script>
+</body></html>
