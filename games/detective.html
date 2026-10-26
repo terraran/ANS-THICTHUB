@@ -33,16 +33,43 @@ button:disabled{background:#94a3b8;color:#1e293b;box-shadow:none;cursor:not-allo
 .casehd{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
 .casehd b{background:var(--sel);color:var(--navy);border-radius:12px;padding:2px 14px;font-size:18px}
 .casehd span{color:var(--muted);font-size:17px}
-.chat{background:#1e293b;border-radius:18px;padding:16px;display:flex;gap:12px;align-items:flex-start}
-.chat .av{flex:none;width:52px;height:52px;border-radius:50%;background:#4f46e5;color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800}
-.chat .who{color:#93c5fd;font-size:16px}
-.chat .msg{background:#fff;color:var(--ink);border-radius:4px 16px 16px 16px;padding:10px 16px;font-size:24px;line-height:1.35;margin-top:4px}
+.file{position:relative}
+/* หน้าต่างแชทในเกม */
+.chatwin{background:#1e293b;border-radius:18px;overflow:hidden;cursor:pointer}
+.chathd{background:#0f172a;color:#cbd5e1;font-size:16px;padding:8px 16px;display:flex;justify-content:space-between;gap:10px}
+.chathd .on{color:#4ade80}
+.lines{padding:14px 16px;display:flex;flex-direction:column;gap:10px;min-height:230px;justify-content:flex-end}
+.ln{display:flex;gap:10px;align-items:flex-end;max-width:85%}
+.ln .av{flex:none;width:40px;height:40px;border-radius:50%;background:#4f46e5;color:#fff;display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:800}
+.ln .who{color:#93c5fd;font-size:14px;margin-bottom:2px}
+.bub{background:#fff;color:var(--ink);border-radius:16px 16px 16px 4px;padding:8px 14px;font-size:19px;line-height:1.35}
+.ln.me{align-self:flex-end}
+.ln.me .bub{background:#0284c7;color:#fff;border-radius:16px 16px 4px 16px}
+.ln.target .bub{font-size:24px;outline:4px solid var(--sel);outline-offset:2px}
+.ln.target .who{margin-bottom:8px}
+.typing .bub{display:flex;gap:5px;align-items:center;padding:12px 16px}
+.typing i{width:9px;height:9px;border-radius:50%;background:#64748b;animation:dot 1s infinite}
+.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+.skip{color:#64748b;font-size:14px;text-align:center;padding-bottom:8px}
+.pop{animation:pop .35s ease-out both}
+.tbar{height:10px;border-radius:6px;background:#e2e8f0;overflow:hidden}
+.tbar i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#f97316,#dc2626)}
+@keyframes dot{0%,60%,100%{transform:translateY(0);opacity:.5}30%{transform:translateY(-6px);opacity:1}}
+@keyframes pop{from{opacity:0;transform:translateY(14px) scale(.9)}to{opacity:1;transform:none}}
+@keyframes shake{0%,100%{transform:none}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+@keyframes bump{0%{transform:scale(1)}40%{transform:scale(1.35)}100%{transform:scale(1)}}
+@keyframes stamp{0%{opacity:0;transform:rotate(-14deg) scale(3)}70%{opacity:1;transform:rotate(-14deg) scale(.92)}100%{opacity:1;transform:rotate(-14deg) scale(1)}}
+.shake{animation:shake .45s}
+.bump{display:inline-block;animation:bump .5s}
+.stamp{position:absolute;right:190px;bottom:22px;border:5px solid #dc2626;color:#dc2626;border-radius:12px;padding:2px 16px;font-size:30px;font-weight:800;transform:rotate(-14deg);animation:stamp .5s ease-out both;background:#ffffffd9;pointer-events:none}
 .hint{background:#fef9c3;color:#713f12;border-radius:12px;padding:6px 14px;font-size:18px}
 .ask{font-size:20px;font-weight:600}
-.signs{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(190px,100%),1fr));gap:10px}
-.sg{background:#f8fafc;color:var(--ink);border:3px solid var(--line);box-shadow:0 3px 0 var(--line);font-size:19px;text-align:left;display:flex;align-items:center;gap:8px}
+.signs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.sg{background:#f8fafc;color:var(--ink);border:3px solid var(--line);box-shadow:0 3px 0 var(--line);font-size:19px;text-align:left;display:flex;align-items:center;gap:8px;transition:transform .1s}
+.sg:not(:disabled):active{transform:translateY(2px)}
 .sg[aria-pressed="true"]{background:#fde68a;border-color:#f59e0b}
-.sg.safe{grid-column:1/-1;justify-content:center}
+.sg.safe{grid-column:1/-1;justify-content:center;background:#f0fdf4;border-color:#86efac;box-shadow:0 3px 0 #86efac}
+.sg.safe[aria-pressed="true"]{background:#bbf7d0;border-color:#16a34a}
 .sg.right{background:#bbf7d0;border-color:var(--ok)}
 .sg.wrong{background:#fecaca;border-color:var(--bad);text-decoration:line-through}
 .sg.miss{border-style:dashed;border-color:var(--ok);background:#f0fdf4}
@@ -59,7 +86,8 @@ button:disabled{background:#94a3b8;color:#1e293b;box-shadow:none;cursor:not-allo
 .final h2{margin:0;font-size:38px}
 .final p{margin:0;font-size:22px;color:var(--muted)}
 .row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
-@media (max-width:560px){.title h1{font-size:38px}.chat .msg{font-size:20px}}
+@media (max-width:560px){.title h1{font-size:38px}.ln.target .bub{font-size:20px}.sg{font-size:16px;padding:6px 10px}}
+@media (prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
 </style></head><body>
 <div class="top">
  <div class="hud hide" id="hud"><span id="hCase"></span><span id="hStar"></span><span id="hTime" class="timer hide"></span></div>
@@ -75,7 +103,8 @@ button:disabled{background:#94a3b8;color:#1e293b;box-shadow:none;cursor:not-allo
  </section>
  <section id="sPlay" class="file hide">
   <div class="casehd"><b id="pCase"></b><span id="pNum"></span></div>
-  <div class="chat"><div class="av" id="pAv"></div><div><div class="who" id="pWho"></div><div class="msg" id="pMsg"></div></div></div>
+  <div class="chatwin" id="pChat"><div class="chathd"><span id="pRoom"></span><span class="on" id="pOnline"></span></div><div class="lines" id="pLines"></div><div class="skip" id="pSkip"></div></div>
+  <div class="tbar hide" id="tBar"><i id="tFill"></i></div>
   <div class="hint hide" id="pHint"></div>
   <div class="ask" id="pAsk"></div>
   <div class="signs" id="pSigns"></div>
@@ -84,6 +113,7 @@ button:disabled{background:#94a3b8;color:#1e293b;box-shadow:none;cursor:not-allo
   <button class="go hide" id="pNext"></button>
  </section>
  <section id="sCase" class="file hide">
+  <div class="stamp" id="cStamp"></div>
   <div class="casehd"><b id="cTitle"></b><span id="cStars"></span></div>
   <div class="sum" id="cSum"></div>
   <button class="go" id="cNext"></button>
@@ -150,10 +180,24 @@ const UI = {
         caseDone: n => `Case ${n} closed`, total: (a, b) => `You got ${a} of ${b} stars`,
         ranks: ['Trainee detective', 'Silver detective', 'Gold detective'], again: 'Play again ↻', toTitle: 'Choose a mode' }
 };
+// บทสนทนาก่อนข้อความที่ต้องสืบ (สุ่ม) · ทำให้ดูเหมือนแชทในเกมจริง
+const ROOMS = [{ th: 'แผนที่ป่า', en: 'Forest map' }, { th: 'ทะเลทราย', en: 'Desert' }, { th: 'เมืองหิมะ', en: 'Snow town' }, { th: 'ปราสาทลอยฟ้า', en: 'Sky castle' }];
+const OPENERS = [
+  { o: { th: 'เล่นเก่งจัง', en: 'You play really well' }, r: { th: 'ขอบคุณ 😊', en: 'Thanks 😊' } },
+  { o: { th: 'สวัสดี 👋 เพิ่งเข้ามาเหรอ', en: 'Hi 👋 did you just join?' }, r: { th: 'ใช่ เพิ่งเข้ามา', en: 'Yes, just joined' } },
+  { o: { th: 'ด่านนี้ยากเนอะ', en: 'This level is hard, huh' }, r: { th: 'ใช่ ตกเหวไป 3 รอบแล้ว', en: 'Yeah, I fell 3 times' } },
+  { o: { th: 'ทีมเราชนะแล้ว เย้!', en: 'Our team won, yay!' }, r: { th: 'เย้ 🎉', en: 'Yay 🎉' } },
+  { o: { th: 'ตัวละครเธอเท่ดีนะ', en: 'Your character looks cool' }, r: { th: 'ขอบคุณนะ', en: 'Thank you' } },
+  { o: { th: 'เล่นเกมนี้มานานยัง', en: 'Have you played this game long?' }, r: { th: 'เพิ่งเล่นได้อาทิตย์เดียว', en: 'Only one week' } }
+];
 const MODES = { easy: { hint: true, time: 0 }, normal: { hint: false, time: 0 }, hard: { hint: false, time: 20 } };
+const REDUCE = matchMedia('(prefers-reduced-motion: reduce)').matches;
 let L = 'th', mode = null, deck = [], idx = 0, pick = new Set(), checked = false, stars = 0, results = [], timer = null, left = 0;
+let convo = null, shown = 0, typing = false, revealed = false, seq = 0;
 const t = o => o[L];
 const U = () => UI[L];
+const wait = ms => new Promise(r => setTimeout(r, ms));
+const restart = (el, cls) => { el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); };
 
 function shuffle(a){ a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 // 12 ข้อความ = 3 คดี × 4 · ง่าย/ปกติ: ปลอดภัย 4 อันตราย 8 · ยาก: ปลอดภัย 3 และเอาข้อความหลายสัญญาณก่อน
@@ -187,25 +231,66 @@ function hud(){
 function start(m){ mode = m; deck = buildDeck(); idx = 0; stars = 0; results = []; nextMsg(); }
 function nextMsg(){
   pick = new Set(); checked = false;
-  show('sPlay'); renderMsg();
-  stopTimer();
-  if (MODES[mode].time) { left = MODES[mode].time; timer = setInterval(() => { left--; hud(); if (left <= 0) { stopTimer(); check(true); } }, 1000); }
+  convo = { room: ROOMS[Math.floor(Math.random() * ROOMS.length)], open: OPENERS[Math.floor(Math.random() * OPENERS.length)] };
+  stopTimer(); $('#tBar').classList.add('hide');
+  show('sPlay'); renderMsg(); hud();
+  playChat();
+}
+// ข้อความเด้งทีละบรรทัด: (กำลังพิมพ์) คนแปลกหน้าทัก → เราตอบ → (กำลังพิมพ์) ข้อความที่ต้องสืบ · แตะหน้าต่างแชทเพื่อข้าม
+async function playChat(){
+  const my = ++seq;
+  shown = 0; typing = false; revealed = false;
+  const plan = [[300, 'typing'], [800, 'line'], [700, 'line'], [500, 'typing'], [1200, 'line']];
+  if (!REDUCE) for (const [ms, what] of plan) {
+    await wait(ms);
+    if (my !== seq || revealed) return;
+    if (what === 'typing') typing = true; else { typing = false; shown++; }
+    renderChat(what === 'line');
+  }
+  if (my === seq) reveal();
+}
+function reveal(){
+  if (revealed) return;
+  revealed = true; typing = false;
+  if (shown < 3) shown = 3;
+  renderChat(false); renderControls();
+  if (MODES[mode].time) {
+    left = MODES[mode].time;
+    const bar = $('#tBar'), fill = $('#tFill');
+    bar.classList.remove('hide'); fill.style.transition = 'none'; fill.style.width = '100%'; void fill.offsetWidth;
+    fill.style.transition = `width ${left}s linear`; fill.style.width = '0%';
+    timer = setInterval(() => { left--; hud(); if (left <= 0) check(true); }, 1000);
+  }
   hud();
 }
-function stopTimer(){ if (timer) clearInterval(timer); timer = null; }
+$('#pChat').onclick = () => { if (!revealed && !$('#sPlay').classList.contains('hide')) { seq++; reveal(); } };
+function stopTimer(){
+  if (timer) clearInterval(timer); timer = null;
+  const fill = $('#tFill'); fill.style.width = getComputedStyle(fill).width; fill.style.transition = 'none';
+}
 
-function renderMsg(){
+function renderMsg(){ renderChat(false); renderControls(); }
+function renderChat(animLast){
+  const m = deck[idx], av = `<span class="av">${m.who[0]}</span>`;
+  const other = (text, cls) => `<div class="ln ${cls}">${av}<div><div class="who">${m.who}</div><div class="bub">${text}</div></div></div>`;
+  const lines = [other(t(convo.open.o), ''), `<div class="ln me"><div class="bub">${t(convo.open.r)}</div></div>`, other(t(m), 'target')].slice(0, shown);
+  if (animLast && lines.length) lines[lines.length - 1] = lines[lines.length - 1].replace('class="ln ', 'class="ln pop ');
+  $('#pRoom').textContent = '🎮 ' + (L === 'en' ? 'Game chat · ' : 'แชทในเกม · ') + t(convo.room);
+  $('#pOnline').textContent = '● ' + m.who;
+  $('#pLines').innerHTML = lines.join('') + (typing ? `<div class="ln typing pop">${av}<div class="bub"><i></i><i></i><i></i></div></div>` : '');
+  $('#pSkip').textContent = revealed ? '' : (L === 'en' ? 'Tap the chat to skip' : 'แตะแชทเพื่อข้าม');
+}
+function renderControls(){
   const m = deck[idx];
   $('#pCase').textContent = U().caseN(Math.floor(idx / 4) + 1);
   $('#pNum').textContent = U().msgN(idx % 4 + 1);
-  $('#pAv').textContent = m.who[0]; $('#pWho').textContent = '💬 ' + m.who; $('#pMsg').textContent = t(m);
   $('#pHint').classList.toggle('hide', !MODES[mode].hint);
   $('#pHint').textContent = U().hint(m.s.length);
   $('#pAsk').textContent = U().ask;
   const btn = (n, label, cls) => {
     let st = '';
     if (checked) { const chosen = pick.has(n), should = n ? m.s.includes(n) : !m.s.length; st = chosen && should ? 'right' : chosen ? 'wrong' : should ? 'miss' : ''; }
-    return `<button type="button" class="sg ${cls} ${st}" data-n="${n}" aria-pressed="${pick.has(n)}" ${checked ? 'disabled' : ''}>${label}</button>`;
+    return `<button type="button" class="sg ${cls} ${st}" data-n="${n}" aria-pressed="${pick.has(n)}" ${checked || !revealed ? 'disabled' : ''}>${label}</button>`;
   };
   $('#pSigns').innerHTML = SIGNS.slice(1).map((s, i) => btn(i + 1, t(s), '')).join('') + btn(0, U().safe, 'safe');
   $('#pCheck').textContent = U().check; $('#pCheck').disabled = !pick.size; $('#pCheck').classList.toggle('hide', checked);
@@ -214,18 +299,19 @@ function renderMsg(){
   $('#pNext').classList.toggle('hide', !checked);
   const r = results[idx];
   $('#pRes').classList.toggle('hide', !checked);
-  if (checked) { $('#pRes').className = 'res ' + r.k; $('#pRes').innerHTML = `<b>${r.timeUp ? U().timeUp : ''}${U()[r.k]}</b><br>${L === 'en' ? m.wen : m.wth}`; }
+  if (checked) { $('#pRes').className = 'res pop ' + r.k; $('#pRes').innerHTML = `<b>${r.timeUp ? U().timeUp : ''}${U()[r.k]}</b><br>${L === 'en' ? m.wen : m.wth}`; }
 }
 $('#pSigns').addEventListener('click', e => {
-  const b = e.target.closest('.sg'); if (!b || checked) return;
+  const b = e.target.closest('.sg'); if (!b || checked || !revealed) return;
   const n = +b.dataset.n;
   if (n === 0) pick = pick.has(0) ? new Set() : new Set([0]);           // ปลอดภัย = เลือกได้อย่างเดียว
   else { pick.delete(0); pick.has(n) ? pick.delete(n) : pick.add(n); }
-  renderMsg();
+  renderControls();
 });
 
 // ⭐⭐ ตรงเป๊ะ · ⭐ เจอสัญญาณที่ถูกอย่างน้อย 1 ข้อ
 function check(timeUp){
+  if (checked) return;
   stopTimer();
   const m = deck[idx], want = m.s.length ? m.s : [0];
   const exact = want.length === pick.size && want.every(n => pick.has(n));
@@ -233,14 +319,16 @@ function check(timeUp){
   const k = exact ? 'good' : some ? 'part' : 'no';
   const got = exact ? 2 : some ? 1 : 0;
   stars += got; results[idx] = { k, got, timeUp: !!timeUp && !exact };
-  checked = true; renderMsg(); hud();
+  checked = true; renderControls(); hud();
+  if (got) restart($('#hStar'), 'bump'); else restart($('#sPlay'), 'shake');
 }
 $('#pCheck').onclick = () => check(false);
-$('#pNext').onclick = () => { if (idx % 4 === 3) { show('sCase'); renderCase(); } else { idx++; nextMsg(); } };
+$('#pNext').onclick = () => { if (idx % 4 === 3) { show('sCase'); renderCase(); restart($('#cStamp'), 'stamp'); } else { idx++; nextMsg(); } };
 
 function renderCase(){
   const c = Math.floor(idx / 4), rs = results.slice(c * 4, c * 4 + 4);
   $('#cTitle').textContent = U().caseDone(c + 1);
+  $('#cStamp').textContent = L === 'en' ? 'CLOSED' : 'ปิดคดี';
   $('#cStars').textContent = U().stars(rs.reduce((a, r) => a + r.got, 0)) + ' / 8';
   $('#cSum').innerHTML = deck.slice(c * 4, c * 4 + 4).map((m, i) => `<div><span>💬 ${m.who}: ${t(m)}</span><b>${'⭐'.repeat(rs[i].got) || '—'}</b></div>`).join('');
   $('#cNext').textContent = idx === deck.length - 1 ? U().finish : U().nextCase;
@@ -256,7 +344,7 @@ function renderEnd(){
   hud();
 }
 $('#eAgain').onclick = () => start(mode);
-function toTitle(){ stopTimer(); mode = null; show('sTitle'); }
+function toTitle(){ seq++; stopTimer(); mode = null; show('sTitle'); }
 $('#eTitle').onclick = toTitle;
 
 $('#goE').onclick = () => start('easy'); $('#goN').onclick = () => start('normal'); $('#goH').onclick = () => start('hard');

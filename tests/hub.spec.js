@@ -151,6 +151,7 @@ test('Y4: เกมนักสืบล็อกถ้าครูยังไ�
 test('เกมนักสืบแชท: เล่นจบ 3 คดี ได้ดาวเต็มเมื่อตอบถูกทุกข้อ', async ({ page }) => {
   const errs = []; page.on('pageerror', e => errs.push(e.message));
   await page.route('**/fonts.googleapis.com/**', r => r.abort());
+  await page.emulateMedia({ reducedMotion: 'reduce' });   // ข้ามอนิเมชันแชทให้เทสต์เร็ว
   await page.goto('/games/detective.html');
   await expect(page.locator('#gback')).toBeHidden();
   await page.click('#goE');
@@ -171,4 +172,20 @@ test('เกมนักสืบแชท: เล่นจบ 3 คดี ไ�
   expect(await page.evaluate(() => [...pick])).toEqual([2]);
   await expect(page.locator('#pHint')).toBeHidden();
   expect(errs).toEqual([]);
+});
+
+test('เกมนักสืบแชท: แชทค่อย ๆ เด้ง ปุ่มล็อกจนข้อความมาครบ แตะแชทเพื่อข้ามได้', async ({ page }) => {
+  await page.route('**/fonts.googleapis.com/**', r => r.abort());
+  await page.goto('/games/detective.html');
+  await page.click('#goN');
+  await expect(page.locator('.sg').first()).toBeDisabled();
+  await expect(page.locator('#pLines .ln.typing')).toBeVisible();
+  await page.click('#pChat');
+  await expect(page.locator('#pLines .ln:not(.typing)')).toHaveCount(3);
+  await expect(page.locator('#pLines .ln.target .bub')).toHaveText(await page.evaluate(() => deck[0].th));
+  await expect(page.locator('.sg').first()).toBeEnabled();
+  // ข้อความถัดไปเล่นแชทเองจนครบโดยไม่ต้องแตะ
+  await page.click('.sg[data-n="0"]'); await page.click('#pCheck'); await page.click('#pNext');
+  await expect(page.locator('#pLines .ln.target')).toBeVisible({ timeout: 6000 });
+  await expect(page.locator('.sg').first()).toBeEnabled();
 });
