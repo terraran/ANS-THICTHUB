@@ -13,7 +13,7 @@ const UI = {
     home: 'หน้าแรก', whichRoom: 'เราเรียนห้องไหน?', changeRoom: 'เปลี่ยนห้อง', whoAmI: 'เราคือใคร? กดชื่อของเรา', onlyMine: 'กดชื่อตัวเองเท่านั้นนะ',
     noName: 'ไม่เจอชื่อตัวเอง? บอกครูได้เลย', emptyRoster: 'ห้องนี้ยังไม่มีรายชื่อ บอกครูได้เลย',
     loading: 'กำลังโหลด...', loadErr: 'โหลดข้อมูลไม่สำเร็จ ตรวจอินเทอร์เน็ตแล้วลองอีกครั้ง', retry: 'ลองอีกครั้ง', notSetup: 'ยังไม่ได้ตั้งค่าการเชื่อมต่อ (config.js)',
-    hi: n => `สวัสดี ${n}!`, notMe: 'ไม่ใช่เรา? เปลี่ยนชื่อ', sent: 'ใบงานที่ส่งแล้ว',
+    hi: n => `สวัสดี ${n}!`, notMe: 'ไม่ใช่เรา? เปลี่ยนชื่อ', logout: 'ออกจากระบบ', sent: 'ใบงานที่ส่งแล้ว',
     tabs: { sheet: 'ใบงาน', game: 'เกม' }, week: n => `สัปดาห์ ${n}`,
     st: { done: 'ส่งแล้ว ✓', doing: 'ทำค้างไว้', todo: 'ยังไม่เริ่ม', lock: 'ล็อกอยู่', need: 'ยังเล่นไม่ได้', play: 'เล่นได้เลย' },
     btn: { done: 'ดูผล / แก้ใหม่', doing: 'ทำต่อ', todo: 'เริ่มทำ', play: 'เล่น' },
@@ -25,7 +25,7 @@ const UI = {
     home: 'Home', whichRoom: 'Which class are you in?', changeRoom: 'Change class', whoAmI: 'Who are you? Tap your name', onlyMine: 'Only tap your own name',
     noName: 'Can’t find your name? Tell your teacher.', emptyRoster: 'This class has no names yet. Tell your teacher.',
     loading: 'Loading...', loadErr: 'Could not load. Check the internet and try again.', retry: 'Try again', notSetup: 'The connection is not set up yet (config.js)',
-    hi: n => `Hi ${n}!`, notMe: 'Not you? Change name', sent: 'Worksheets sent',
+    hi: n => `Hi ${n}!`, notMe: 'Not you? Change name', logout: 'Log out', sent: 'Worksheets sent',
     tabs: { sheet: 'Worksheets', game: 'Games' }, week: n => `Week ${n}`,
     st: { done: 'Sent ✓', doing: 'In progress', todo: 'Not started', lock: 'Locked', need: 'Not yet', play: 'Ready to play' },
     btn: { done: 'See results / redo', doing: 'Continue', todo: 'Start', play: 'Play' },
@@ -140,6 +140,7 @@ async function pageLib(room, name){
      <div class="me"><span class="av" style="background:${AV[idx % AV.length]}">${esc(initial(name))}</span>
       <div><b>${esc(U().hi(name))}</b><small>${esc(room)} · <button type="button" class="back" data-go="#/names/${esc(room)}">${esc(U().notMe)}</button> · <button type="button" class="back" data-go="#/">${esc(U().home)}</button></small></div></div>
      ${total != null ? `<div class="prog"><span>${esc(U().sent)}</span><div class="track"><div class="fill" style="width:${total ? Math.round(done / total * 100) : 0}%"></div></div><b>${done}/${total}</b></div>` : ''}
+     <button type="button" class="logout" data-logout>🚪 ${esc(U().logout)}</button>
     </div>`;
   const shell = (body, done, total) => { view.innerHTML = `<div class="page">${header(done, total)}${body}<div class="wrap bar">${langBtns()}</div></div>`; };
   if (!HubAPI.configured()) return shell(msgBox(U().notSetup));
@@ -209,12 +210,14 @@ function route(){
   return pageHome();
 }
 view.addEventListener('click', e => {
-  const el = e.target.closest('[data-go],[data-lang],[data-tab],[data-retry],[data-game]');
+  const el = e.target.closest('[data-go],[data-lang],[data-tab],[data-retry],[data-game],[data-logout]');
   if (!el) return;
   if (el.dataset.go) return go(el.dataset.go);
   if (el.dataset.lang) { L = el.dataset.lang; store.set('lang', L); return route(); }
   if (el.dataset.tab) { tab = el.dataset.tab; return route(); }
   if (el.dataset.game) return openGame(el.dataset.game);
+  // ออกจากระบบ = ลืมห้อง/ชื่อในเครื่องนี้ คนต่อไปต้องเลือกชื่อใหม่
+  if (el.hasAttribute('data-logout')) { store.del('me'); libState = null; return go('#/'); }
   if (el.hasAttribute('data-retry')) { libState = null; return route(); }
 });
 addEventListener('hashchange', () => { libState = null; route(); });

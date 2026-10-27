@@ -29,7 +29,8 @@ window.HubUtil = (() => {
   // localStorage ใช้จำห้อง/ชื่อ/ภาษาในเครื่องนี้เท่านั้น · บางเครื่องปิดไว้ จึงห่อ try/catch
   const store = {
     get(k){ try { return JSON.parse(localStorage.getItem('ansHub.' + k)); } catch (e) { return null; } },
-    set(k, v){ try { localStorage.setItem('ansHub.' + k, JSON.stringify(v)); } catch (e) {} }
+    set(k, v){ try { localStorage.setItem('ansHub.' + k, JSON.stringify(v)); } catch (e) {} },
+    del(k){ try { localStorage.removeItem('ansHub.' + k); } catch (e) {} }
   };
   // ตัวอักษรแรกของชื่อ ข้ามสระหน้า เ แ โ ใ ไ
   const initial = s => { const c = [...String(s)]; return /[เแโใไ]/.test(c[0]) && c[1] ? c[1] : c[0] || '?'; };

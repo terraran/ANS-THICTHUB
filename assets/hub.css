@@ -73,6 +73,8 @@ h1{margin:0;font-weight:800}
 .me .av{width:60px;height:60px;border:3px solid #fff}
 .me b{font-size:30px;font-weight:800;line-height:1.1;display:block}
 .me small{font-size:17px;color:#bfdbfe}
+.logout{min-height:48px;font-size:19px;font-weight:600;background:#ffffff1f;color:#fff;border:2px solid #ffffff66;border-radius:14px;padding:4px 18px}
+.logout:hover{background:#ffffff33}
 .me small button{font-size:17px;min-height:0;display:inline;text-decoration:underline}
 .prog{display:flex;align-items:center;gap:12px;background:var(--navy-2);border-radius:40px;padding:8px 20px}
 .prog span{font-size:18px;color:#bfdbfe}

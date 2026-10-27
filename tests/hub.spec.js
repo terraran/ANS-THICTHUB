@@ -165,6 +165,20 @@ test('มือถือ: หน้าเลือกชื่อไม่ล้
   }
 });
 
+test('ออกจากระบบ: ลืมชื่อในเครื่องนี้ กด THAI ICT แล้วต้องเลือกห้องใหม่', async ({ page }) => {
+  mockApi(page);
+  await page.goto('/#/lib/Y3.2/' + encodeURIComponent('ขิม'));
+  await expect(page.locator('.me b')).toHaveText('สวัสดี ขิม!');
+  await page.click('[data-logout]');
+  await expect(page.locator('#goIct')).toBeVisible();
+  expect(await page.evaluate(() => localStorage.getItem('ansHub.me'))).toBeNull();
+  await page.click('#goIct');
+  await expect(page).toHaveURL(/#\/rooms$/);
+  await page.click('[data-lang="en"]');
+  await page.goto('/#/lib/Y3.2/' + encodeURIComponent('ขิม'));
+  await expect(page.locator('[data-logout]')).toHaveText('🚪 Log out');
+});
+
 test('Y4: เกมนักสืบล็อกถ้าครูยังไม่เปิด', async ({ page }) => {
   mockApi(page, { open: { y4w1: true } });
   await page.goto('/#/lib/Y4.2/' + encodeURIComponent('UNO'));
@@ -175,11 +189,11 @@ test('Y4: เกมนักสืบล็อกถ้าครูยังไ�
 test('เกมนักสืบแชท: เล่นจบ 3 คดี ได้ดาวเต็มเมื่อตอบถูกทุกข้อ', async ({ page }) => {
   const errs = []; page.on('pageerror', e => errs.push(e.message));
   await page.route('**/fonts.googleapis.com/**', r => r.abort());
-  await page.emulateMedia({ reducedMotion: 'reduce' });   // ข้ามอนิเมชันแชทให้เทสต์เร็ว
   await page.goto('/games/detective.html');
   await expect(page.locator('#gback')).toBeHidden();
   await page.click('#goE');
   for (let i = 0; i < 12; i++) {
+    await page.click('#pChat');                            // แตะแชทเพื่อข้ามให้เทสต์เร็ว
     await expect(page.locator('#pHint')).toBeVisible();
     const want = await page.evaluate(() => deck[idx].s);
     for (const n of (want.length ? want : [0])) await page.click(`.sg[data-n="${n}"]`);
@@ -191,26 +205,31 @@ test('เกมนักสืบแชท: เล่นจบ 3 คดี ไ�
   await expect(page.locator('#eStars')).toHaveText('ได้ดาว 24 จาก 24 ดวง');
   await expect(page.locator('#eRank')).toHaveText('นักสืบระดับทอง');
   // เลือก "ปลอดภัย" แล้วเลือกสัญญาณ → ปลอดภัยหลุด
-  await page.click('#eTitle'); await page.click('#goN');
+  await page.click('#eTitle'); await page.click('#goN'); await page.click('#pChat');
   await page.click('.sg[data-n="0"]'); await page.click('.sg[data-n="2"]');
   expect(await page.evaluate(() => [...pick])).toEqual([2]);
   await expect(page.locator('#pHint')).toBeHidden();
   expect(errs).toEqual([]);
 });
 
-test('เกมนักสืบแชท: แชทค่อย ๆ เด้ง ปุ่มล็อกจนข้อความมาครบ แตะแชทเพื่อข้ามได้', async ({ page }) => {
+test('เกมนักสืบแชท: แชทค่อย ๆ เด้ง (แม้เครื่องปิดภาพเคลื่อนไหว) ปุ่มล็อกจนข้อความมาครบ แตะแชทเพื่อข้ามได้', async ({ page }) => {
   await page.route('**/fonts.googleapis.com/**', r => r.abort());
+  await page.emulateMedia({ reducedMotion: 'reduce' });   // เครื่องนักเรียนที่ปิด "แสดงภาพเคลื่อนไหว" ใน Windows
   await page.goto('/games/detective.html');
   await page.click('#goN');
   await expect(page.locator('.sg').first()).toBeDisabled();
   await expect(page.locator('#pLines .ln.typing')).toBeVisible();
+  await expect(page.locator('#pLines .ln:not(.typing)')).toHaveCount(1);
   await page.click('#pChat');
   await expect(page.locator('#pLines .ln:not(.typing)')).toHaveCount(3);
-  await expect(page.locator('#pLines .ln.target .bub')).toHaveText(await page.evaluate(() => deck[0].th));
+  // บทสนทนาเป็นเรื่องเดียวกับข้อความที่ต้องสืบ: คนนั้นทัก → เราตอบ → ข้อความที่ต้องสืบ
+  const m = await page.evaluate(() => deck[0]);
+  await expect(page.locator('#pLines .ln .bub')).toHaveText([m.o.th, m.r.th, m.th]);
   await expect(page.locator('.sg').first()).toBeEnabled();
   // ข้อความถัดไปเล่นแชทเองจนครบโดยไม่ต้องแตะ
   await page.click('.sg[data-n="0"]'); await page.click('#pCheck'); await page.click('#pNext');
   await expect(page.locator('#pLines .ln.target')).toBeVisible({ timeout: 6000 });
+  await expect(page.locator('#pLines .ln.target')).toHaveCSS('opacity', '1');
   await expect(page.locator('.sg').first()).toBeEnabled();
 });
 

@@ -87,7 +87,10 @@ button:disabled{background:#94a3b8;color:#1e293b;box-shadow:none;cursor:not-allo
 .final p{margin:0;font-size:22px;color:var(--muted)}
 .row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
 @media (max-width:560px){.title h1{font-size:38px}.ln.target .bub{font-size:20px}.sg{font-size:16px;padding:6px 10px}}
-@media (prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+/* เครื่องที่ปิดภาพเคลื่อนไหวใน Windows: แชทยังเด้งทีละบรรทัด (แค่จางเข้า) · ปิดเฉพาะการสั่น/เด้ง/ประทับตรา */
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@keyframes blink{0%,60%,100%{opacity:.35}30%{opacity:1}}
+@media (prefers-reduced-motion:reduce){.pop{animation-name:fade}.typing i{animation-name:blink}.shake,.bump,.stamp{animation:none}}
 </style></head><body>
 <div class="top">
  <div class="hud hide" id="hud"><span id="hCase"></span><span id="hStar"></span><span id="hTime" class="timer hide"></span></div>
@@ -134,31 +137,56 @@ const SIGNS = [null,
   { th: '🎁 ให้ของรางวัล', en: '🎁 Gifts / prizes' },
   { th: '🤫 ให้เก็บเป็นความลับ', en: '🤫 Keep it secret' }];
 // ข้อความใหม่ (ไม่ซ้ำกับการ์ดในใบงาน) · s = สัญญาณที่มี ([] = ปลอดภัย)
+// o = คนนั้นทักก่อน · r = เราตอบ · แล้วจึงเป็นข้อความที่ต้องสืบ ให้บทสนทนาต่อเนื่องเป็นเรื่องเดียวกัน
 const MSGS = [
-  { who: 'Leo_Blast', s: [], th: 'เมื่อกี้ยิงแม่นมาก!', en: 'Nice shot just now!', wth: 'ชมการเล่นเฉย ๆ ไม่ได้ขออะไร', wen: 'Just praise. Nothing is asked.' },
-  { who: 'PandaPro', s: [], th: 'ด่านนี้มีทางลับอยู่หลังน้ำตกนะ', en: 'There is a secret path behind the waterfall.', wth: '"ทางลับ" เป็นเรื่องในเกม ไม่ได้ให้เราปิดบังผู้ใหญ่', wen: 'A "secret path" is part of the game. It does not ask you to hide anything from adults.' },
-  { who: 'Kiki_99', s: [], th: 'พักกินน้ำก่อนนะ เดี๋ยวมาเล่นต่อ', en: 'Taking a water break, back soon.', wth: 'บอกว่าจะพักเฉย ๆ', wen: 'Just saying they will take a break.' },
-  { who: 'RocketMan', s: [], th: 'ใครอยากเข้าทีมแดงบ้าง', en: 'Who wants to join the red team?', wth: 'ชวนเล่นเป็นทีมในเกม', wen: 'Inviting players to a team in the game.' },
-  { who: 'Mochi', s: [], th: 'แพ้แล้ว ไม่เป็นไร รอบหน้าเอาใหม่', en: 'We lost. That is okay, next round!', wth: 'ให้กำลังใจกันในเกม', wen: 'Cheering each other on in the game.' },
-  { who: 'GGWP', s: [], th: 'กดปุ่ม E เพื่อเปิดประตู', en: 'Press E to open the door.', wth: 'บอกวิธีเล่นเกม', wen: 'A tip about how to play.' },
-  { who: 'StarLight', s: [], th: 'ชุดใหม่ในร้านค้าเกมสวยมาก', en: 'The new outfit in the game shop looks great.', wth: 'คุยเรื่องของในร้านค้าเกม ไม่ได้จะให้ของเรา', wen: 'Talking about the game shop. Not offering you anything.' },
-  { who: 'TinyTank', s: [], th: 'ขอบคุณที่ช่วยกันป้องกันฐานนะ', en: 'Thanks for helping defend the base!', wth: 'ขอบคุณเรื่องในเกม', wen: 'Saying thanks for something in the game.' },
-  { who: 'GiftBox', s: [1, 3], th: 'พี่จะเติมเพชรให้ฟรี บอกชื่อผู้ใช้กับรหัสผ่านมาสิ', en: 'I will give you free gems. Tell me your username and password.', wth: 'ล่อด้วยของฟรี แล้วขอรหัสผ่าน', wen: 'Offers free gems, then asks for your password.' },
-  { who: 'Camy', s: [2], th: 'ส่งรูปห้องนอนมาให้ดูหน่อย', en: 'Send me a photo of your bedroom.', wth: 'ขอรูปจากคนแปลกหน้า', wen: 'A stranger asking for photos.' },
-  { who: 'SecretPal', s: [4], th: 'อย่าบอกพ่อแม่นะว่าเราคุยกัน', en: 'Don’t tell your parents we are chatting.', wth: 'ให้ปิดบังผู้ใหญ่ เป็นสัญญาณอันตราย', wen: 'Asks you to hide it from adults. That is a warning sign.' },
-  { who: 'Vip_Bro', s: [1], th: 'เบอร์โทรเธอเบอร์อะไร เดี๋ยวแอดไลน์ไป', en: 'What is your phone number? I will add you on another app.', wth: 'ขอเบอร์โทร = ข้อมูลส่วนตัว', wen: 'A phone number is personal information.' },
-  { who: 'LuckyDraw', s: [3], th: 'ยินดีด้วย! เธอได้สกินหายาก กดลิงก์รับเลย', en: 'Congrats! You won a rare skin. Tap the link to get it.', wth: 'ให้รางวัลจากคนแปลกหน้า อาจเป็นกับดัก', wen: 'A prize from a stranger can be a trap.' },
-  { who: 'FunCam', s: [2, 3], th: 'ถ่ายรูปตัวเองส่งมา เดี๋ยวให้ตัวละครพิเศษ', en: 'Send me a selfie and I will give you a special character.', wth: 'ขอรูป แล้วล่อด้วยของรางวัล', wen: 'Asks for a photo and offers a prize.' },
-  { who: 'TrustMe', s: [3, 4], th: 'ของที่พี่ให้ ห้ามเล่าให้ใครฟังนะ', en: 'The gift I gave you, don’t tell anyone about it.', wth: 'ให้ของ แล้วให้เก็บเป็นความลับ', wen: 'Gives a gift and asks you to keep it secret.' },
-  { who: 'Hero_X', s: [1], th: 'บ้านเธออยู่แถวไหน', en: 'Where do you live?', wth: 'ถามที่อยู่ = ข้อมูลส่วนตัว', wen: 'Your address is personal information.' },
-  { who: 'Bestie4ever', s: [2, 4], th: 'ส่งรูปหน้าเธอมา แล้วลบแชทนี้ด้วยนะ', en: 'Send me a photo of your face, then delete this chat.', wth: 'ขอรูป และให้ลบแชทเพื่อไม่ให้ใครเห็น', wen: 'Asks for a photo and to delete the chat so nobody sees.' },
-  { who: 'CoinKing', s: [1, 3], th: 'ให้เหรียญ 5,000 ฟรี แค่บอกว่าเรียนโรงเรียนอะไร', en: 'Free 5,000 coins. Just tell me which school you go to.', wth: 'ล่อด้วยเหรียญ แล้วถามชื่อโรงเรียน', wen: 'Offers coins, then asks for your school.' },
-  { who: 'Shh_Shh', s: [4], th: 'เรื่องที่เราคุยกันเป็นความลับของเราสองคนนะ', en: 'What we talk about is a secret between us two.', wth: 'ให้เก็บความลับกับคนแปลกหน้า', wen: 'Keeping secrets with a stranger is a warning sign.' },
-  { who: 'VideoStar', s: [2], th: 'เปิดกล้องวิดีโอคอลกับพี่หน่อย', en: 'Turn on your camera for a video call with me.', wth: 'ขอเห็นหน้าผ่านกล้อง', wen: 'Asks to see you on camera.' },
-  { who: 'ProCoach', s: [1, 3], th: 'พี่ช่วยเล่นให้ผ่านด่านฟรี ขอรหัสผ่านเข้าไปเล่นแทนนะ', en: 'I will clear the level for you for free. Give me your password.', wth: 'เสนอช่วยฟรี แล้วขอรหัสผ่าน', wen: 'Offers free help, then asks for your password.' },
-  { who: 'NiceGuy', s: [2, 3, 4], th: 'พี่ซื้อบัตรเติมเงินให้ ส่งรูปมาแลก แต่อย่าบอกใครนะ', en: 'I will buy you a top-up card. Send a photo in return, but don’t tell anyone.', wth: 'ให้ของ ขอรูป และให้เก็บเป็นความลับ ครบ 3 สัญญาณ', wen: 'A gift, a photo request and a secret: three signs.' },
-  { who: 'MapQuest', s: [1], th: 'ชื่อจริงเธอชื่ออะไร วันเกิดวันไหน', en: 'What is your real name and birthday?', wth: 'ชื่อจริงและวันเกิดเป็นข้อมูลส่วนตัว', wen: 'Your real name and birthday are personal information.' },
-  { who: 'PrizeBot', s: [1, 3], th: 'เธอได้รางวัลไอแพด ส่งที่อยู่มารับของได้เลย', en: 'You won an iPad! Send your address to get it.', wth: 'ล่อด้วยรางวัลใหญ่ แล้วขอที่อยู่', wen: 'A big prize, then asks for your address.' }
+  { who: 'Leo_Blast', o: { th: 'ใครยิงบอสตัวสุดท้ายอะ', en: 'Who hit the last boss?' }, r: { th: 'เราเอง 😆', en: 'Me 😆' },
+    s: [], th: 'เมื่อกี้ยิงแม่นมาก!', en: 'Nice shot just now!', wth: 'ชมการเล่นเฉย ๆ ไม่ได้ขออะไร', wen: 'Just praise. Nothing is asked.' },
+  { who: 'PandaPro', o: { th: 'ยังหาหีบที่ 3 ไม่เจอเหรอ', en: 'Still can’t find chest 3?' }, r: { th: 'ใช่ วนหาจนเวียนหัวแล้ว', en: 'No, I have looked everywhere' },
+    s: [], th: 'ด่านนี้มีทางลับอยู่หลังน้ำตกนะ', en: 'There is a secret path behind the waterfall.', wth: '"ทางลับ" เป็นเรื่องในเกม ไม่ได้ให้เราปิดบังผู้ใหญ่', wen: 'A "secret path" is part of the game. It does not ask you to hide anything from adults.' },
+  { who: 'Kiki_99', o: { th: 'เล่นกันมาชั่วโมงนึงแล้วนะ', en: 'We have played for an hour' }, r: { th: 'จริงด้วย เริ่มเหนื่อยแล้ว', en: 'True, I am getting tired' },
+    s: [], th: 'พักกินน้ำก่อนนะ เดี๋ยวมาเล่นต่อ', en: 'Taking a water break, back soon.', wth: 'บอกว่าจะพักเฉย ๆ', wen: 'Just saying they will take a break.' },
+  { who: 'RocketMan', o: { th: 'รอบหน้าแบ่งทีมใหม่นะ', en: 'New teams next round' }, r: { th: 'โอเค เรายังไม่มีทีมเลย', en: 'OK, I do not have a team yet' },
+    s: [], th: 'ใครอยากเข้าทีมแดงบ้าง', en: 'Who wants to join the red team?', wth: 'ชวนเล่นเป็นทีมในเกม', wen: 'Inviting players to a team in the game.' },
+  { who: 'Mochi', o: { th: 'โห อีกนิดเดียวเอง', en: 'So close!' }, r: { th: 'เสียดายมาก 😭', en: 'Argh 😭' },
+    s: [], th: 'แพ้แล้ว ไม่เป็นไร รอบหน้าเอาใหม่', en: 'We lost. That is okay, next round!', wth: 'ให้กำลังใจกันในเกม', wen: 'Cheering each other on in the game.' },
+  { who: 'GGWP', o: { th: 'ติดอยู่หน้าประตูเหรอ', en: 'Stuck at the door?' }, r: { th: 'ใช่ เปิดไม่ออก', en: 'Yes, it will not open' },
+    s: [], th: 'กดปุ่ม E เพื่อเปิดประตู', en: 'Press E to open the door.', wth: 'บอกวิธีเล่นเกม', wen: 'A tip about how to play.' },
+  { who: 'StarLight', o: { th: 'เห็นอัปเดตวันนี้ยัง', en: 'Seen today’s update?' }, r: { th: 'ยังเลย มีอะไรใหม่', en: 'Not yet, what is new?' },
+    s: [], th: 'ชุดใหม่ในร้านค้าเกมสวยมาก', en: 'The new outfit in the game shop looks great.', wth: 'คุยเรื่องของในร้านค้าเกม ไม่ได้จะให้ของเรา', wen: 'Talking about the game shop. Not offering you anything.' },
+  { who: 'TinyTank', o: { th: 'ฐานเรารอดแล้ว!', en: 'Our base survived!' }, r: { th: 'เมื่อกี้เกือบแตกแล้ว', en: 'That was close' },
+    s: [], th: 'ขอบคุณที่ช่วยกันป้องกันฐานนะ', en: 'Thanks for helping defend the base!', wth: 'ขอบคุณเรื่องในเกม', wen: 'Saying thanks for something in the game.' },
+  { who: 'GiftBox', o: { th: 'ตัวละครเธอยังใส่ชุดเริ่มต้นอยู่เลย', en: 'Your character still wears the starter outfit' }, r: { th: 'ใช่ เพชรไม่พอซื้อชุด', en: 'Yeah, not enough gems' },
+    s: [1, 3], th: 'พี่จะเติมเพชรให้ฟรี บอกชื่อผู้ใช้กับรหัสผ่านมาสิ', en: 'I will give you free gems. Tell me your username and password.', wth: 'ล่อด้วยของฟรี แล้วขอรหัสผ่าน', wen: 'Offers free gems, then asks for your password.' },
+  { who: 'Camy', o: { th: 'เธอเล่นอยู่ที่บ้านเหรอ', en: 'Are you playing at home?' }, r: { th: 'ใช่ เล่นในห้องนอน', en: 'Yes, in my bedroom' },
+    s: [2], th: 'ส่งรูปห้องนอนมาให้ดูหน่อย', en: 'Send me a photo of your bedroom.', wth: 'ขอรูปจากคนแปลกหน้า', wen: 'A stranger asking for photos.' },
+  { who: 'SecretPal', o: { th: 'พรุ่งนี้มาเล่นด้วยกันอีกนะ', en: 'Play again tomorrow?' }, r: { th: 'ได้ เดี๋ยวขอแม่ก่อน', en: 'OK, I will ask my mum first' },
+    s: [4], th: 'อย่าบอกพ่อแม่นะว่าเราคุยกัน', en: 'Don’t tell your parents we are chatting.', wth: 'ให้ปิดบังผู้ใหญ่ เป็นสัญญาณอันตราย', wen: 'Asks you to hide it from adults. That is a warning sign.' },
+  { who: 'Vip_Bro', o: { th: 'เธอเล่นดีนะ อยากชวนเล่นด้วยกันบ่อย ๆ', en: 'You are good. Let’s play together more' }, r: { th: 'ได้เลย', en: 'Sure' },
+    s: [1], th: 'เบอร์โทรเธอเบอร์อะไร เดี๋ยวแอดไลน์ไป', en: 'What is your phone number? I will add you on another app.', wth: 'ขอเบอร์โทร = ข้อมูลส่วนตัว', wen: 'A phone number is personal information.' },
+  { who: 'LuckyDraw', o: { th: 'วันนี้เกมมีกิจกรรมแจกของนะ', en: 'There is a giveaway event today' }, r: { th: 'จริงเหรอ ไม่เห็นรู้เลย', en: 'Really? I did not know' },
+    s: [3], th: 'ยินดีด้วย! เธอได้สกินหายาก กดลิงก์รับเลย', en: 'Congrats! You won a rare skin. Tap the link to get it.', wth: 'ให้รางวัลจากคนแปลกหน้า อาจเป็นกับดัก', wen: 'A prize from a stranger can be a trap.' },
+  { who: 'FunCam', o: { th: 'อยากได้ตัวละครนินจาไหม', en: 'Want the ninja character?' }, r: { th: 'อยากได้มาก แต่มันแพง', en: 'Yes! But it is expensive' },
+    s: [2, 3], th: 'ถ่ายรูปตัวเองส่งมา เดี๋ยวให้ตัวละครพิเศษ', en: 'Send me a selfie and I will give you a special character.', wth: 'ขอรูป แล้วล่อด้วยของรางวัล', wen: 'Asks for a photo and offers a prize.' },
+  { who: 'TrustMe', o: { th: 'ได้ดาบที่พี่ส่งให้ยัง', en: 'Did you get the sword I sent?' }, r: { th: 'ได้แล้ว ขอบคุณนะ', en: 'Got it, thanks' },
+    s: [3, 4], th: 'ของที่พี่ให้ ห้ามเล่าให้ใครฟังนะ', en: 'The gift I gave you, don’t tell anyone about it.', wth: 'ให้ของ แล้วให้เก็บเป็นความลับ', wen: 'Gives a gift and asks you to keep it secret.' },
+  { who: 'Hero_X', o: { th: 'ตอนนี้ฝนตกหนักมากเลย ที่เธอตกไหม', en: 'It is pouring here. Is it raining where you are?' }, r: { th: 'ไม่ตกนะ แดดออก', en: 'No, it is sunny' },
+    s: [1], th: 'บ้านเธออยู่แถวไหน', en: 'Where do you live?', wth: 'ถามที่อยู่ = ข้อมูลส่วนตัว', wen: 'Your address is personal information.' },
+  { who: 'Bestie4ever', o: { th: 'เราเป็นเพื่อนสนิทกันแล้วนะ', en: 'We are best friends now' }, r: { th: 'ได้สิ 😊', en: 'Sure 😊' },
+    s: [2, 4], th: 'ส่งรูปหน้าเธอมา แล้วลบแชทนี้ด้วยนะ', en: 'Send me a photo of your face, then delete this chat.', wth: 'ขอรูป และให้ลบแชทเพื่อไม่ให้ใครเห็น', wen: 'Asks for a photo and to delete the chat so nobody sees.' },
+  { who: 'CoinKing', o: { th: 'เลิกเรียนแล้วเหรอ', en: 'Done with school already?' }, r: { th: 'ใช่ เพิ่งกลับถึงบ้าน', en: 'Yes, I just got home' },
+    s: [1, 3], th: 'ให้เหรียญ 5,000 ฟรี แค่บอกว่าเรียนโรงเรียนอะไร', en: 'Free 5,000 coins. Just tell me which school you go to.', wth: 'ล่อด้วยเหรียญ แล้วถามชื่อโรงเรียน', wen: 'Offers coins, then asks for your school.' },
+  { who: 'Shh_Shh', o: { th: 'คุยกับเธอสนุกกว่าคนอื่นอีก', en: 'Talking with you is more fun than anyone' }, r: { th: 'จริงเหรอ 😄', en: 'Really? 😄' },
+    s: [4], th: 'เรื่องที่เราคุยกันเป็นความลับของเราสองคนนะ', en: 'What we talk about is a secret between us two.', wth: 'ให้เก็บความลับกับคนแปลกหน้า', wen: 'Keeping secrets with a stranger is a warning sign.' },
+  { who: 'VideoStar', o: { th: 'พิมพ์คุยกันช้าจังเลยเนอะ', en: 'Typing is so slow, huh' }, r: { th: 'ใช่ พิมพ์ไม่ทัน', en: 'Yeah, I cannot keep up' },
+    s: [2], th: 'เปิดกล้องวิดีโอคอลกับพี่หน่อย', en: 'Turn on your camera for a video call with me.', wth: 'ขอเห็นหน้าผ่านกล้อง', wen: 'Asks to see you on camera.' },
+  { who: 'ProCoach', o: { th: 'ด่าน 12 ผ่านยังอะ', en: 'Passed level 12 yet?' }, r: { th: 'ยังเลย ตายตลอด', en: 'Not yet, I keep losing' },
+    s: [1, 3], th: 'พี่ช่วยเล่นให้ผ่านด่านฟรี ขอรหัสผ่านเข้าไปเล่นแทนนะ', en: 'I will clear the level for you for free. Give me your password.', wth: 'เสนอช่วยฟรี แล้วขอรหัสผ่าน', wen: 'Offers free help, then asks for your password.' },
+  { who: 'NiceGuy', o: { th: 'อยากได้แพ็กเพชรอันใหม่ไหม', en: 'Want the new gem pack?' }, r: { th: 'อยากได้ แต่ไม่มีเงิน', en: 'Yes, but I have no money' },
+    s: [2, 3, 4], th: 'พี่ซื้อบัตรเติมเงินให้ ส่งรูปมาแลก แต่อย่าบอกใครนะ', en: 'I will buy you a top-up card. Send a photo in return, but don’t tell anyone.', wth: 'ให้ของ ขอรูป และให้เก็บเป็นความลับ ครบ 3 สัญญาณ', wen: 'A gift, a photo request and a secret: three signs.' },
+  { who: 'MapQuest', o: { th: 'ชื่อในเกมเธอเพราะดีนะ', en: 'Nice game name' }, r: { th: 'ขอบคุณ ตั้งเอง', en: 'Thanks, I made it up' },
+    s: [1], th: 'ชื่อจริงเธอชื่ออะไร วันเกิดวันไหน', en: 'What is your real name and birthday?', wth: 'ชื่อจริงและวันเกิดเป็นข้อมูลส่วนตัว', wen: 'Your real name and birthday are personal information.' },
+  { who: 'PrizeBot', o: { th: 'เธอเพิ่งเล่นครบ 100 รอบใช่ไหม', en: 'You just finished 100 rounds, right?' }, r: { th: 'ใช่ ทำไมเหรอ', en: 'Yes, why?' },
+    s: [1, 3], th: 'เธอได้รางวัลไอแพด ส่งที่อยู่มารับของได้เลย', en: 'You won an iPad! Send your address to get it.', wth: 'ล่อด้วยรางวัลใหญ่ แล้วขอที่อยู่', wen: 'A big prize, then asks for your address.' }
 ];
 const UI = {
   th: { title: 'นักสืบแชท', sub: 'คนแปลกหน้าส่งข้อความมาในเกม! อ่านให้ดี แล้วหาว่ามีสัญญาณอันตรายอะไรซ่อนอยู่',
@@ -180,18 +208,8 @@ const UI = {
         caseDone: n => `Case ${n} closed`, total: (a, b) => `You got ${a} of ${b} stars`,
         ranks: ['Trainee detective', 'Silver detective', 'Gold detective'], again: 'Play again ↻', toTitle: 'Choose a mode' }
 };
-// บทสนทนาก่อนข้อความที่ต้องสืบ (สุ่ม) · ทำให้ดูเหมือนแชทในเกมจริง
 const ROOMS = [{ th: 'แผนที่ป่า', en: 'Forest map' }, { th: 'ทะเลทราย', en: 'Desert' }, { th: 'เมืองหิมะ', en: 'Snow town' }, { th: 'ปราสาทลอยฟ้า', en: 'Sky castle' }];
-const OPENERS = [
-  { o: { th: 'เล่นเก่งจัง', en: 'You play really well' }, r: { th: 'ขอบคุณ 😊', en: 'Thanks 😊' } },
-  { o: { th: 'สวัสดี 👋 เพิ่งเข้ามาเหรอ', en: 'Hi 👋 did you just join?' }, r: { th: 'ใช่ เพิ่งเข้ามา', en: 'Yes, just joined' } },
-  { o: { th: 'ด่านนี้ยากเนอะ', en: 'This level is hard, huh' }, r: { th: 'ใช่ ตกเหวไป 3 รอบแล้ว', en: 'Yeah, I fell 3 times' } },
-  { o: { th: 'ทีมเราชนะแล้ว เย้!', en: 'Our team won, yay!' }, r: { th: 'เย้ 🎉', en: 'Yay 🎉' } },
-  { o: { th: 'ตัวละครเธอเท่ดีนะ', en: 'Your character looks cool' }, r: { th: 'ขอบคุณนะ', en: 'Thank you' } },
-  { o: { th: 'เล่นเกมนี้มานานยัง', en: 'Have you played this game long?' }, r: { th: 'เพิ่งเล่นได้อาทิตย์เดียว', en: 'Only one week' } }
-];
 const MODES = { easy: { hint: true, time: 0 }, normal: { hint: false, time: 0 }, hard: { hint: false, time: 20 } };
-const REDUCE = matchMedia('(prefers-reduced-motion: reduce)').matches;
 let L = 'th', mode = null, deck = [], idx = 0, pick = new Set(), checked = false, stars = 0, results = [], timer = null, left = 0;
 let convo = null, shown = 0, typing = false, revealed = false, seq = 0;
 const t = o => o[L];
@@ -231,7 +249,7 @@ function hud(){
 function start(m){ mode = m; deck = buildDeck(); idx = 0; stars = 0; results = []; nextMsg(); }
 function nextMsg(){
   pick = new Set(); checked = false;
-  convo = { room: ROOMS[Math.floor(Math.random() * ROOMS.length)], open: OPENERS[Math.floor(Math.random() * OPENERS.length)] };
+  convo = { room: ROOMS[Math.floor(Math.random() * ROOMS.length)] };
   stopTimer(); $('#tBar').classList.add('hide');
   show('sPlay'); renderMsg(); hud();
   playChat();
@@ -241,7 +259,7 @@ async function playChat(){
   const my = ++seq;
   shown = 0; typing = false; revealed = false;
   const plan = [[300, 'typing'], [800, 'line'], [700, 'line'], [500, 'typing'], [1200, 'line']];
-  if (!REDUCE) for (const [ms, what] of plan) {
+  for (const [ms, what] of plan) {
     await wait(ms);
     if (my !== seq || revealed) return;
     if (what === 'typing') typing = true; else { typing = false; shown++; }
@@ -273,7 +291,7 @@ function renderMsg(){ renderChat(false); renderControls(); }
 function renderChat(animLast){
   const m = deck[idx], av = `<span class="av">${m.who[0]}</span>`;
   const other = (text, cls) => `<div class="ln ${cls}">${av}<div><div class="who">${m.who}</div><div class="bub">${text}</div></div></div>`;
-  const lines = [other(t(convo.open.o), ''), `<div class="ln me"><div class="bub">${t(convo.open.r)}</div></div>`, other(t(m), 'target')].slice(0, shown);
+  const lines = [other(t(m.o), ''), `<div class="ln me"><div class="bub">${t(m.r)}</div></div>`, other(t(m), 'target')].slice(0, shown);
   if (animLast && lines.length) lines[lines.length - 1] = lines[lines.length - 1].replace('class="ln ', 'class="ln pop ');
   $('#pRoom').textContent = '🎮 ' + (L === 'en' ? 'Game chat · ' : 'แชทในเกม · ') + t(convo.room);
   $('#pOnline').textContent = '● ' + m.who;
