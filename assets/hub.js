@@ -173,14 +173,16 @@ function cardHtml(a, isOpen, status, room, name, rounds, draft, need){
   if (s === 'lock') action = `<div class="lockbox">${ICON.lock}${esc(U().locked)}</div>`;
   else if (s === 'need') action = `<div class="lockbox">${ICON.lock}${esc(U().needSheet(need.week))}</div>`;
   else if (a.kind === 'game') action = `<button type="button" class="btn" style="background:#15803d" data-game="${esc(a.id)}">${esc(U().btn.play)}</button>`;
-  else action = `<a class="btn" href="${esc(sheetHref(a, room, name, rounds + 1, draft))}">${esc(U().btn[draft ? 'doing' : s])}</a>`;
+  else action = `<a class="btn" href="${esc(sheetHref(a, room, name, rounds + 1, draft, s === 'done'))}">${esc(U().btn[draft ? 'doing' : s])}</a>`;
   return `<div class="card${s === 'lock' || s === 'need' ? ' locked' : ''}" data-act="${esc(a.id)}">
     <div class="pic" style="background:${art}">${a.kind === 'game' ? ICON.game : ICON.sheet}<span>${esc(tag)}</span></div>
     <div class="bd"><div class="ttl">${esc(tt(a.title))}</div><span class="st ${s}">${esc(U().st[s])}</span><div class="sp"></div>${action}</div>
   </div>`;
 }
 // ส่งห้อง/ชื่อ/ภาษา/รอบถัดไปให้ใบงานทาง # (ไม่ถูกส่งไปเซิร์ฟเวอร์) เผื่อเครื่องที่ปิด localStorage
-const sheetHref = (a, room, name, round, draft) => `${a.path}#${new URLSearchParams(Object.assign({ room, name, lang: L, round }, draft ? { draft: 1 } : {}))}`;
+// draft=1 → โหลดงานค้างมาทำต่อ · done=1 → โหลดงานที่ส่งล่าสุดมาให้ดูผล
+const sheetHref = (a, room, name, round, draft, done) =>
+  `${a.path}#${new URLSearchParams(Object.assign({ room, name, lang: L, round }, draft ? { draft: 1 } : done ? { done: 1 } : {}))}`;
 
 // ---------- เกม (เปิดเต็มจอใน iframe) ----------
 function openGame(id){

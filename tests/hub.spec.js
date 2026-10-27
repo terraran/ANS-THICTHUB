@@ -4,7 +4,7 @@ const fs = require('fs'), path = require('path');
 const content = id => JSON.parse(fs.readFileSync(path.join(__dirname, '../worksheet/content', id + '.json'), 'utf8'));
 
 // api.posts = งานที่ส่ง · api.drafts = งานค้าง (key: "ห้อง|ชื่อ|กิจกรรม") · ส่ง api เดิมเข้าไปเพื่อจำลอง "อีกเครื่อง"
-function mockApi(page, { open = { y3w1: true, y4w1: true, adventure: true } } = {}, api = { posts: [], done: {}, drafts: {} }) {
+function mockApi(page, { open = { y3w1: true, y4w1: true, adventure: true } } = {}, api = { posts: [], done: {}, drafts: {}, members: {} }) {
   page.route('**/fonts.googleapis.com/**', r => r.abort());
   page.route('**/script.google.com/**', async route => {
     const req = route.request();
@@ -15,7 +15,7 @@ function mockApi(page, { open = { y3w1: true, y4w1: true, adventure: true } } = 
       } else {
         api.posts.push(b);
         const d = JSON.parse(b.row[12]);
-        for (const m of b.members) { api.done[m] = d; delete api.drafts[`${b.row[3]}|${m}|${d.act}`]; }
+        for (const m of b.members) { api.done[m] = d; api.members[m] = b.members; delete api.drafts[`${b.row[3]}|${m}|${d.act}`]; }
       }
       return route.fulfill({ body: 'ok' });
     }
@@ -27,6 +27,10 @@ function mockApi(page, { open = { y3w1: true, y4w1: true, adventure: true } } = 
       for (const k of Object.keys(api.drafts)) { const [r, n, a] = k.split('|'); if (r === room && n === name) drafts[a] = api.drafts[k].updatedAt; }
       body = { ok: true, open, status: d ? { [d.act]: 'done' } : {}, rounds: d ? { [d.act]: d.round } : {}, drafts };
     } else if (p.get('action') === 'draft') body = { ok: true, draft: api.drafts[`${room}|${name}|${p.get('act')}`] || null };
+    else if (p.get('action') === 'last') {
+      const d = api.done[name];
+      body = { ok: true, last: d && d.act === p.get('act') ? { data: d, time: '2026-10-27T02:30:00.000Z', members: api.members[name] || [name] } : null };
+    }
     else body = { ok: false, error: 'action' };
     route.fulfill({ contentType: 'application/json', body: JSON.stringify(body) });
   });
@@ -92,9 +96,20 @@ test('Y3: เลือกห้อง → ชื่อ → ทำใบงาน
   await page.click('#lib2');
   await expect(page.locator('.card[data-act="y3w1"] .st')).toHaveText('ส่งแล้ว ✓');
   await expect(page.locator('.prog b')).toHaveText('1/1');
-  // เปิดใหม่ = รอบที่ 2
+  // เปิดอีกครั้ง = เห็นงานที่ส่งไปพร้อมผลตรวจ แล้วแก้ส่งใหม่เป็นรอบที่ 2 ได้
   await page.click('.card[data-act="y3w1"] a.btn');
-  await expect(page).toHaveURL(/round=2/);
+  await expect(page).toHaveURL(/done=1/);
+  await expect(page.locator('#res')).toBeVisible();
+  await expect(page.locator('.mark')).toHaveCount(16);
+  await expect(page.locator('#result')).toHaveText('ถูก 16/16 ใบ');
+  await expect(page.locator('#sent')).toContainText('ส่งให้ครูแล้วเมื่อ');
+  await expect(page.locator('#mine')).toContainText('เพราะมันบอกว่าได้ของฟรี');
+  await expect(page.locator('#mine')).toContainText('เรารู้เพราะครูสอนในห้อง');
+  await expect(page.locator('.cardx[data-id="b1"]')).toHaveClass(/hes/);
+  await page.click('#edit');
+  await expect(page.locator('#s1')).toHaveClass(/on/);
+  await expect(page.locator('#pool .cardx')).toHaveCount(0);          // คำตอบเดิมยังอยู่ แก้ต่อได้
+  await expect(page.locator('#task')).toContainText('ขั้นที่ 1');
   expect(errs).toEqual([]);
 });
 
@@ -313,4 +328,22 @@ test('เกมล็อกจนกว่าจะส่งใบงานท�
   await page.click('[data-tab="game"]');
   await expect(page.locator('.card[data-act="adventure"] .st')).toHaveText('เล่นได้เลย');
   await expect(page.locator('.card[data-act="adventure"] button')).toBeVisible();
+});
+
+test('ดูงานที่ส่งไว้กับการ์ดชุดเก่า: แสดงการ์ดชุดเดิม แล้วแก้ส่งใหม่ได้กับชุดใหม่', async ({ page }) => {
+  const api = mockApi(page);
+  // งานจากใบงานเก่า (v2) ที่ยังใช้การ์ด a2/a5/a7/b5/b6/b7 ซึ่งตอนนี้อยู่ใน retired
+  const place = { a1: 'a', a2: 'a', a3: 'a', a4: 'a', a5: 'a', a6: 'a', a7: 'a', a8: 'b', b1: 'b', b2: 'b', b3: 'b', b4: 'b', b5: 'b', b6: 'b', b7: 'b', b8: 'b' };
+  api.done['TALENT'] = { v: 2, act: 'y3w1', round: 1, place, signs: { b1: [1] }, hes: 'b2', reason: 'old reason', fr: '' };
+  api.members['TALENT'] = ['TALENT', 'JOEY'];
+  await page.goto('/worksheet/?act=y3w1#room=Y3.1&name=TALENT&round=2&done=1');
+  await expect(page.locator('.cardx')).toHaveCount(16);
+  await expect(page.locator('.cardx[data-id="a2"]')).toHaveCount(1);
+  await expect(page.locator('.cardx[data-id="a9"]')).toHaveCount(0);
+  await expect(page.locator('#result')).toHaveText('ถูก 15/16 ใบ');
+  await expect(page.locator('#pName')).toHaveText('JOEY');
+  await page.click('#edit');
+  await expect(page).not.toHaveURL(/done=1/);
+  await expect(page.locator('#pool .cardx')).toHaveCount(16);
+  await expect(page.locator('.cardx[data-id="a9"]')).toHaveCount(1);
 });

@@ -76,6 +76,12 @@ assert.deepStrictEqual(S.get({ action: 'state', room: 'Y3.2', name: 'กาย' 
 assert.strictEqual(tabs.Drafts.length, 2);
 assert.strictEqual(S.get({ action: 'state', room: 'Y3.2', name: 'กาย' }).rounds.y3w1, 3);
 
+// งานที่ส่งล่าสุด: แถวสุดท้ายที่มีชื่อเด็ก (ไม่สนตัวพิมพ์) · ไม่มี = null
+assert.strictEqual(S.get({ action: 'last', room: 'Y3.2', name: 'กาย', act: 'y3w1' }).last.data.round, 3);
+assert.deepStrictEqual(S.get({ action: 'last', room: 'Y3.2', name: 'กาย', act: 'y3w1' }).last.members, ['ขิม', 'กาย']);
+assert.strictEqual(S.get({ action: 'last', room: 'Y3.4', name: 'YUKI', act: 'y3w1' }).last.data.act, 'y3w1');
+assert.strictEqual(S.get({ action: 'last', room: 'Y3.2', name: 'ท้าย', act: 'y3w1' }).last, null);
+
 // หน้าแชร์เดิม
 assert.deepStrictEqual(S.get({ key: 'wrong', level: 'Y3', week: '1' }), { error: 'key' });
 assert.strictEqual(S.get({ key: 'secret', level: 'Y3', week: '1' }).rows.length, 5);

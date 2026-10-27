@@ -1,4 +1,5 @@
-// ใบงานกลาง: worksheet/?act=y3w1#room=Y3.2&name=ขิม&lang=th&round=2&draft=1 (draft=1 = มีงานค้าง ให้โหลดมาทำต่อ)
+// ใบงานกลาง: worksheet/?act=y3w1#room=Y3.2&name=ขิม&lang=th&round=2&draft=1
+// draft=1 = มีงานค้าง ให้โหลดมาทำต่อ · done=1 = ส่งแล้ว ให้โหลดงานที่ส่งล่าสุดมาแสดงผลตรวจ
 // เนื้อหามาจาก content/<act>.json · ข้อมูลการ์ดในคลัง (frq, afterGame) มาจาก ../data/activities.json
 (() => {
 const $ = s => document.querySelector(s);
@@ -11,6 +12,7 @@ const UI = {
         doneTask: 'ดูผลการตรวจ การ์ด ✗ มีคำอธิบายบอกไว้ ส่วนการ์ด ✓ เอาเมาส์ชี้เพื่อดูคำอธิบาย', should: 'ควรอยู่ใน', result: (a, n) => `ถูก ${a}/${n} ใบ`, round: n => `รอบที่ ${n}`,
         wait: 'กำลังส่งคำตอบให้ครู...', ok: 'ส่งคำตอบให้ครูแล้ว ✓', err: 'ส่งไม่สำเร็จ ลองกดส่งอีกครั้ง หรือบอกครู', play: n => `🎮 เล่นเกม${n}`,
         noMe: 'ยังไม่ได้เลือกห้องและชื่อ เข้าใบงานจากคลังกิจกรรมนะ', noAct: 'ไม่พบใบงานนี้', goLib: 'ไปที่คลังกิจกรรม',
+        sentAt: tm => `ส่งให้ครูแล้วเมื่อ ${tm} ✓`, myReason: 'เหตุผลของเรา:', myFr: 'คิดย้อนกลับ:', lastLoading: 'กำลังโหลดงานที่ส่งไปแล้ว...',
         saved: tm => `💾 บันทึกอัตโนมัติแล้ว ${tm}`, resumed: tm => `↻ ทำต่อจากที่บันทึกไว้ ${tm}`, restart: 'เริ่มใหม่ ↺', confirmRestart: 'ลบงานที่ทำไว้ แล้วเริ่มใหม่ไหม?',
         loading: 'กำลังโหลดงานที่ทำค้างไว้...', pairAdd: '+ ทำกับเพื่อน', pairChange: 'เปลี่ยนเพื่อน', pairHd: r => `ทำงานคู่กับใคร? (${r})`,
         solo: 'ทำคนเดียว', pairFt: 'กดส่งครั้งเดียว ใบงานนับให้ทั้งสองคน', rosterErr: 'โหลดรายชื่อไม่สำเร็จ ลองใหม่อีกครั้ง' },
@@ -21,6 +23,7 @@ const UI = {
         doneTask: 'Here are your results. ✗ cards show why. Point at a ✓ card to see why it is right.', should: 'Belongs in', result: (a, n) => `${a}/${n} correct`, round: n => `Round ${n}`,
         wait: 'Sending to your teacher...', ok: 'Sent to your teacher ✓', err: 'Could not send. Try sending again or tell your teacher.', play: n => `🎮 Play ${n}`,
         noMe: 'Pick your class and name first. Open worksheets from the activity page.', noAct: 'Worksheet not found', goLib: 'Go to activities',
+        sentAt: tm => `Sent to your teacher on ${tm} ✓`, myReason: 'Our reason:', myFr: 'Looking back:', lastLoading: 'Loading the work you sent...',
         saved: tm => `💾 Saved ${tm}`, resumed: tm => `↻ Continuing from ${tm}`, restart: 'Start over ↺', confirmRestart: 'Delete your saved work and start over?',
         loading: 'Loading your saved work...', pairAdd: '+ Work with a friend', pairChange: 'Change friend', pairHd: r => `Who are you working with? (${r})`,
         solo: 'Work alone', pairFt: 'Send once and it counts for both of you', rosterErr: 'Could not load names. Try again.' }
@@ -33,7 +36,7 @@ const actId = new URLSearchParams(location.search).get('act') || '';
 let L = (H.get('lang') || store.get('lang')) === 'en' ? 'en' : 'th';
 let C = null, A = null, game = null;   // เนื้อหาใบงาน · ข้อมูลการ์ดในคลัง · เกมหลังส่ง
 let step = 1, placed = {}, signs = {}, hes = '', sel = null, round = Math.max(1, parseInt(H.get('round'), 10) || 1);
-let checked = false, sendState = '', scale = 1, sending = false, dirty = false, partner = '';
+let checked = false, sendState = '', scale = 1, sending = false, dirty = false, partner = '', sentAt = null, oldSet = false;
 const app = $('#app'), pool = $('#pool'), stage = $('#stage');
 const t = o => HubUtil.t(o, L);
 const plain = h => String(h).replace(/<[^>]+>/g, '');
@@ -167,7 +170,10 @@ $('#forBack').onclick = () => setStep(3);
 
 const score = () => C.cards.filter(c => placed[c.id] === c.bin).length;
 function showSent(){ const U = UI[L], s = $('#sent'); s.className = 'sent ' + sendState;
-  s.textContent = sendState === 'ok' ? U.ok : sendState === 'err' ? U.err : sendState === 'wait' ? U.wait : '';
+  s.textContent = sendState === 'ok' ? (sentAt ? U.sentAt(sentAt.toLocaleString('th-TH', { day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' })) : U.ok)
+    : sendState === 'err' ? U.err : sendState === 'wait' ? U.wait : '';
+  const rs = $('#reason').value.trim(), fr = $('#fr').value.trim();
+  $('#mine').innerHTML = checked && rs ? `<b>🤔 ${U.myReason}</b> ${esc(rs)}` + (fr ? ` · <b>🧭 ${U.myFr}</b> ${esc(fr)}` : '') : '';
   $('#play').classList.toggle('hide', !(game && sendState === 'ok')); }
 
 // แถวที่ส่ง: รูปแบบเดิม 15 ช่อง (Script เติมเวลาไว้หน้าสุด) · JSON v3 = v2 + frq
@@ -187,14 +193,13 @@ function buildRow(fr){
 const members = () => [me.name, partner].filter(Boolean);
 async function send(fr){
   sending = true; update(); sendState = 'wait'; showSent();
-  clearTimeout(saveTimer);
+  clearTimeout(saveTimer); sentAt = null;
   try { await HubAPI.submit(buildRow(fr), members()); sendState = 'ok'; dirty = false; }
   catch (e) { sendState = 'err'; }
   sending = false; showSent();
   if (sendState === 'err') { uncheck(); setStep(4); alert(UI[L].err); }
 }
-function submit(fr){
-  checked = true;
+function markResults(){
   C.cards.forEach(c => {
     const el = cardOf(c.id), right = placed[c.id] === c.bin;
     el.classList.add(right ? 'good' : 'bad'); el.insertAdjacentHTML('beforeend', `<div class="mark ${right ? 'ok' : 'no'}">${right ? '✓' : '✗'}</div>`);
@@ -203,7 +208,17 @@ function submit(fr){
       if (chosen && should) ch.classList.add('right'); else if (chosen) ch.classList.add('wrong'); else if (should) ch.classList.add('miss');
     });
   });
-  app.classList.add('checked'); setStep(3); send(fr);
+  app.classList.add('checked');
+}
+function submit(fr){ checked = true; markResults(); setStep(3); send(fr); }
+// งานที่ส่งล่าสุด: วางการ์ดตามที่ส่ง แสดงผลตรวจ · กด "แก้แล้วส่งใหม่" ทำรอบถัดไปจากคำตอบเดิมได้
+function showSubmitted(last){
+  const d = last.data, key = n => String(n).replace(/\s+/g, '').toUpperCase();
+  restore({ placed: d.place, signs: d.signs, hes: d.hes, reason: d.reason, fr: d.fr,
+            partner: (last.members || []).find(n => key(n) !== key(me.name)) || '' });
+  round = d.round || 1; sentAt = last.time ? new Date(last.time) : null;
+  checked = true; markResults(); setStep(3);
+  sendState = 'ok'; showSent();
 }
 function uncheck(){
   checked = false; app.classList.remove('checked');
@@ -213,7 +228,11 @@ function uncheck(){
 }
 $('#check').onclick = () => submit($('#fr').value.trim());
 $('#skip').onclick = () => submit('');
-$('#edit').onclick = () => { uncheck(); round++; sendState = ''; showSent(); setStep(1); };
+$('#edit').onclick = () => {
+  // ส่งไว้กับการ์ดชุดเก่า (ครูเปลี่ยนการ์ดแล้ว) → เริ่มรอบใหม่กับการ์ดชุดปัจจุบัน
+  if (oldSet) { const h = new URLSearchParams(location.hash.slice(1)); h.delete('done'); h.set('round', round + 1); location.hash = h; return location.reload(); }
+  uncheck(); round++; sendState = ''; sentAt = null; showSent(); setStep(1);
+};
 $('#lib2').onclick = () => { location.href = libHref(); };
 $('#toLib').addEventListener('click', () => { if (dirty && !checked) saveNow(); });
 
@@ -306,17 +325,27 @@ async function boot(){
     C = c; A = acts.activities.find(a => a.id === actId) || null;
     game = A && A.afterGame ? acts.activities.find(a => a.id === A.afterGame) || null : null;
   } catch (e) { return showMsg(UI[L].noAct); }
-  shuffle(C.cards).forEach(c => pool.appendChild(cardEl(c)));
-  let start = 1;
-  if (H.get('draft') === '1' && HubAPI.configured()) {
-    $('#loadingTxt').textContent = UI[L].loading; $('#loading').classList.remove('hide');
-    try {
-      const d = await HubAPI.draft(me.room, me.name, actId);
-      if (d && d.data && d.data.placed) { start = restore(d.data) || 1; resumedAt = new Date(d.updatedAt); $('#resume').classList.remove('hide'); setTimeout(() => $('#resume').classList.add('hide'), 15000); }
-    } catch (e) {}
+  const want = H.get('draft') === '1' ? 'draft' : H.get('done') === '1' ? 'last' : '';
+  let saved = null;
+  if (want && HubAPI.configured()) {
+    $('#loadingTxt').textContent = want === 'draft' ? UI[L].loading : UI[L].lastLoading; $('#loading').classList.remove('hide');
+    try { saved = want === 'draft' ? await HubAPI.draft(me.room, me.name, actId) : await HubAPI.last(me.room, me.name, actId); } catch (e) {}
     $('#loading').classList.add('hide');
   }
+  const last = want === 'last' && saved && saved.data && saved.data.place ? saved : null;
+  if (last) {
+    // งานที่ส่งกับการ์ดชุดเก่า: แสดงด้วยการ์ดที่เด็กเห็นตอนส่ง (ดูจาก retired ในไฟล์เนื้อหา)
+    const ids = Object.keys(last.data.place), all = C.cards.concat(C.retired || []);
+    if (ids.some(id => !C.cards.some(c => c.id === id))) { oldSet = true; C = Object.assign({}, C, { cards: ids.map(id => all.find(c => c.id === id)).filter(Boolean) }); }
+  }
+  shuffle(C.cards).forEach(c => pool.appendChild(cardEl(c)));
+  let start = 1;
+  if (want === 'draft' && saved && saved.data && saved.data.placed) {
+    start = restore(saved.data) || 1; resumedAt = new Date(saved.updatedAt);
+    $('#resume').classList.remove('hide'); setTimeout(() => $('#resume').classList.add('hide'), 15000);
+  }
   setStep(start);
+  if (last) showSubmitted(last);
 }
 boot();
 })();

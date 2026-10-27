@@ -109,3 +109,5 @@ textarea{font-family:inherit;font-size:22px;width:100%;padding:8px 12px;border:2
 #resume{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);z-index:55;background:#fef3c7;color:#92400e;border:2px solid #f59e0b;border-radius:16px;padding:6px 8px 6px 18px;font-size:18px;display:flex;align-items:center;gap:14px;box-shadow:0 8px 20px #0002}
 #resume button{font-size:16px;min-height:40px;padding:2px 14px}
 #loading{position:absolute;inset:62px 0 0 0;background:#f1f5f9cc;z-index:45;display:flex;align-items:center;justify-content:center}
+.mine{font-size:16px;color:#334155;margin-top:4px;line-height:1.35}
+.mine b{color:#b45309}

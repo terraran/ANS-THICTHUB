@@ -14,6 +14,7 @@
 //   GET  ?action=roster&room=Y3.2             → { ok, names: [...] }
 //   GET  ?action=state&room=Y3.2&name=ขิม     → { ok, open: {actId: true}, status: {actId: 'done'}, rounds: {actId: n}, drafts: {actId: updatedAt} }
 //   GET  ?action=draft&room=..&name=..&act=..  → { ok, draft: { data, updatedAt } | null }
+//   GET  ?action=last&room=..&name=..&act=..   → { ok, last: { data, time, members } | null }   ← งานที่ส่งล่าสุด (ให้เด็กดูงานตัวเอง)
 //   POST {action:'draft', room, act, members:[...], data:{...}}   ← บันทึกงานค้างให้ทุกคนใน members
 //   POST {action:'submit', row:[15 ช่อง], members:[...]}          ← ส่งงาน แล้วลบงานค้างของทุกคนใน members
 // ของเดิม (ยังใช้ได้)
@@ -34,6 +35,7 @@ function doGet(e) {
     if (p.action === 'roster') return json_({ ok: true, names: roster_(p.room) });
     if (p.action === 'state') return json_(Object.assign({ ok: true }, state_(p.room, p.name)));
     if (p.action === 'draft') return json_({ ok: true, draft: getDraft_(p.room, p.name, p.act) });
+    if (p.action === 'last') return json_({ ok: true, last: lastSubmission_(p.room, p.name, p.act) });
     if (!p.action && p.key !== undefined) return legacyShare_(p);
     return json_({ ok: false, error: 'action' });
   } catch (err) {
@@ -90,6 +92,22 @@ function state_(room, name) {
     if (String(r[0]) === room && nameKey_(r[1]) === me && r[2]) drafts[String(r[2])] = iso_(r[4]);
   });
   return { open, status, rounds, drafts };
+}
+
+// แถวล่าสุดของกิจกรรมนี้ที่มีชื่อเด็กอยู่ใน members (แถวต่อท้ายตามเวลา จึงเอาแถวสุดท้ายที่ตรง)
+function lastSubmission_(room, name, act) {
+  if (!room || !name || !act) throw new Error('room/name/act');
+  const me = nameKey_(name);
+  let last = null;
+  subSheet_().getDataRange().getValues().forEach(r => {
+    if (String(r[COL.room]) !== room) return;
+    const d = parseJson_(r[COL.json]);
+    if (!d || d.act !== act) return;
+    const who = r[COL.members] ? parseJson_(r[COL.members]) : null;
+    const list = Array.isArray(who) ? who : splitNames_(r[COL.names]);
+    if (list.some(n => nameKey_(n) === me)) last = { data: d, time: iso_(r[0]), members: list };
+  });
+  return last;
 }
 
 // ---------- งานที่ทำค้าง ----------

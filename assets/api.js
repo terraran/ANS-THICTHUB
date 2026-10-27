@@ -19,6 +19,7 @@ window.HubAPI = (() => {
     state: (room, name) => get({ action: 'state', room, name }),
     submit: (row, members) => post({ action: 'submit', row, members }),
     draft: (room, name, act) => get({ action: 'draft', room, name, act }).then(j => j.draft),
+    last: (room, name, act) => get({ action: 'last', room, name, act }).then(j => j.last),
     saveDraft: (room, act, members, data) => post({ action: 'draft', room, act, members, data })
   };
 })();
