@@ -157,26 +157,27 @@ async function pageLib(room, name){
   const list = mine.filter(a => a.kind === tab);
   const tabs = `<div class="wrap tabs" role="tablist">${Object.keys(U().tabs).map(k =>
     `<button type="button" role="tab" data-tab="${k}" aria-selected="${k === tab}">${esc(U().tabs[k])}<small>${mine.filter(a => a.kind === k).length}</small></button>`).join('')}</div>`;
-  const cards = list.length ? `<div class="wrap cards">${list.map(a => cardHtml(a, open[a.id], status[a.id], room, name, (libState.data.rounds || {})[a.id] || 0)).join('')}</div>` : msgBox(U().noActs);
+  const cards = list.length ? `<div class="wrap cards">${list.map(a => cardHtml(a, open[a.id], status[a.id], room, name, (libState.data.rounds || {})[a.id] || 0, !!(libState.data.drafts || {})[a.id])).join('')}</div>` : msgBox(U().noActs);
   shell(tabs + cards, done, openSheets.length);
 }
 const libHash = (room, name) => `#/lib/${room}/${encodeURIComponent(name)}`;
 
-function cardHtml(a, isOpen, status, room, name, rounds){
-  const s = !isOpen ? 'lock' : a.kind === 'game' ? 'play' : (status === 'done' || status === 'doing' ? status : 'todo');
+// มีงานค้าง: ยังไม่เคยส่ง = "ทำค้างไว้" · ส่งแล้วแต่กำลังแก้รอบใหม่ = ยังเป็น "ส่งแล้ว" แต่ปุ่มเป็น "ทำต่อ"
+function cardHtml(a, isOpen, status, room, name, rounds, draft){
+  const s = !isOpen ? 'lock' : a.kind === 'game' ? 'play' : status === 'done' ? 'done' : draft ? 'doing' : 'todo';
   const art = !isOpen ? '#94a3b8' : a.kind === 'game' ? '#15803d' : '#0284c7';
   const tag = a.kind === 'sheet' ? U().week(a.week) : tt(a.tag);
   let action;
   if (s === 'lock') action = `<div class="lockbox">${ICON.lock}${esc(U().locked)}</div>`;
   else if (a.kind === 'game') action = `<button type="button" class="btn" style="background:#15803d" data-game="${esc(a.id)}">${esc(U().btn.play)}</button>`;
-  else action = `<a class="btn" href="${esc(sheetHref(a, room, name, rounds + 1))}">${esc(U().btn[s])}</a>`;
+  else action = `<a class="btn" href="${esc(sheetHref(a, room, name, rounds + 1, draft))}">${esc(U().btn[draft ? 'doing' : s])}</a>`;
   return `<div class="card${s === 'lock' ? ' locked' : ''}" data-act="${esc(a.id)}">
     <div class="pic" style="background:${art}">${a.kind === 'game' ? ICON.game : ICON.sheet}<span>${esc(tag)}</span></div>
     <div class="bd"><div class="ttl">${esc(tt(a.title))}</div><span class="st ${s}">${esc(U().st[s])}</span><div class="sp"></div>${action}</div>
   </div>`;
 }
 // ส่งห้อง/ชื่อ/ภาษา/รอบถัดไปให้ใบงานทาง # (ไม่ถูกส่งไปเซิร์ฟเวอร์) เผื่อเครื่องที่ปิด localStorage
-const sheetHref = (a, room, name, round) => `${a.path}#${new URLSearchParams({ room, name, lang: L, round })}`;
+const sheetHref = (a, room, name, round, draft) => `${a.path}#${new URLSearchParams(Object.assign({ room, name, lang: L, round }, draft ? { draft: 1 } : {}))}`;
 
 // ---------- เกม (เปิดเต็มจอใน iframe) ----------
 function openGame(id){

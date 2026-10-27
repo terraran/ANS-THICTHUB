@@ -9,7 +9,8 @@
  <a id="toLib" class="hlink" href="../">◀ <span id="lLib"></span></a>
  <h1 id="ttl"></h1>
  <div class="steps"><span class="st" id="s1"></span><span class="st" id="s2"></span><span class="st" id="s3"></span><span class="st" id="s4"></span></div>
- <span class="who"><span class="av" id="meAv"></span><span id="meName"></span></span>
+ <span class="saved hide" id="saved"></span>
+ <span class="who"><span class="av" id="meAv"></span><span id="meName"></span><span id="pairWho" class="hide">+ <span class="av pav" id="pAv"></span><span id="pName"></span></span><button id="pairBtn" class="pairbtn"></button></span>
  <div class="lang"><button id="lth" class="on">TH</button><button id="len">EN</button></div>
 </header>
 <div class="body" id="app">
@@ -42,6 +43,9 @@
  </div>
  <div class="forbtns"><button id="forBack" class="ghost"></button><span><button id="skip" class="ghost"></button><button id="check" class="send"></button></span></div>
 </div>
+<div id="pairPanel" class="hide"><div class="pph" id="pairHd"></div><div class="ppl" id="pairList"></div><div class="ppf" id="pairFt"></div></div>
+<div id="resume" class="hide"><span id="resumeTxt"></span><button id="restart" class="ghost"></button></div>
+<div id="loading" class="hide"><div class="msgbox" id="loadingTxt"></div></div>
 <div id="msg" class="hide"><div class="msgbox"><p id="msgTxt"></p><a class="btn" href="../" id="msgBtn"></a></div></div>
 </div>
 <div id="gameWrap" style="display:none"><iframe id="gameFrame" title="game"></iframe></div>

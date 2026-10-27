@@ -1,4 +1,4 @@
-// ANS ICT Hub · Apps Script (ผูกกับ Google Sheet ของครู) · Phase 1
+// ANS ICT Hub · Apps Script (ผูกกับ Google Sheet ของครู) · Phase 2
 // วางทับโค้ดเดิมทั้งไฟล์ → Deploy → Manage deployments → แก้ไข → Version: New version (URL เดิม)
 //
 // รหัสครูไม่อยู่ในไฟล์นี้: ตั้งที่ Project Settings → Script properties → TEACHER_KEY
@@ -7,20 +7,24 @@
 //   Submissions : แถวที่ใบงานส่ง [timestamp, level, week, title, room, names, lang, score, wrong, exact, chosen, hesCard, reason, JSON, fr, round, members]
 //   Roster      : room | nickname | active | order
 //   Unlocks     : room | activityId | open      (room ใส่ Y3.2 = ห้องเดียว, Y3 = ทั้งชั้น, * = ทุกห้อง · ห้องเดียวชนะชั้น ชั้นชนะ *)
+//   Drafts      : room | nickname | activityId | json | updatedAt   (งานที่ทำค้าง 1 แถวต่อคนต่อกิจกรรม · ส่งงานแล้วลบ)
 // กิจกรรมที่ไม่มีแถวใน Unlocks = ปิด
 //
 // นักเรียน (ไม่ต้องใช้ key)
 //   GET  ?action=roster&room=Y3.2             → { ok, names: [...] }
-//   GET  ?action=state&room=Y3.2&name=ขิม     → { ok, open: {actId: true}, status: {actId: 'done'}, rounds: {actId: n} }
-//   POST {action:'submit', row:[15 ช่อง], members:[...]}
+//   GET  ?action=state&room=Y3.2&name=ขิม     → { ok, open: {actId: true}, status: {actId: 'done'}, rounds: {actId: n}, drafts: {actId: updatedAt} }
+//   GET  ?action=draft&room=..&name=..&act=..  → { ok, draft: { data, updatedAt } | null }
+//   POST {action:'draft', room, act, members:[...], data:{...}}   ← บันทึกงานค้างให้ทุกคนใน members
+//   POST {action:'submit', row:[15 ช่อง], members:[...]}          ← ส่งงาน แล้วลบงานค้างของทุกคนใน members
 // ของเดิม (ยังใช้ได้)
 //   POST {row:[15 ช่อง]}                        ← ใบงานไฟล์เก่า
 //   GET  ?key=..&level=Y3&week=1                → { rows: [...] }  ← หน้าแชร์ผลงานเดิม
 
-const TAB = { sub: 'Submissions', roster: 'Roster', unlocks: 'Unlocks' };
+const TAB = { sub: 'Submissions', roster: 'Roster', unlocks: 'Unlocks', drafts: 'Drafts' };
 const HEAD = {
   Roster: ['room', 'nickname', 'active', 'order'],
-  Unlocks: ['room', 'activityId', 'open']
+  Unlocks: ['room', 'activityId', 'open'],
+  Drafts: ['room', 'nickname', 'activityId', 'json', 'updatedAt']
 };
 const COL = { room: 4, names: 5, json: 13, round: 15, members: 16 };   // index ในแถว Submissions (เริ่ม 0)
 
@@ -29,6 +33,7 @@ function doGet(e) {
   try {
     if (p.action === 'roster') return json_({ ok: true, names: roster_(p.room) });
     if (p.action === 'state') return json_(Object.assign({ ok: true }, state_(p.room, p.name)));
+    if (p.action === 'draft') return json_({ ok: true, draft: getDraft_(p.room, p.name, p.act) });
     if (!p.action && p.key !== undefined) return legacyShare_(p);
     return json_({ ok: false, error: 'action' });
   } catch (err) {
@@ -38,14 +43,17 @@ function doGet(e) {
 
 function doPost(e) {
   const body = JSON.parse(e.postData.contents);
-  if (!Array.isArray(body.row)) return ContentService.createTextOutput('bad');
-  const members = Array.isArray(body.members) && body.members.length
-    ? body.members.map(String)
-    : splitNames_(body.row[COL.names - 1]);
   const lock = LockService.getScriptLock();
   lock.waitLock(10000);
   try {
+    if (body.action === 'draft') { saveDraft_(body); return ContentService.createTextOutput('ok'); }
+    if (!Array.isArray(body.row)) return ContentService.createTextOutput('bad');
+    const members = Array.isArray(body.members) && body.members.length
+      ? body.members.map(String)
+      : splitNames_(body.row[COL.names - 1]);
     subSheet_().appendRow([new Date()].concat(body.row, [JSON.stringify(members)]));
+    const d = parseJson_(body.row[COL.json - 1]);
+    if (d && d.act) deleteDrafts_(String(body.row[COL.room - 1]), members, d.act);
   } finally {
     lock.releaseLock();
   }
@@ -77,7 +85,46 @@ function state_(room, name) {
     status[d.act] = 'done';
     rounds[d.act] = Math.max(rounds[d.act] || 0, Number(d.round || r[COL.round]) || 1);
   });
-  return { open, status, rounds };
+  const drafts = {};
+  rows_(TAB.drafts).forEach(r => {
+    if (String(r[0]) === room && nameKey_(r[1]) === me && r[2]) drafts[String(r[2])] = iso_(r[4]);
+  });
+  return { open, status, rounds, drafts };
+}
+
+// ---------- งานที่ทำค้าง ----------
+function draftSheet_() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  return ss.getSheetByName(TAB.drafts) || makeTab_(ss, TAB.drafts);
+}
+
+function getDraft_(room, name, act) {
+  if (!room || !name || !act) throw new Error('room/name/act');
+  const me = nameKey_(name);
+  const r = rows_(TAB.drafts).find(r => String(r[0]) === room && nameKey_(r[1]) === me && String(r[2]) === act);
+  return r ? { data: parseJson_(r[3]), updatedAt: iso_(r[4]) } : null;
+}
+
+// บันทึกทับแถวเดิมของแต่ละคน (ทำคู่ = บันทึกให้ทั้งคู่ เพื่อนเปิดทำต่อจากเครื่องตัวเองได้)
+function saveDraft_(b) {
+  const room = String(b.room || ''), act = String(b.act || '');
+  const members = (Array.isArray(b.members) ? b.members : []).map(String).filter(String);
+  if (!room || !act || !members.length) return;
+  const sh = draftSheet_(), v = sh.getDataRange().getValues(), now = new Date(), json = JSON.stringify(b.data || {});
+  members.forEach(name => {
+    const k = nameKey_(name);
+    const i = v.findIndex((r, n) => n > 0 && String(r[0]) === room && nameKey_(r[1]) === k && String(r[2]) === act);
+    if (i > 0) sh.getRange(i + 1, 4, 1, 2).setValues([[json, now]]);
+    else { sh.appendRow([room, name, act, json, now]); v.push([room, name, act, json, now]); }
+  });
+}
+
+function deleteDrafts_(room, members, act) {
+  const sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(TAB.drafts);
+  if (!sh) return;
+  const keys = members.map(nameKey_), v = sh.getDataRange().getValues();
+  for (let i = v.length - 1; i >= 1; i--)
+    if (String(v[i][0]) === room && String(v[i][2]) === act && keys.indexOf(nameKey_(v[i][1])) >= 0) sh.deleteRow(i + 1);
 }
 
 function openFor_(room) {
@@ -132,19 +179,23 @@ function parseJson_(s) { try { return JSON.parse(s); } catch (e) { return null; 
 function isOn_(v) { return v === true || /^(true|1|yes|on|เปิด)$/i.test(String(v).trim()); }
 function isOff_(v) { return v === false || /^(false|0|no|off|ซ่อน|ปิด)$/i.test(String(v).trim()); }
 
+function iso_(d) { return d instanceof Date ? d.toISOString() : String(d || ''); }
+
+function makeTab_(ss, name) {
+  const sh = ss.insertSheet(name);
+  sh.getRange(1, 1, 1, HEAD[name].length).setValues([HEAD[name]]).setFontWeight('bold');
+  sh.setFrozenRows(1);
+  return sh;
+}
+
 function json_(o) {
   return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON);
 }
 
-// กด Run ครั้งเดียวจากหน้า Apps Script: สร้างแท็บ Roster / Unlocks พร้อมหัวตาราง (ถ้ายังไม่มี)
+// กด Run ครั้งเดียวจากหน้า Apps Script: สร้างแท็บ Roster / Unlocks / Drafts พร้อมหัวตาราง (ถ้ายังไม่มี)
 function setup() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
-  Object.keys(HEAD).forEach(name => {
-    if (ss.getSheetByName(name)) return;
-    const sh = ss.insertSheet(name);
-    sh.getRange(1, 1, 1, HEAD[name].length).setValues([HEAD[name]]).setFontWeight('bold');
-    sh.setFrozenRows(1);
-  });
+  Object.keys(HEAD).forEach(name => { if (!ss.getSheetByName(name)) makeTab_(ss, name); });
   if (!ss.getSheetByName(TAB.sub)) Logger.log('ยังไม่มีแท็บ Submissions: เปลี่ยนชื่อแท็บที่รับงานอยู่เป็น Submissions');
   if (!PropertiesService.getScriptProperties().getProperty('TEACHER_KEY')) Logger.log('ยังไม่ได้ตั้ง TEACHER_KEY ใน Script properties');
 }

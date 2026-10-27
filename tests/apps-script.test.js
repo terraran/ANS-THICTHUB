@@ -3,12 +3,16 @@ const fs = require('fs'), path = require('path'), vm = require('vm'), assert = r
 
 function load(tabs, props = {}) {
   const sheet = name => ({
-    getDataRange: () => ({ getValues: () => tabs[name] }),
-    appendRow: r => tabs[name].push(r)
+    getDataRange: () => ({ getValues: () => tabs[name].map(r => r.slice()) }),
+    appendRow: r => tabs[name].push(r),
+    getRange: (r, c) => ({ setValues: v => { v[0].forEach((x, i) => { tabs[name][r - 1][c - 1 + i] = x; }); return { setFontWeight() {} }; } }),
+    deleteRow: i => tabs[name].splice(i - 1, 1),
+    setFrozenRows() {}
   });
   const ss = {
     getSheetByName: n => tabs[n] ? sheet(n) : null,
-    getSheets: () => [sheet(Object.keys(tabs)[0])]
+    getSheets: () => [sheet(Object.keys(tabs)[0])],
+    insertSheet: n => { tabs[n] = [[]]; return sheet(n); }
   };
   const ctx = {
     SpreadsheetApp: { getActiveSpreadsheet: () => ss },
@@ -57,9 +61,24 @@ tabs.Submissions.push([new Date()].concat(row('y3w1', 'Y3.4', 'Loukpear + yuki '
 for (const n of ['LOUK PEAR', 'YUKI']) assert.deepStrictEqual(S.get({ action: 'state', room: 'Y3.4', name: n }).status, { y3w1: 'done' }, n);
 assert.deepStrictEqual(S.get({ action: 'state', room: 'Y3.4', name: 'YUK' }).status, {});
 
+// งานที่ทำค้าง: แท็บ Drafts สร้างเองถ้ายังไม่มี · ทำคู่บันทึกให้ทั้งคู่ · บันทึกซ้ำ = ทับแถวเดิม
+assert.strictEqual(S.get({ action: 'draft', room: 'Y3.2', name: 'ขิม', act: 'y3w1' }).draft, null);
+S.post({ action: 'draft', room: 'Y3.2', act: 'y3w1', members: ['ขิม', 'กาย'], data: { step: 2 } });
+S.post({ action: 'draft', room: 'Y3.2', act: 'y3w1', members: ['ขิม', 'กาย'], data: { step: 3 } });
+assert.deepStrictEqual(tabs.Drafts[0], ['room', 'nickname', 'activityId', 'json', 'updatedAt']);
+assert.strictEqual(tabs.Drafts.length, 3);
+assert.deepStrictEqual(S.get({ action: 'draft', room: 'Y3.2', name: 'กาย', act: 'y3w1' }).draft.data, { step: 3 });
+assert.deepStrictEqual(Object.keys(S.get({ action: 'state', room: 'Y3.2', name: 'ขิม' }).drafts), ['y3w1']);
+S.post({ action: 'draft', room: 'Y3.2', act: 'y4w1', members: ['ท้าย'], data: { step: 1 } });
+// ส่งงานแล้ว งานค้างของทั้งคู่ (กิจกรรมนั้น) หายไป ของคนอื่นยังอยู่
+S.post({ action: 'submit', row: row('y3w1', 'Y3.2', 'ขิม + กาย', 3), members: ['ขิม', 'กาย'] });
+assert.deepStrictEqual(S.get({ action: 'state', room: 'Y3.2', name: 'กาย' }).drafts, {});
+assert.strictEqual(tabs.Drafts.length, 2);
+assert.strictEqual(S.get({ action: 'state', room: 'Y3.2', name: 'กาย' }).rounds.y3w1, 3);
+
 // หน้าแชร์เดิม
 assert.deepStrictEqual(S.get({ key: 'wrong', level: 'Y3', week: '1' }), { error: 'key' });
-assert.strictEqual(S.get({ key: 'secret', level: 'Y3', week: '1' }).rows.length, 4);
+assert.strictEqual(S.get({ key: 'secret', level: 'Y3', week: '1' }).rows.length, 5);
 assert.deepStrictEqual(load(tabs).get({ key: '', level: 'Y3', week: '1' }), { error: 'key' }, 'no key set → locked');
 assert.strictEqual(S.get({ action: 'roster' }).ok, false);
 console.log('apps-script tests: ok');

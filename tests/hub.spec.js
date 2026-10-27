@@ -3,24 +3,31 @@ const { test, expect } = require('@playwright/test');
 const fs = require('fs'), path = require('path');
 const content = id => JSON.parse(fs.readFileSync(path.join(__dirname, '../worksheet/content', id + '.json'), 'utf8'));
 
-function mockApi(page, { open = { y3w1: true, y4w1: true, adventure: true } } = {}) {
-  const api = { posts: [], done: {} };
+// api.posts = งานที่ส่ง · api.drafts = งานค้าง (key: "ห้อง|ชื่อ|กิจกรรม") · ส่ง api เดิมเข้าไปเพื่อจำลอง "อีกเครื่อง"
+function mockApi(page, { open = { y3w1: true, y4w1: true, adventure: true } } = {}, api = { posts: [], done: {}, drafts: {} }) {
   page.route('**/fonts.googleapis.com/**', r => r.abort());
   page.route('**/script.google.com/**', async route => {
     const req = route.request();
     if (req.method() === 'POST') {
       const b = JSON.parse(req.postData());
-      api.posts.push(b);
-      for (const m of b.members) api.done[m] = JSON.parse(b.row[12]);
+      if (b.action === 'draft') {
+        for (const m of b.members) api.drafts[`${b.room}|${m}|${b.act}`] = { data: b.data, updatedAt: new Date().toISOString() };
+      } else {
+        api.posts.push(b);
+        const d = JSON.parse(b.row[12]);
+        for (const m of b.members) { api.done[m] = d; delete api.drafts[`${b.row[3]}|${m}|${d.act}`]; }
+      }
       return route.fulfill({ body: 'ok' });
     }
-    const p = new URL(req.url()).searchParams;
+    const p = new URL(req.url()).searchParams, room = p.get('room'), name = p.get('name');
     let body;
     if (p.get('action') === 'roster') body = { ok: true, names: ['กาย', 'ขิม', 'เมษา'] };
     else if (p.get('action') === 'state') {
-      const d = api.done[p.get('name')];
-      body = { ok: true, open, status: d ? { [d.act]: 'done' } : {}, rounds: d ? { [d.act]: d.round } : {} };
-    } else body = { ok: false, error: 'action' };
+      const d = api.done[name], drafts = {};
+      for (const k of Object.keys(api.drafts)) { const [r, n, a] = k.split('|'); if (r === room && n === name) drafts[a] = api.drafts[k].updatedAt; }
+      body = { ok: true, open, status: d ? { [d.act]: 'done' } : {}, rounds: d ? { [d.act]: d.round } : {}, drafts };
+    } else if (p.get('action') === 'draft') body = { ok: true, draft: api.drafts[`${room}|${name}|${p.get('act')}`] || null };
+    else body = { ok: false, error: 'action' };
     route.fulfill({ contentType: 'application/json', body: JSON.stringify(body) });
   });
   return api;
@@ -232,4 +239,60 @@ test('ใบงาน Y3: การ์ดใหม่ 16 ใบ และเก�
   expect(C.cards.map(c => c.id)).toEqual(expect.arrayContaining(['a9', 'a10', 'a11', 'b9', 'b10', 'b11']));
   expect(C.retired.map(c => c.id).sort()).toEqual(['a2', 'a5', 'a7', 'b5', 'b6', 'b7']);
   for (const c of C.cards.filter(c => c.bin === 'b')) expect(c.signs.length).toBeGreaterThan(0);
+});
+
+test('งานค้าง: เปลี่ยนขั้นแล้วบันทึกเอง · เปิดอีกเครื่องกดทำต่อ กลับมาขั้นเดิม', async ({ page, browser }) => {
+  const api = mockApi(page);
+  await page.goto('/worksheet/?act=y3w1#room=Y3.2&name=' + encodeURIComponent('ขิม'));
+  const C = content('y3w1');
+  await expect(page.locator('#pool .cardx')).toHaveCount(16);
+  for (const c of C.cards) { await page.click(`.cardx[data-id="${c.id}"]`); await page.click(`.bin.${c.bin} h2`); }
+  await page.click('#next');                                      // ไปขั้น 2 = บันทึกทันที
+  const b = C.cards.find(c => c.bin === 'b');
+  await page.click(`.cardx[data-id="${b.id}"] .chip[data-s="${b.signs[0]}"]`);
+  await expect(page.locator('#saved')).toContainText('บันทึกอัตโนมัติแล้ว');
+  await page.click('#toLib');                                      // ออกจากใบงาน = บันทึกที่เหลือ
+  await expect.poll(() => (api.drafts['Y3.2|ขิม|y3w1'] || {}).data && api.drafts['Y3.2|ขิม|y3w1'].data.signs[b.id]).toEqual([b.signs[0]]);
+
+  // "อีกเครื่อง" = browser context ใหม่ ไม่มี localStorage เดิม
+  const ctx = await browser.newContext({ viewport: { width: 1366, height: 768 } });
+  const p2 = await ctx.newPage();
+  mockApi(p2, undefined, api);
+  await p2.goto('/#/lib/Y3.2/' + encodeURIComponent('ขิม'));
+  await expect(p2.locator('.card[data-act="y3w1"] .st')).toHaveText('ทำค้างไว้');
+  await p2.click('.card[data-act="y3w1"] a.btn:has-text("ทำต่อ")');
+  await expect(p2.locator('#resume')).toBeVisible();
+  await expect(p2.locator('#s2')).toHaveClass(/on/);
+  await expect(p2.locator('#pool .cardx')).toHaveCount(0);
+  await expect(p2.locator(`.cardx[data-id="${b.id}"] .chip[data-s="${b.signs[0]}"]`)).toHaveClass(/on/);
+  await ctx.close();
+});
+
+test('ทำคู่: เลือกเพื่อน ส่งครั้งเดียว นับให้ทั้งคู่ และงานค้างหายหลังส่ง', async ({ page }) => {
+  const api = mockApi(page);
+  await page.goto('/worksheet/?act=y3w1#room=Y3.2&name=' + encodeURIComponent('ขิม'));
+  await page.click('#pairBtn');
+  await expect(page.locator('#pairList button')).toHaveCount(3);   // ทำคนเดียว + กาย + เมษา (ไม่มีชื่อตัวเอง)
+  await page.click('#pairList button:has-text("กาย")');
+  await expect(page.locator('#pName')).toHaveText('กาย');
+  await expect(page.locator('#pairBtn')).toHaveText('เปลี่ยนเพื่อน');
+  await expect.poll(() => Object.keys(api.drafts).sort()).toEqual(['Y3.2|กาย|y3w1', 'Y3.2|ขิม|y3w1']);
+  await doWorksheet(page, 'y3w1', { skip: true });
+  const sub = api.posts[0];
+  expect(sub.members).toEqual(['ขิม', 'กาย']);
+  expect(sub.row[4]).toBe('ขิม + กาย');
+  expect(api.drafts).toEqual({});
+  await page.goto('/#/lib/Y3.2/' + encodeURIComponent('กาย'));
+  await expect(page.locator('.card[data-act="y3w1"] .st')).toHaveText('ส่งแล้ว ✓');
+});
+
+test('งานค้าง: กดเริ่มใหม่ ได้ใบงานว่าง', async ({ page }) => {
+  const api = mockApi(page);
+  api.drafts['Y3.2|ขิม|y3w1'] = { data: { v: 1, step: 1, round: 1, placed: { a1: 'a', b1: 'b' }, signs: {}, hes: '', reason: '', fr: '', partner: '' }, updatedAt: new Date().toISOString() };
+  await page.goto('/worksheet/?act=y3w1#room=Y3.2&name=' + encodeURIComponent('ขิม') + '&draft=1');
+  await expect(page.locator('#pool .cardx')).toHaveCount(14);
+  page.once('dialog', d => d.accept());
+  await page.click('#restart');
+  await expect(page.locator('#pool .cardx')).toHaveCount(16);
+  await expect(page.locator('#resume')).toBeHidden();
 });

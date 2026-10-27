@@ -9,14 +9,17 @@ window.HubAPI = (() => {
     if (!j || !j.ok) throw new Error((j && j.error) || 'bad response');
     return j;
   }
+  // keepalive: ส่งต่อได้แม้กำลังปิดหน้า/ออกจากใบงาน
   async function post(body){
-    await fetch(C.endpoint, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) });
+    await fetch(C.endpoint, { method: 'POST', mode: 'no-cors', keepalive: true, headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) });
   }
   return {
     configured,
     roster: room => get({ action: 'roster', room }).then(j => j.names),
     state: (room, name) => get({ action: 'state', room, name }),
-    submit: (row, members) => post({ action: 'submit', row, members })
+    submit: (row, members) => post({ action: 'submit', row, members }),
+    draft: (room, name, act) => get({ action: 'draft', room, name, act }).then(j => j.draft),
+    saveDraft: (room, act, members, data) => post({ action: 'draft', room, act, members, data })
   };
 })();
 
