@@ -121,12 +121,14 @@ test('Y4: ข้าม FoR แล้วส่ง · ภาษาอังกฤ�
 });
 
 test('การ์ดที่ครูยังไม่เปิดถูกล็อก · เกมเปิดเต็มจอและปิดได้', async ({ page }) => {
-  mockApi(page, { open: { adventure: true } });
+  const api = mockApi(page, { open: { adventure: true } });
+  api.done['กาย'] = { act: 'y3w1', round: 1 };                    // ส่งใบงานคู่กันแล้ว เกมจึงเล่นได้
   await page.goto('/#/lib/Y3.1/' + encodeURIComponent('กาย'));
   await expect(page.locator('.card[data-act="y3w1"] .lockbox')).toBeVisible();
   await expect(page.locator('.card[data-act="y3w1"] a')).toHaveCount(0);
   await page.click('[data-tab="game"]');
   await expect(page.locator('.card')).toHaveCount(1);   // Y3 เห็นแค่เกมผจญภัย
+  await expect(page.locator('.card[data-act="adventure"] .st')).toHaveText('เล่นได้เลย');
   await page.click('.card[data-act="adventure"] button');
   await expect(page.locator('#gameWrap')).toBeVisible();
   await page.frameLocator('#gameFrame').locator('#gback').click();
@@ -295,4 +297,20 @@ test('งานค้าง: กดเริ่มใหม่ ได้ใบ�
   await page.click('#restart');
   await expect(page.locator('#pool .cardx')).toHaveCount(16);
   await expect(page.locator('#resume')).toBeHidden();
+});
+
+test('เกมล็อกจนกว่าจะส่งใบงานที่คู่กัน แล้วปลดล็อกหลังส่ง', async ({ page }) => {
+  mockApi(page);
+  await page.goto('/#/lib/Y3.2/' + encodeURIComponent('ขิม'));
+  await page.click('[data-tab="game"]');
+  await expect(page.locator('.card[data-act="adventure"] .st')).toHaveText('ยังเล่นไม่ได้');
+  await expect(page.locator('.card[data-act="adventure"] .lockbox')).toHaveText('ทำใบงานสัปดาห์ 1 ให้เสร็จก่อน');
+  await expect(page.locator('.card[data-act="adventure"] button')).toHaveCount(0);
+  await page.click('[data-tab="sheet"]');
+  await page.click('.card[data-act="y3w1"] a.btn');
+  await doWorksheet(page, 'y3w1', { skip: true });
+  await page.click('#lib2');
+  await page.click('[data-tab="game"]');
+  await expect(page.locator('.card[data-act="adventure"] .st')).toHaveText('เล่นได้เลย');
+  await expect(page.locator('.card[data-act="adventure"] button')).toBeVisible();
 });

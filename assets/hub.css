@@ -93,7 +93,7 @@ h1{margin:0;font-weight:800}
 .card .st{align-self:flex-start;border-radius:20px;padding:2px 12px;font-size:16px;font-weight:600}
 .st.done{background:var(--done-bg);color:var(--done-fg)}
 .st.doing{background:var(--doing-bg);color:var(--doing-fg)}
-.st.todo,.st.lock{background:var(--todo-bg);color:var(--todo-fg)}
+.st.todo,.st.lock,.st.need{background:var(--todo-bg);color:var(--todo-fg)}
 .card .sp{flex:1}
 .card .btn{width:100%}
 .card .lockbox{display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px;border-radius:14px;font-size:19px;color:var(--muted);background:var(--todo-bg)}

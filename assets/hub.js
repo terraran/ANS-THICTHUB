@@ -15,9 +15,9 @@ const UI = {
     loading: 'กำลังโหลด...', loadErr: 'โหลดข้อมูลไม่สำเร็จ ตรวจอินเทอร์เน็ตแล้วลองอีกครั้ง', retry: 'ลองอีกครั้ง', notSetup: 'ยังไม่ได้ตั้งค่าการเชื่อมต่อ (config.js)',
     hi: n => `สวัสดี ${n}!`, notMe: 'ไม่ใช่เรา? เปลี่ยนชื่อ', sent: 'ใบงานที่ส่งแล้ว',
     tabs: { sheet: 'ใบงาน', game: 'เกม' }, week: n => `สัปดาห์ ${n}`,
-    st: { done: 'ส่งแล้ว ✓', doing: 'ทำค้างไว้', todo: 'ยังไม่เริ่ม', lock: 'ล็อกอยู่', play: 'เล่นได้เลย' },
+    st: { done: 'ส่งแล้ว ✓', doing: 'ทำค้างไว้', todo: 'ยังไม่เริ่ม', lock: 'ล็อกอยู่', need: 'ยังเล่นไม่ได้', play: 'เล่นได้เลย' },
     btn: { done: 'ดูผล / แก้ใหม่', doing: 'ทำต่อ', todo: 'เริ่มทำ', play: 'เล่น' },
-    locked: 'ครูยังไม่เปิด', noActs: 'ยังไม่มีกิจกรรมในหมวดนี้', closeGame: '✕ กลับคลังกิจกรรม'
+    needSheet: n => `ทำใบงานสัปดาห์ ${n} ให้เสร็จก่อน`, locked: 'ครูยังไม่เปิด', noActs: 'ยังไม่มีกิจกรรมในหมวดนี้', closeGame: '✕ กลับคลังกิจกรรม'
   },
   en: {
     hello: 'What shall we learn today? Pick one!', ict: 'THAI ICT', ictTag: 'Worksheets + games', ictSub: 'ICT worksheets and games for Y3–Y4 · pick your class and name',
@@ -27,9 +27,9 @@ const UI = {
     loading: 'Loading...', loadErr: 'Could not load. Check the internet and try again.', retry: 'Try again', notSetup: 'The connection is not set up yet (config.js)',
     hi: n => `Hi ${n}!`, notMe: 'Not you? Change name', sent: 'Worksheets sent',
     tabs: { sheet: 'Worksheets', game: 'Games' }, week: n => `Week ${n}`,
-    st: { done: 'Sent ✓', doing: 'In progress', todo: 'Not started', lock: 'Locked', play: 'Ready to play' },
+    st: { done: 'Sent ✓', doing: 'In progress', todo: 'Not started', lock: 'Locked', need: 'Not yet', play: 'Ready to play' },
     btn: { done: 'See results / redo', doing: 'Continue', todo: 'Start', play: 'Play' },
-    locked: 'Not open yet', noActs: 'Nothing here yet', closeGame: '✕ Back to activities'
+    needSheet: n => `Finish the week ${n} worksheet first`, locked: 'Not open yet', noActs: 'Nothing here yet', closeGame: '✕ Back to activities'
   }
 };
 
@@ -157,21 +157,24 @@ async function pageLib(room, name){
   const list = mine.filter(a => a.kind === tab);
   const tabs = `<div class="wrap tabs" role="tablist">${Object.keys(U().tabs).map(k =>
     `<button type="button" role="tab" data-tab="${k}" aria-selected="${k === tab}">${esc(U().tabs[k])}<small>${mine.filter(a => a.kind === k).length}</small></button>`).join('')}</div>`;
-  const cards = list.length ? `<div class="wrap cards">${list.map(a => cardHtml(a, open[a.id], status[a.id], room, name, (libState.data.rounds || {})[a.id] || 0, !!(libState.data.drafts || {})[a.id])).join('')}</div>` : msgBox(U().noActs);
+  const cards = list.length ? `<div class="wrap cards">${list.map(a => cardHtml(a, open[a.id], status[a.id], room, name, (libState.data.rounds || {})[a.id] || 0, !!(libState.data.drafts || {})[a.id],
+    a.requires && status[a.requires] !== 'done' ? ACTS.find(x => x.id === a.requires) : null)).join('')}</div>` : msgBox(U().noActs);
   shell(tabs + cards, done, openSheets.length);
 }
 const libHash = (room, name) => `#/lib/${room}/${encodeURIComponent(name)}`;
 
 // มีงานค้าง: ยังไม่เคยส่ง = "ทำค้างไว้" · ส่งแล้วแต่กำลังแก้รอบใหม่ = ยังเป็น "ส่งแล้ว" แต่ปุ่มเป็น "ทำต่อ"
-function cardHtml(a, isOpen, status, room, name, rounds, draft){
-  const s = !isOpen ? 'lock' : a.kind === 'game' ? 'play' : status === 'done' ? 'done' : draft ? 'doing' : 'todo';
-  const art = !isOpen ? '#94a3b8' : a.kind === 'game' ? '#15803d' : '#0284c7';
+// need = ใบงานที่ต้องส่งก่อนถึงจะเล่นเกมนี้ได้ (activities.json: requires)
+function cardHtml(a, isOpen, status, room, name, rounds, draft, need){
+  const s = !isOpen ? 'lock' : a.kind === 'game' ? (need ? 'need' : 'play') : status === 'done' ? 'done' : draft ? 'doing' : 'todo';
+  const art = s === 'lock' || s === 'need' ? '#94a3b8' : a.kind === 'game' ? '#15803d' : '#0284c7';
   const tag = a.kind === 'sheet' ? U().week(a.week) : tt(a.tag);
   let action;
   if (s === 'lock') action = `<div class="lockbox">${ICON.lock}${esc(U().locked)}</div>`;
+  else if (s === 'need') action = `<div class="lockbox">${ICON.lock}${esc(U().needSheet(need.week))}</div>`;
   else if (a.kind === 'game') action = `<button type="button" class="btn" style="background:#15803d" data-game="${esc(a.id)}">${esc(U().btn.play)}</button>`;
   else action = `<a class="btn" href="${esc(sheetHref(a, room, name, rounds + 1, draft))}">${esc(U().btn[draft ? 'doing' : s])}</a>`;
-  return `<div class="card${s === 'lock' ? ' locked' : ''}" data-act="${esc(a.id)}">
+  return `<div class="card${s === 'lock' || s === 'need' ? ' locked' : ''}" data-act="${esc(a.id)}">
     <div class="pic" style="background:${art}">${a.kind === 'game' ? ICON.game : ICON.sheet}<span>${esc(tag)}</span></div>
     <div class="bd"><div class="ttl">${esc(tt(a.title))}</div><span class="st ${s}">${esc(U().st[s])}</span><div class="sp"></div>${action}</div>
   </div>`;

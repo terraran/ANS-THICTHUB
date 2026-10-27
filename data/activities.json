@@ -13,10 +13,10 @@
     { "id": "adventure", "level": "Y3", "kind": "game",
       "tag": { "th": "ป๊อปอัปหลอก", "en": "Trick pop-ups" },
       "title": { "th": "ผจญภัยป่ามหัศจรรย์", "en": "Magic Forest Adventure" },
-      "path": "games/adventure.html", "ownBack": true },
+      "path": "games/adventure.html", "ownBack": true, "requires": "y3w1" },
     { "id": "detective", "level": "Y4", "kind": "game",
       "tag": { "th": "ข้อความแปลกหน้า", "en": "Stranger messages" },
       "title": { "th": "นักสืบแชท", "en": "Chat Detective" },
-      "path": "games/detective.html", "ownBack": true }
+      "path": "games/detective.html", "ownBack": true, "requires": "y4w1" }
   ]
 }
