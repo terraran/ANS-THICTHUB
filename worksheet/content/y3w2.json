@@ -1,0 +1,72 @@
+{
+ "act": "y3w2",
+ "level": "Y3",
+ "week": 2,
+ "map": "bubble",
+ "title": { "th": "ข้อมูลนี้ บอกได้ หรือ ไม่ควรบอก?", "en": "Can we share it, or keep it private?" },
+ "topicA": { "th": "ข้อมูลที่บอกได้", "en": "Info we can share" },
+ "topicB": { "th": "ข้อมูลส่วนตัวที่ไม่ควรบอก", "en": "Private info we keep" },
+ "bins": [
+  { "id": "a", "label": { "th": "🟢 บอกได้ เท่านั้น", "en": "🟢 Only OK to share" } },
+  { "id": "m", "label": { "th": "🤝 เหมือนกัน", "en": "🤝 Same for both" } },
+  { "id": "b", "label": { "th": "🔴 ส่วนตัว เท่านั้น", "en": "🔴 Only private" } }
+ ],
+ "steps": {
+  "th": ["1 เปรียบเทียบ", "2 ยกตัวอย่าง", "3 ให้เหตุผล", "4 คิดย้อนกลับ"],
+  "en": ["1 Compare", "2 Examples", "3 Explain", "4 Look back"]
+ },
+ "task1": {
+  "th": "<b>ขั้นที่ 1</b> ลากการ์ดลักษณะลง Double Bubble Map · ลักษณะที่ <b>เหมือนกัน</b> วางตรงกลาง · ลักษณะที่ <b>ต่างกัน</b> วางด้านข้างของข้อมูลแบบนั้น (แตะการ์ดแล้วแตะกล่องก็ได้)",
+  "en": "<b>Step 1</b> Drag each card into the Double Bubble Map. Things that are <b>the same</b> go in the middle. Things that are <b>different</b> go on that side. (You can also tap a card, then tap a box.)"
+ },
+ "task2": {
+  "th": "<b>ขั้นที่ 2</b> เขียนตัวอย่างข้อมูล ฝั่งละ 2 อย่าง",
+  "en": "<b>Step 2</b> Write 2 examples for each side."
+ },
+ "task3": {
+  "th": "<b>ขั้นที่ 3</b> กดการ์ดที่เราลังเลที่สุดบนใบงาน แล้วเขียนเหตุผล",
+  "en": "<b>Step 3</b> Tap the card you were least sure about, then write your reason."
+ },
+ "think": {
+  "th": "🤔 ถ้ามีคนในเกมถามว่าเราเรียนโรงเรียนอะไร เราจะตอบหรือทำอย่างไร?",
+  "en": "🤔 If someone in a game asks which school we go to, what will we say or do?"
+ },
+ "write": {
+  "cols": 2,
+  "fields": [
+   { "id": "share1", "label": { "th": "🟢 ข้อมูลที่บอกได้ ตัวอย่างที่ 1", "en": "🟢 Info we can share, example 1" }, "ph": { "th": "เช่น สีที่ชอบ...", "en": "e.g. my favourite colour..." } },
+   { "id": "priv1", "label": { "th": "🔴 ข้อมูลส่วนตัวที่ไม่ควรบอก ตัวอย่างที่ 1", "en": "🔴 Private info, example 1" }, "ph": { "th": "เช่น ...", "en": "e.g. ..." } },
+   { "id": "share2", "label": { "th": "🟢 ข้อมูลที่บอกได้ ตัวอย่างที่ 2", "en": "🟢 Info we can share, example 2" }, "ph": { "th": "พิมพ์ตัวอย่าง...", "en": "Type an example..." } },
+   { "id": "priv2", "label": { "th": "🔴 ข้อมูลส่วนตัวที่ไม่ควรบอก ตัวอย่างที่ 2", "en": "🔴 Private info, example 2" }, "ph": { "th": "พิมพ์ตัวอย่าง...", "en": "Type an example..." } }
+  ]
+ },
+ "cards": [
+  { "id": "m1", "icon": "🙋", "bin": "m",
+    "text": { "th": "เป็นเรื่องเกี่ยวกับตัวเรา", "en": "It is about us" },
+    "why": { "th": "สีที่ชอบก็เป็นเรื่องของเรา ที่อยู่บ้านก็เป็นเรื่องของเรา จึงเหมือนกันทั้งสองแบบ", "en": "Our favourite colour is about us, and so is our home address. Both sides share this." } },
+  { "id": "m2", "icon": "💬", "bin": "m",
+    "text": { "th": "คนในเกมอาจถามเราได้", "en": "Someone in a game might ask us about it" },
+    "why": { "th": "คนในเกมถามได้ทั้งการ์ตูนที่ชอบ และชื่อโรงเรียน แต่เราต้องคิดก่อนตอบ", "en": "People in a game can ask about our favourite cartoon or our school. We must think before we answer." } },
+  { "id": "m3", "icon": "🤔", "bin": "m",
+    "text": { "th": "ถ้ามีคนถาม แล้วเราไม่แน่ใจ ถามผู้ใหญ่ได้เสมอ", "en": "If someone asks and we are not sure, we can always ask an adult" },
+    "why": { "th": "ไม่ว่าข้อมูลแบบไหน ถ้าไม่แน่ใจก็ถามผู้ใหญ่ก่อนได้ทุกครั้ง", "en": "With any kind of info, if we are not sure, we can ask an adult first." } },
+  { "id": "a1", "icon": "🔍", "bin": "a",
+    "text": { "th": "บอกไปแล้ว คนอื่นก็ยังหาตัวเราไม่เจอ", "en": "Even if we share it, people still cannot find us" },
+    "why": { "th": "รู้ว่าเราชอบสีฟ้า ก็ไม่รู้ว่าบ้านเราอยู่ไหน", "en": "Knowing we like blue does not tell anyone where we live." } },
+  { "id": "a2", "icon": "😊", "bin": "a",
+    "text": { "th": "ช่วยให้เพื่อนรู้ว่าเราชอบอะไร", "en": "Helps friends know what we like" },
+    "why": { "th": "อาหารหรือการ์ตูนที่ชอบ บอกเพื่อนได้ ทำให้คุยกันสนุก", "en": "Favourite food or cartoons are fine to share and help us chat with friends." } },
+  { "id": "a3", "icon": "🎭", "bin": "a",
+    "text": { "th": "ถึงคนแปลกหน้ารู้ ก็เอาไปทำตัวเป็นเราไม่ได้", "en": "Even if a stranger knows it, they cannot pretend to be us" },
+    "why": { "th": "คนจำนวนมากชอบสีเดียวกับเรา เอาไปใช้แทนเราไม่ได้", "en": "Lots of people like the same colour. Nobody can use it to be us." } },
+  { "id": "b1", "icon": "📍", "bin": "b",
+    "text": { "th": "ทำให้คนอื่นหาเราเจอในชีวิตจริง", "en": "Lets people find us in real life" },
+    "why": { "th": "ที่อยู่บ้านและชื่อโรงเรียน บอกได้ว่าเราอยู่ที่ไหน", "en": "Our address and school tell people where we are." } },
+  { "id": "b2", "icon": "🔑", "bin": "b",
+    "text": { "th": "ใช้เข้าบัญชีเกมของเราได้", "en": "Can be used to get into our game account" },
+    "why": { "th": "รหัสผ่านเหมือนกุญแจบ้าน ใครรู้ก็เข้าบัญชีเราได้", "en": "A password is like a house key. Anyone who knows it can get into our account." } },
+  { "id": "b3", "icon": "🪪", "bin": "b",
+    "text": { "th": "บอกได้ว่าเราเป็นใครตัวจริง", "en": "Shows who we really are" },
+    "why": { "th": "ชื่อจริงนามสกุลและรูปถ่าย ทำให้คนแปลกหน้ารู้ว่าเราเป็นใคร", "en": "Our full name and photos tell strangers who we really are." } }
+ ]
+}

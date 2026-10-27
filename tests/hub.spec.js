@@ -347,3 +347,123 @@ test('ดูงานที่ส่งไว้กับการ์ดชุ�
   await expect(page.locator('#pool .cardx')).toHaveCount(16);
   await expect(page.locator('.cardx[data-id="a9"]')).toHaveCount(1);
 });
+
+// ---- สัปดาห์ 2: Double Bubble (Y3) · Flow Map (Y4) ----
+async function placeAll(page, C, wrong = {}) {
+  await expect(page.locator('#pool .cardx')).toHaveCount(C.cards.length);
+  for (const c of C.cards) { await page.click(`.cardx[data-id="${c.id}"]`); await page.click(`.bin[data-bin="${wrong[c.id] || c.bin}"] h2`); }
+}
+
+test('เนื้อหาสัปดาห์ 2: การ์ดทุกใบอยู่ในกล่องที่มีจริง · ช่องเขียนชี้กล่องที่มีจริง · id ไม่ซ้ำ', async () => {
+  for (const id of ['y3w2', 'y4w2']) {
+    const C = content(id), bins = C.bins.map(b => b.id);
+    expect(C.act).toBe(id);
+    expect(new Set(C.cards.map(c => c.id)).size).toBe(C.cards.length);
+    for (const c of C.cards) { expect(bins).toContain(c.bin); expect(c.text.th && c.text.en && c.why.th && c.why.en).toBeTruthy(); }
+    for (const b of bins) expect(C.cards.some(c => c.bin === b)).toBe(true);
+    for (const f of C.write.fields) if (f.in) expect(bins).toContain(f.in);
+  }
+  expect(content('y3w2').map).toBe('bubble');
+  expect(content('y4w2').write.choose).toHaveLength(3);
+  const acts = JSON.parse(fs.readFileSync(path.join(__dirname, '../data/activities.json'), 'utf8')).activities;
+  for (const id of ['y3w2', 'y4w2']) expect(acts.find(a => a.id === id)).toMatchObject({ week: 2, kind: 'sheet', path: 'worksheet/?act=' + id });
+});
+
+test('Y3 สัปดาห์ 2 Double Bubble: จัดลง 3 กล่อง → เขียนตัวอย่าง → ส่ง → เปิดดูงานที่ส่ง', async ({ page }) => {
+  const errs = []; page.on('pageerror', e => errs.push(e.message));
+  const api = mockApi(page, { open: { y3w1: true, y3w2: true } });
+  await page.goto('/#/lib/Y3.2/' + encodeURIComponent('ขิม'));
+  await page.click('.card[data-act="y3w2"] a.btn');
+  const C = content('y3w2');
+  await expect(page.locator('#s1')).toHaveText('1 เปรียบเทียบ');
+  await expect(page.locator('#topA')).toHaveText('ข้อมูลที่บอกได้');
+  await expect(page.locator('.bin')).toHaveCount(3);
+  await placeAll(page, C, { m1: 'b' });                         // ตั้งใจวาง "เกี่ยวกับตัวเรา" ผิดฝั่ง
+  await page.click('#next');                                    // ขั้น 2 เขียนตัวอย่าง
+  await expect(page.locator('#writer')).toBeVisible();
+  await expect(page.locator('#wch')).toBeHidden();
+  await expect(page.locator('#next')).toBeDisabled();
+  const ex = { share1: 'สีที่ชอบ', share2: 'การ์ตูนที่ชอบ', priv1: 'ที่อยู่บ้าน', priv2: 'รหัสผ่าน' };
+  for (const [k, v] of Object.entries(ex)) await page.fill(`[data-f="${k}"]`, v);
+  await page.click('#next');                                    // ขั้น 3
+  await expect(page.locator('#writer')).toBeHidden();
+  await page.click('.cardx[data-id="m1"]');
+  await page.fill('#reason', 'เพราะที่อยู่ก็เป็นเรื่องของเรา');
+  await page.click('#toFor');
+  await expect(page.locator('#frq')).toHaveText('เรารู้ได้อย่างไรว่าลักษณะไหนเหมือนกัน ลักษณะไหนต่างกัน?');
+  await page.fill('#fr', 'เรารู้เพราะดูว่าทำให้คนอื่นหาเราเจอไหม');
+  await page.click('#check');
+  await expect(page.locator('#sent')).toHaveClass(/ok/);
+  await expect(page.locator('#result')).toHaveText('ถูก 8/9 ใบ');
+  await expect(page.locator('.cardx[data-id="m1"] .exp')).toContainText('ควรอยู่ใน "🤝 เหมือนกัน"');
+  await expect(page.locator('#writer')).toBeVisible();          // ผลตรวจแสดงตัวอย่างที่เขียนไว้ (แก้ไม่ได้)
+  await expect(page.locator('[data-f="priv2"]')).toHaveJSProperty('readOnly', true);
+
+  const row = api.posts[0].row;
+  expect(row).toHaveLength(15);
+  expect(row.slice(0, 7)).toEqual(['Y3', 2, 'ข้อมูลนี้ บอกได้ หรือ ไม่ควรบอก?', 'Y3.2', 'ขิม', 'TH', '8/9']);
+  expect(row[7]).toBe('เป็นเรื่องเกี่ยวกับตัวเรา');
+  expect(row[8]).toBe('-');
+  expect(row[9]).toContain('รหัสผ่าน');
+  const d = JSON.parse(row[12]);
+  expect(d).toMatchObject({ v: 3, act: 'y3w2', map: 'bubble', hes: 'm1', write: { pick: '', f: ex }, signs: {} });
+  expect(d.place.m1).toBe('b');
+
+  // เปิดอีกครั้งจากคลัง = เห็นงานที่ส่ง พร้อมตัวอย่างที่เขียน
+  await page.click('#lib2');
+  await page.click('.card[data-act="y3w2"] a.btn');
+  await expect(page.locator('#result')).toHaveText('ถูก 8/9 ใบ');
+  await expect(page.locator('[data-f="share2"]')).toHaveValue('การ์ตูนที่ชอบ');
+  await page.click('#edit');
+  await expect(page.locator('#writer')).toBeHidden();
+  await expect(page.locator('#pool .cardx')).toHaveCount(0);
+  expect(errs).toEqual([]);
+});
+
+test('Y4 สัปดาห์ 2 Flow Map: ต้องเลือกสถานการณ์ · เขียนในกล่อง · ภาษาอังกฤษ · งานค้างทำต่อได้', async ({ page, browser }) => {
+  const errs = []; page.on('pageerror', e => errs.push(e.message));
+  const api = mockApi(page, { open: { y4w2: true } });
+  await page.goto('/worksheet/?act=y4w2#room=Y4.1&name=' + encodeURIComponent('เมษา') + '&lang=en');
+  const C = content('y4w2');
+  await expect(page.locator('#s1')).toHaveText('1 Order');
+  await expect(page.locator('.frow .bin')).toHaveCount(4);
+  await expect(page.locator('.frow .arrow')).toHaveCount(3);
+  await expect(page.locator('.bin[data-bin="s1"] h2')).toHaveText('👀 1 Spot');
+  await expect(page.locator('[data-f="w1"]')).toBeHidden();      // ช่องเขียนยังไม่โผล่ในขั้น 1
+  await placeAll(page, C, { x4: 's3' });                         // "ถามเพื่อนในเกม" หลอกตาว่าเป็นสอบถาม
+  await page.click('#next');
+  await expect(page.locator('#wch')).toBeVisible();
+  await expect(page.locator('.pick')).toHaveCount(3);
+  for (const f of C.write.fields) await page.fill(`.bin[data-bin="${f.in}"] [data-f="${f.id}"]`, 'We will not reply ' + f.id);
+  await expect(page.locator('#next')).toBeDisabled();            // ยังไม่ได้เลือกสถานการณ์
+  await page.click('.pick[data-p="p3"]');
+  await expect(page.locator('.pick[data-p="p3"]')).toHaveClass(/on/);
+  await expect(page.locator('#next')).toBeEnabled();
+  await page.click('#toLib');                                     // ออกกลางทาง = บันทึกงานค้าง
+  await expect.poll(() => { const d = api.drafts['Y4.1|เมษา|y4w2']; return d && d.data.write.pick; }).toBe('p3');
+
+  // อีกเครื่อง: ทำต่อ กลับมาขั้น 2 พร้อมสถานการณ์และข้อความเดิม
+  const ctx = await browser.newContext({ viewport: { width: 1366, height: 768 } });
+  const p2 = await ctx.newPage();
+  mockApi(p2, { open: { y4w2: true } }, api);
+  await p2.goto('/worksheet/?act=y4w2#room=Y4.1&name=' + encodeURIComponent('เมษา') + '&lang=en&draft=1');
+  await expect(p2.locator('#s2')).toHaveClass(/on/);
+  await expect(p2.locator('.pick[data-p="p3"]')).toHaveClass(/on/);
+  await expect(p2.locator('[data-f="w4"]')).toHaveValue('We will not reply w4');
+  await p2.click('#next');
+  await p2.click('.cardx[data-id="x4"]');
+  await p2.fill('#reason', 'Friends in the game seemed helpful');
+  await p2.click('#toFor');
+  await p2.click('#skip');
+  await expect(p2.locator('#sent')).toHaveClass(/ok/);
+  await expect(p2.locator('#result')).toHaveText(`${C.cards.length - 1}/${C.cards.length} correct`);
+  await expect(p2.locator('.cardx[data-id="x4"] .exp')).toContainText('Belongs in "🚫 Do not do this"');
+  const row = api.posts[0].row;
+  expect(row.slice(0, 2)).toEqual(['Y4', 2]);
+  expect(row[5]).toBe('EN');
+  expect(row[9]).toContain('🙋 3 สอบถาม: We will not reply w3');
+  const d = JSON.parse(row[12]);
+  expect(d).toMatchObject({ act: 'y4w2', map: 'flow', write: { pick: 'p3' }, fr: '' });
+  await ctx.close();
+  expect(errs).toEqual([]);
+});

@@ -1,6 +1,8 @@
 // ใบงานกลาง: worksheet/?act=y3w1#room=Y3.2&name=ขิม&lang=th&round=2&draft=1
 // draft=1 = มีงานค้าง ให้โหลดมาทำต่อ · done=1 = ส่งแล้ว ให้โหลดงานที่ส่งล่าสุดมาแสดงผลตรวจ
 // เนื้อหามาจาก content/<act>.json · ข้อมูลการ์ดในคลัง (frq, afterGame) มาจาก ../data/activities.json
+// map: "tree" (ค่าเริ่มต้น Tree Map 2 กลุ่ม binA/binB) · "bubble" (Double Bubble: กล่อง a / m=เหมือนกัน / b) · "flow" (Flow Map: กล่องตาม bins)
+// ขั้น 2: มี signs = กดป้ายสัญญาณบนการ์ดกลุ่ม b · มี write = เขียนตัวอย่าง/วิธีรับมือ (เลือกสถานการณ์ได้ถ้ามี write.choose)
 (() => {
 const $ = s => document.querySelector(s);
 const { store, initial, esc, AV } = HubUtil;
@@ -36,6 +38,7 @@ const actId = new URLSearchParams(location.search).get('act') || '';
 let L = (H.get('lang') || store.get('lang')) === 'en' ? 'en' : 'th';
 let C = null, A = null, game = null;   // เนื้อหาใบงาน · ข้อมูลการ์ดในคลัง · เกมหลังส่ง
 let step = 1, placed = {}, signs = {}, hes = '', sel = null, round = Math.max(1, parseInt(H.get('round'), 10) || 1);
+let wr = { pick: '', f: {} };   // ขั้นเขียน: สถานการณ์ที่เลือก + ข้อความแต่ละช่อง
 let checked = false, sendState = '', scale = 1, sending = false, dirty = false, partner = '', sentAt = null, oldSet = false;
 const app = $('#app'), pool = $('#pool'), stage = $('#stage');
 const t = o => HubUtil.t(o, L);
@@ -47,6 +50,55 @@ function fit(){ scale = Math.min(innerWidth / 1600, innerHeight / 900); stage.st
 addEventListener('resize', fit); fit();
 function shuffle(a){ a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 const cardOf = id => document.querySelector(`.cardx[data-id="${id}"]`);
+const bins = () => C.bins || [{ id: 'a', label: C.binA }, { id: 'b', label: C.binB }];
+const binLabel = id => (bins().find(b => b.id === id) || {}).label;
+const isWrite = () => !!C.write;
+const fieldEl = id => document.querySelector(`[data-f="${id}"]`);
+const signsDone = () => C.cards.filter(c => placed[c.id] === 'b').every(c => signs[c.id] && signs[c.id].size);
+const writeDone = () => (!C.write.choose || !!wr.pick) && C.write.fields.every(f => (wr.f[f.id] || '').trim().length >= 2);
+const step2Done = () => isWrite() ? writeDone() : signsDone();
+
+// สร้างแผนภาพตามชนิด (tree ใช้ HTML เดิมใน index.html)
+function buildMap(){
+  const m = $('#map'), box = b => `<div class="bin ${b.id}" data-bin="${b.id}"><h2></h2><div class="list"></div>` +
+    (C.write ? C.write.fields.filter(f => f.in === b.id).map(fieldHtml).join('') : '') + '</div>';
+  if (C.map === 'bubble') {
+    const [a, mid, b] = ['a', 'm', 'b'].map(id => bins().find(x => x.id === id));
+    m.className = 'map bubble';
+    m.innerHTML = box(a) + '<div class="topic a" id="topA"></div>' + box(mid) + '<div class="topic b" id="topB"></div>' + box(b);
+  } else if (C.map === 'flow') {
+    const steps = bins().filter(b => !b.off), off = bins().filter(b => b.off);
+    m.className = 'map flow';
+    m.innerHTML = '<div class="frow">' + steps.map(box).join('<div class="arrow">➜</div>') + '</div>' + off.map(box).join('');
+  }
+  if (!C.write) return;
+  const w = C.write;
+  if (w.choose) { $('#map').before($('#writer')); $('#wch').classList.remove('hide'); $('#choose').innerHTML = w.choose.map(c => `<button class="pick" data-p="${c.id}"></button>`).join(''); }
+  $('#wgrid').style.gridTemplateColumns = `repeat(${w.cols || 2}, 1fr)`;
+  $('#wgrid').innerHTML = w.fields.filter(f => !f.in).map(fieldHtml).join('');
+  $('#wgrid').classList.toggle('hide', !w.fields.some(f => !f.in));
+  document.querySelectorAll('[data-f]').forEach(el => {
+    el.addEventListener('input', () => { wr.f[el.dataset.f] = el.value; dirty = true; update(); });
+    el.addEventListener('pointerdown', e => e.stopPropagation());
+  });
+  $('#choose').addEventListener('click', e => {
+    const b = e.target.closest('.pick'); if (!b || step !== 2 || checked) return;
+    wr.pick = b.dataset.p; paintPick(); dirty = true; update();
+  });
+}
+const fieldHtml = f => `<div class="wfield"><label></label><textarea rows="2" data-f="${f.id}"></textarea></div>`;
+const paintPick = () => document.querySelectorAll('.pick').forEach(b => b.classList.toggle('on', b.dataset.p === wr.pick));
+function paintWrite(){
+  if (!C.write) return;
+  const w = C.write;
+  $('#chooseHd').textContent = t(w.chooseHd);
+  document.querySelectorAll('.pick').forEach(b => { const c = w.choose.find(x => x.id === b.dataset.p); b.innerHTML = `<span class="pic">${c.icon || ''}</span>${t(c.text)}`; });
+  w.fields.forEach(f => { const el = fieldEl(f.id); if (!el) return; el.placeholder = t(f.ph); el.previousElementSibling.textContent = t(f.label); });
+}
+const writeSummary = () => {
+  const th = o => (o && typeof o === 'object') ? o.th : o, w = C.write, p = (w.choose || []).find(c => c.id === wr.pick);
+  return (p ? plain(th(p.text)) + ' | ' : '') + w.fields.map(f => plain(th(f.label || binLabel(f.in)) || f.id) + ': ' + (wr.f[f.id] || '').trim()).join(' | ');
+};
 
 function showMsg(text){
   $('#msgTxt').textContent = text; $('#msgBtn').textContent = UI[L].goLib;
@@ -57,7 +109,7 @@ function showMsg(text){
 function cardEl(c){
   const d = document.createElement('div'); d.className = 'cardx'; d.dataset.id = c.id;
   d.innerHTML = (c.icon ? `<div class="ic">${c.icon}</div>` : '') + `<div class="bd">` + (c.who ? `<div class="nm">💬 ${esc(c.who)}</div>` : '') +
-    `<div class="tx"></div><div class="chips">${C.signs.map((s, i) => `<span class="chip" data-s="${i + 1}"></span>`).join('')}</div><div class="exp"></div></div>`;
+    `<div class="tx"></div><div class="chips">${(C.signs || []).map((s, i) => `<span class="chip" data-s="${i + 1}"></span>`).join('')}</div><div class="exp"></div></div>`;
   d.querySelectorAll('.chip').forEach(ch => ch.addEventListener('click', e => {
     if (step !== 2 || checked) return;
     e.stopPropagation(); const set = signs[c.id] || (signs[c.id] = new Set()); const n = +ch.dataset.s;
@@ -79,13 +131,16 @@ function applyLang(){
   $('#lLib').textContent = U.lib;
   $('#toLib').href = libHref();
   $('#ttl').textContent = `${U.week(C.week)} · ${t(C.title)}`; document.title = t(C.title);
-  U.steps.forEach((s, i) => $('#s' + (i + 1)).textContent = s);
+  (t(C.steps) || U.steps).forEach((s, i) => $('#s' + (i + 1)).textContent = s);
   $('#stag').textContent = U.stepTag(Math.min(step, 4));
   let task = t(C['task' + step]) || '';
   if (step === 3) task += hes ? '' : `<br><b>${U.pickHint}</b>`;
   if (checked) task = `<b>${U.round(round)}</b> · ${U.doneTask}`;
   $('#task').innerHTML = task;
-  $('#root').textContent = t(C.root); $('#binA').textContent = t(C.binA); $('#binB').textContent = t(C.binB);
+  if ($('#root')) $('#root').textContent = t(C.root);
+  if ($('#topA')) { $('#topA').textContent = t(C.topicA); $('#topB').textContent = t(C.topicB); }
+  document.querySelectorAll('.bin').forEach(el => el.querySelector('h2').textContent = t(binLabel(el.dataset.bin)));
+  paintWrite();
   $('#back').textContent = U.back; $('#next').textContent = U.next; $('#toFor').textContent = U.next;
   $('#edit').textContent = U.edit; $('#lib2').textContent = U.lib2; $('#play').textContent = U.play(t(game && game.title));
   const hc = C.cards.find(c => c.id === hes); $('#hesTxt').innerHTML = `${U.picked} <b>${hc ? esc(plain(t(hc.text))) : ''}</b>`;
@@ -99,7 +154,7 @@ function applyLang(){
     const el = cardOf(c.id); if (!el) return;
     el.querySelector('.tx').innerHTML = t(c.text);
     el.querySelectorAll('.chip').forEach(ch => ch.textContent = t(C.signs[ch.dataset.s - 1].short));
-    el.querySelector('.exp').innerHTML = checked ? (placed[c.id] === c.bin ? '' : `<b>${U.should} "${t(c.bin === 'a' ? C.binA : C.binB)}"</b> · `) + t(c.why) : '';
+    el.querySelector('.exp').innerHTML = checked ? (placed[c.id] === c.bin ? '' : `<b>${U.should} "${t(binLabel(c.bin))}"</b> · `) + t(c.why) : '';
   });
   if (checked) { $('#result').textContent = U.result(score(), C.cards.length); $('#think').innerHTML = t(C.think); showSent(); }
 }
@@ -136,7 +191,7 @@ function onUp(e){
   else if (d.home === pool) pool.insertBefore(d.el, d.next && d.next.parentNode === pool ? d.next : null);
   else { pool.appendChild(d.el); delete placed[d.el.dataset.id]; update(); }
 }
-document.querySelectorAll('.bin').forEach(b => b.addEventListener('click', e => { if (e.target.closest('.cardx')) return; if (sel && step === 1) { place(sel, b); sel.classList.remove('sel'); sel = null; } }));
+$('#map').addEventListener('click', e => { const b = e.target.closest('.bin'); if (!b || e.target.closest('.cardx, .wfield')) return; if (sel && step === 1) { place(sel, b); sel.classList.remove('sel'); sel = null; } });
 pool.addEventListener('click', e => { if (sel && e.target === pool) { pool.appendChild(sel); delete placed[sel.dataset.id]; sel.classList.remove('sel'); sel = null; update(); } });
 function place(el, bin){ bin.querySelector('.list').appendChild(el); placed[el.dataset.id] = bin.dataset.bin; dirty = true; update(); }
 
@@ -144,7 +199,7 @@ function update(){
   if (!C) return;
   if (dirty && !checked) scheduleSave();
   if (step === 1) $('#next').disabled = Object.keys(placed).length !== C.cards.length;
-  if (step === 2) $('#next').disabled = !C.cards.filter(c => placed[c.id] === 'b').every(c => signs[c.id] && signs[c.id].size);
+  if (step === 2) $('#next').disabled = !step2Done();
   $('#toFor').disabled = !(hes && $('#reason').value.trim().length >= 5);
   $('#check').disabled = $('#skip').disabled = sending;
 }
@@ -158,7 +213,11 @@ function setStep(n){
   $('#drawer').classList.toggle('hide', !(n === 3 && hes && !checked));
   $('#res').classList.toggle('hide', !checked);
   $('#forPanel').classList.toggle('hide', n !== 4);
-  if (n === 2) C.cards.forEach(c => { if (placed[c.id] !== 'b') delete signs[c.id]; const el = cardOf(c.id); el && el.querySelectorAll('.chip').forEach(ch => ch.classList.toggle('on', !!(signs[c.id] && signs[c.id].has(+ch.dataset.s)))); });
+  if (C.write) {
+    $('#writer').classList.toggle('hide', !(n === 2 || checked));
+    document.querySelectorAll('[data-f]').forEach(el => { el.readOnly = n !== 2 || checked; });
+  }
+  if (n === 2 && !isWrite()) C.cards.forEach(c => { if (placed[c.id] !== 'b') delete signs[c.id]; const el = cardOf(c.id); el && el.querySelectorAll('.chip').forEach(ch => ch.classList.toggle('on', !!(signs[c.id] && signs[c.id].has(+ch.dataset.s)))); });
   if (n === 4) setTimeout(() => $('#fr').focus(), 0);
   applyLang(); update();
   if (dirty && !checked) saveNow();
@@ -181,14 +240,15 @@ function buildRow(fr){
   const th = o => (o && typeof o === 'object') ? o.th : o;
   const wrong = C.cards.filter(c => placed[c.id] !== c.bin).map(c => plain(th(c.text)));
   const inB = C.cards.filter(c => placed[c.id] === 'b');
-  const exact = inB.filter(c => c.bin === 'b' && [...(signs[c.id] || [])].sort().join() === (c.signs || []).slice().sort().join()).length;
-  const chosen = inB.map(c => plain(th(c.text)) + ' = ' + [...(signs[c.id] || [])].sort().map(n => plain(th(C.signs[n - 1].short))).join(', ')).join(' | ');
+  const exact = isWrite() ? null : inB.filter(c => c.bin === 'b' && [...(signs[c.id] || [])].sort().join() === (c.signs || []).slice().sort().join()).length;
+  const chosen = isWrite() ? writeSummary() : inB.map(c => plain(th(c.text)) + ' = ' + [...(signs[c.id] || [])].sort().map(n => plain(th(C.signs[n - 1].short))).join(', ')).join(' | ');
   const hc = C.cards.find(c => c.id === hes);
-  const sg = {}; inB.forEach(c => sg[c.id] = [...(signs[c.id] || [])].sort());
+  const sg = {}; if (!isWrite()) inB.forEach(c => sg[c.id] = [...(signs[c.id] || [])].sort());
   const reason = $('#reason').value.trim();
   const data = { v: 3, act: C.act, round, place: placed, signs: sg, hes, reason, fr, frq: th(frq()) };
+  if (isWrite()) Object.assign(data, { map: C.map, write: wr });
   return [C.level, C.week, th(C.title), me.room, members().join(' + '), L.toUpperCase(), `${score()}/${C.cards.length}`,
-          wrong.join(' | ') || '-', `${exact}/${C.cards.filter(c => c.bin === 'b').length}`, chosen, hc ? plain(th(hc.text)) : '', reason, JSON.stringify(data), fr || '-', round];
+          wrong.join(' | ') || '-', isWrite() ? '-' : `${exact}/${C.cards.filter(c => c.bin === 'b').length}`, chosen, hc ? plain(th(hc.text)) : '', reason, JSON.stringify(data), fr || '-', round];
 }
 const members = () => [me.name, partner].filter(Boolean);
 async function send(fr){
@@ -214,7 +274,7 @@ function submit(fr){ checked = true; markResults(); setStep(3); send(fr); }
 // งานที่ส่งล่าสุด: วางการ์ดตามที่ส่ง แสดงผลตรวจ · กด "แก้แล้วส่งใหม่" ทำรอบถัดไปจากคำตอบเดิมได้
 function showSubmitted(last){
   const d = last.data, key = n => String(n).replace(/\s+/g, '').toUpperCase();
-  restore({ placed: d.place, signs: d.signs, hes: d.hes, reason: d.reason, fr: d.fr,
+  restore({ placed: d.place, signs: d.signs, hes: d.hes, reason: d.reason, fr: d.fr, write: d.write,
             partner: (last.members || []).find(n => key(n) !== key(me.name)) || '' });
   round = d.round || 1; sentAt = last.time ? new Date(last.time) : null;
   checked = true; markResults(); setStep(3);
@@ -241,7 +301,7 @@ let saveTimer = 0, savedAt = null, resumedAt = null;
 const hm = d => d.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
 function snapshot(){
   const sg = {}; Object.keys(signs).forEach(id => { if (signs[id].size) sg[id] = [...signs[id]].sort(); });
-  return { v: 1, step, round, placed, signs: sg, hes, reason: $('#reason').value, fr: $('#fr').value, partner };
+  return { v: 1, step, round, placed, signs: sg, write: wr, hes, reason: $('#reason').value, fr: $('#fr').value, partner };
 }
 function scheduleSave(){ clearTimeout(saveTimer); saveTimer = setTimeout(saveNow, 8000); }
 function saveNow(){
@@ -258,13 +318,17 @@ function restore(d){
   round = Math.max(round, d.round || 1);
   Object.keys(d.placed || {}).forEach(id => { const el = cardOf(id), bin = document.querySelector(`.bin[data-bin="${d.placed[id]}"]`); if (el && bin) { bin.querySelector('.list').appendChild(el); placed[id] = d.placed[id]; } });
   Object.keys(d.signs || {}).forEach(id => { if (placed[id] === 'b') { signs[id] = new Set(d.signs[id]); cardOf(id).querySelectorAll('.chip').forEach(ch => ch.classList.toggle('on', signs[id].has(+ch.dataset.s))); } });
+  if (C.write && d.write) {
+    wr = { pick: d.write.pick || '', f: Object.assign({}, d.write.f) };
+    Object.keys(wr.f).forEach(id => { const el = fieldEl(id); if (el) el.value = wr.f[id]; }); paintPick();
+  }
   if (d.hes && cardOf(d.hes)) { hes = d.hes; cardOf(hes).classList.add('hes'); }
   $('#reason').value = d.reason || ''; $('#fr').value = d.fr || '';
   setPartner(d.partner && d.partner !== me.name ? d.partner : '');
   // ไปขั้นที่ไกลที่สุดที่ทำได้จริง (กันข้อมูลไม่ครบ)
   let n = 1;
   if (Object.keys(placed).length === C.cards.length) n = 2;
-  if (n === 2 && C.cards.filter(c => placed[c.id] === 'b').every(c => signs[c.id] && signs[c.id].size)) n = 3;
+  if (n === 2 && step2Done()) n = 3;
   return Math.min(Math.max(1, d.step || 1), n === 3 && hes && $('#reason').value.trim().length >= 5 ? 4 : n);
 }
 $('#restart').onclick = () => {
@@ -338,6 +402,7 @@ async function boot(){
     const ids = Object.keys(last.data.place), all = C.cards.concat(C.retired || []);
     if (ids.some(id => !C.cards.some(c => c.id === id))) { oldSet = true; C = Object.assign({}, C, { cards: ids.map(id => all.find(c => c.id === id)).filter(Boolean) }); }
   }
+  buildMap();
   shuffle(C.cards).forEach(c => pool.appendChild(cardEl(c)));
   let start = 1;
   if (want === 'draft' && saved && saved.data && saved.data.placed) {

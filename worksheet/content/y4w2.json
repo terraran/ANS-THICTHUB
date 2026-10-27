@@ -1,0 +1,89 @@
+{
+ "act": "y4w2",
+ "level": "Y4",
+ "week": 2,
+ "map": "flow",
+ "title": { "th": "เพื่อนโดนหลอก เราช่วยด้วยหลัก 3 ส.", "en": "A friend got tricked: help with the 3 S steps" },
+ "bins": [
+  { "id": "s1", "label": { "th": "👀 1 สังเกต", "en": "👀 1 Spot" } },
+  { "id": "s2", "label": { "th": "🤔 2 สงสัย", "en": "🤔 2 Stop and doubt" } },
+  { "id": "s3", "label": { "th": "🙋 3 สอบถาม", "en": "🙋 3 Speak to an adult" } },
+  { "id": "s4", "label": { "th": "🚩 4 รายงาน", "en": "🚩 4 Report" } },
+  { "id": "x", "off": true, "label": { "th": "🚫 ไม่ควรทำ", "en": "🚫 Do not do this" } }
+ ],
+ "steps": {
+  "th": ["1 เรียงขั้นตอน", "2 เขียนวิธีรับมือ", "3 ให้เหตุผล", "4 คิดย้อนกลับ"],
+  "en": ["1 Order", "2 Write the plan", "3 Explain", "4 Look back"]
+ },
+ "task1": {
+  "th": "<b>ขั้นที่ 1</b> ลากการ์ดลง Flow Map ว่าเป็นขั้นตอนไหนของหลัก 3 ส. + รายงาน · การ์ดที่ <b>ไม่ควรทำ</b> วางกล่องล่าง (แตะการ์ดแล้วแตะกล่องก็ได้)",
+  "en": "<b>Step 1</b> Drag each card into the Flow Map step it belongs to. Cards we should <b>not do</b> go in the bottom box. (You can also tap a card, then tap a box.)"
+ },
+ "task2": {
+  "th": "<b>ขั้นที่ 2</b> เลือกสถานการณ์ 1 ใบ แล้วเขียนในแต่ละกล่องว่าเราจะ <b>ทำหรือพูดอะไร</b>",
+  "en": "<b>Step 2</b> Pick 1 situation, then write what we would <b>do or say</b> in each box."
+ },
+ "task3": {
+  "th": "<b>ขั้นที่ 3</b> กดการ์ดที่เราลังเลที่สุดบนใบงาน แล้วเขียนเหตุผล",
+  "en": "<b>Step 3</b> Tap the card you were least sure about, then write your reason."
+ },
+ "think": {
+  "th": "🤔 ถ้าเจอเหตุการณ์นี้ที่บ้าน เราจะสอบถามใครเป็นคนแรก เพราะอะไร?",
+  "en": "🤔 If this happens at home, who will we ask first, and why?"
+ },
+ "write": {
+  "chooseHd": { "th": "เลือกสถานการณ์ 1 ใบ:", "en": "Pick 1 situation:" },
+  "choose": [
+   { "id": "p1", "icon": "🎮", "text": { "th": "ต้นกล้าส่งรหัสผ่านแลกสกินฟรี ตอนนี้เข้าเกมไม่ได้ และขอว่า \"อย่าบอกครูนะ\"", "en": "Tonkla sent a password for a free skin, now cannot log in, and says \"Don't tell the teacher\"" } },
+   { "id": "p2", "icon": "📷", "text": { "th": "คนในเกมชมว่าเราเล่นเก่ง แล้วขอรูปหน้าเรา บอกว่าจะส่งเพชรให้", "en": "A player says we play well, then asks for a photo of our face for free gems" } },
+   { "id": "p3", "icon": "🔗", "text": { "th": "คนแปลกหน้าส่งลิงก์มาว่า \"กดรับรางวัลภายใน 1 นาที อย่าบอกใคร\"", "en": "A stranger sends a link: \"Claim your prize in 1 minute. Tell no one\"" } }
+  ],
+  "fields": [
+   { "id": "w1", "in": "s1", "ph": { "th": "เราเห็นสัญญาณ...", "en": "We see the sign..." } },
+   { "id": "w2", "in": "s2", "ph": { "th": "เราจะยังไม่...", "en": "We will not..." } },
+   { "id": "w3", "in": "s3", "ph": { "th": "เราจะบอก... ว่า...", "en": "We will tell... that..." } },
+   { "id": "w4", "in": "s4", "ph": { "th": "เราจะ... กับผู้ใหญ่", "en": "With an adult, we will..." } }
+  ]
+ },
+ "cards": [
+  { "id": "s1a", "icon": "📖", "bin": "s1",
+    "text": { "th": "อ่านแชทอีกครั้ง ดูว่าเขาขออะไรจากเรา", "en": "Read the chat again. What is the person asking for?" },
+    "why": { "th": "ขั้นแรกคือสังเกตให้รู้ก่อนว่ามีสัญญาณอันตรายอะไรบ้าง", "en": "First we spot what danger signs are there." } },
+  { "id": "s1b", "icon": "🧑‍🤝‍🧑", "bin": "s1",
+    "text": { "th": "ดูว่าคนนี้เป็นคนที่เรารู้จักตัวจริง หรือแค่ชื่อในเกม", "en": "Check if this is someone we know in real life, or just a game name" },
+    "why": { "th": "เป็นการสังเกต ชื่อในเกมใครจะตั้งว่าอะไรก็ได้", "en": "This is spotting. Anyone can choose any name in a game." } },
+  { "id": "s2a", "icon": "✋", "bin": "s2",
+    "text": { "th": "ยังไม่ตอบ ไม่กดลิงก์ และไม่ส่งอะไรไป", "en": "Do not reply, do not tap the link, do not send anything" },
+    "why": { "th": "สงสัยก่อนเชื่อ หยุดไว้ก่อน ยังไม่ทำตามที่เขาขอ", "en": "Doubt before we believe. Stop and do not do what they ask." } },
+  { "id": "s2b", "icon": "🎁", "bin": "s2",
+    "text": { "th": "ถามตัวเองว่า ของฟรีแบบนี้มีจริงหรือเปล่า", "en": "Ask ourselves: is free stuff like this really true?" },
+    "why": { "th": "เป็นการสงสัย ไม่รีบเชื่อสิ่งที่ดีเกินจริง", "en": "This is doubting. We do not quickly believe something too good to be true." } },
+  { "id": "s3a", "icon": "🙋", "bin": "s3",
+    "text": { "th": "เล่าให้ครูหรือผู้ปกครองฟังทันที", "en": "Tell a teacher or parent right away" },
+    "why": { "th": "สอบถามผู้รู้ คือครูหรือผู้ปกครอง", "en": "We speak to someone who knows: a teacher or parent." } },
+  { "id": "s3b", "icon": "🗣️", "bin": "s3",
+    "text": { "th": "ถามผู้ใหญ่ว่า เราควรทำอย่างไรต่อดี", "en": "Ask an adult what we should do next" },
+    "why": { "th": "ให้ผู้ใหญ่ช่วยคิด ก่อนจะทำอะไรต่อ", "en": "An adult helps us decide before we do anything else." } },
+  { "id": "s4a", "icon": "🚩", "bin": "s4",
+    "text": { "th": "บล็อกและกดรายงานไปพร้อมกับผู้ใหญ่", "en": "Block and report together with an adult" },
+    "why": { "th": "รายงานร่วมกับผู้ใหญ่ ให้ระบบรู้ว่าคนนี้หลอกคนอื่น", "en": "We report with an adult so the game knows this person tricks others." } },
+  { "id": "s4b", "icon": "💾", "bin": "s4",
+    "text": { "th": "เก็บแชทไว้ ไม่ลบ ให้ผู้ใหญ่ดูได้", "en": "Keep the chat, do not delete it, so an adult can see it" },
+    "why": { "th": "แชทเป็นหลักฐานตอนรายงาน ถ้าลบไปผู้ใหญ่จะช่วยยาก", "en": "The chat is proof when we report. If we delete it, it is hard for adults to help." } },
+  { "id": "x1", "icon": "🗑️", "bin": "x",
+    "text": { "th": "ลบแชททิ้งเลย จะได้ไม่มีใครเห็น", "en": "Delete the chat so nobody sees it" },
+    "why": { "th": "ลบแชทแล้วไม่มีหลักฐาน ผู้ใหญ่ช่วยรายงานไม่ได้", "en": "Deleting it removes the proof, so adults cannot help report it." } },
+  { "id": "x2", "icon": "🤐", "bin": "x",
+    "text": { "th": "เก็บเป็นความลับ เพราะเพื่อนขอไว้", "en": "Keep it secret because our friend asked us to" },
+    "why": { "th": "การบอกให้เก็บเป็นความลับคือสัญญาณอันตราย ช่วยเพื่อนจริงคือบอกผู้ใหญ่", "en": "Being told to keep a secret is a danger sign. Really helping a friend means telling an adult." } },
+  { "id": "x3", "icon": "💬", "bin": "x",
+    "text": { "th": "ทักกลับไปถามคนนั้นว่า เป็นใคร ทำไมหลอกเพื่อน", "en": "Message that person back: who are you, why did you trick my friend?" },
+    "why": { "th": "การตอบกลับทำให้คนหลอกคุยกับเราต่อได้ ต้องไม่ตอบ", "en": "Replying lets the trickster keep talking to us. We should not reply." } },
+  { "id": "x4", "icon": "👫", "bin": "x",
+    "text": { "th": "ถามเพื่อนในเกมว่า คนนี้ไว้ใจได้ไหม", "en": "Ask friends in the game if this person can be trusted" },
+    "why": { "th": "สอบถามต้องถามผู้รู้ คือครูหรือผู้ปกครอง ไม่ใช่คนในเกม", "en": "We should ask someone who knows, a teacher or parent, not people in the game." } },
+  { "id": "x5", "icon": "⛔", "bin": "x",
+    "text": { "th": "บล็อกเองทันที ไม่ต้องบอกใคร", "en": "Block them right away and tell nobody" },
+    "why": { "th": "บล็อกได้ แต่ต้องทำพร้อมผู้ใหญ่ และต้องบอกผู้ใหญ่ด้วย", "en": "Blocking is OK, but we do it with an adult and we must tell them." } }
+ ]
+}

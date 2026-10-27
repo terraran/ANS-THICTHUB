@@ -23,6 +23,8 @@
 2. เพิ่มการ์ดใน `data/activities.json` (`id`, `level`, `week`, `kind: "sheet"`, `title`, `path: "worksheet/?act=y3w2"`, `frq`)
 3. เปิดให้ห้องเรียนในแท็บ `Unlocks` ของ Sheet
 
+ชนิดแผนภาพ (`map` ในไฟล์เนื้อหา): ไม่ใส่ = Tree Map 2 กลุ่ม (`y3w1`) · `"bubble"` = Double Bubble กล่อง a / m (เหมือนกัน) / b (`y3w2`) · `"flow"` = Flow Map ตาม `bins` (`y4w2`) · ขั้น 2 ใช้ `signs` (กดป้ายสัญญาณ) หรือ `write` (เขียนตัวอย่าง/วิธีรับมือ เลือกสถานการณ์ได้ด้วย `write.choose`)
+
 ## ตั้งค่าหลังบ้าน (ทำครั้งเดียว)
 1. ใน Google Sheet เปลี่ยนชื่อแท็บที่รับงานอยู่เป็น **Submissions**
 2. Extensions → Apps Script → วางโค้ดจาก `apps-script/Code.gs` ทับของเดิมทั้งไฟล์ → Save
