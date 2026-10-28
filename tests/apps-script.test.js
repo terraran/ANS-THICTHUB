@@ -93,14 +93,14 @@ assert.strictEqual(tabs.Unlocks.filter(r => r[0] === 'Y3.2' && r[1] === 'y3w1').
 // รายชื่อ: เพิ่มหลายชื่อ (ซ้ำ = ข้าม, ซ้ำแต่ซ่อน = แสดงกลับ, ช่องว่างเกินถูกตัด) · ซ่อน · แสดง
 assert.strictEqual(S.post({ action: 'roster', key: 'wrong', room: 'Y3.2', op: 'add', names: ['แอบ'] }), 'key');
 S.post({ action: 'roster', key: 'secret', room: 'Y3.2', op: 'add', names: ['  มายด์   ก ', 'ขิม', 'ซ่อนไว้', '', 'จีน'] });
-assert.deepStrictEqual(S.get({ action: 'roster', room: 'Y3.2' }).names, ['กาย', 'ขิม', 'ซ่อนไว้', 'มายด์ ก', 'จีน', 'ท้าย']);
+assert.deepStrictEqual(S.get({ action: 'roster', room: 'Y3.2' }).names, ['กาย', 'ขิม', 'ซ่อนไว้', 'ท้าย', 'มายด์ ก', 'จีน']);
 S.post({ action: 'roster', key: 'secret', room: 'Y3.2', op: 'active', name: 'จีน', active: false });
 assert.ok(!S.get({ action: 'roster', room: 'Y3.2' }).names.includes('จีน'));
 assert.deepStrictEqual(S.get({ action: 'dashboard', key: 'secret', room: 'Y3.2' }).roster.find(x => x.name === 'จีน'), { name: 'จีน', active: false });
 S.post({ action: 'roster', key: 'secret', room: 'Y3.2', op: 'active', name: 'จีน', active: true });
 assert.ok(S.get({ action: 'roster', room: 'Y3.2' }).names.includes('จีน'));
 S.post({ action: 'roster', key: 'secret', room: 'Y3.1', op: 'add', names: ['ขิม'] });
-assert.deepStrictEqual(S.get({ action: 'roster', room: 'Y3.1' }).names, ['ขิม', 'อื่น'], 'same name in another room is fine');
+assert.deepStrictEqual(S.get({ action: 'roster', room: 'Y3.1' }).names, ['อื่น', 'ขิม'], 'same name in another room is fine');
 
 // แก้ชื่อ: งานที่ส่ง (ทั้งแถวเก่าที่มีแต่ชื่อ และแถวที่มี members) + งานค้าง + เพื่อนคู่ในงานค้าง ตามไปชื่อใหม่ · ห้องอื่นไม่เปลี่ยน
 S.post({ action: 'draft', room: 'Y3.2', act: 'y3w2', members: ['ขิม', 'ท้าย'], data: { step: 1, partner: 'ท้าย' } });
@@ -109,7 +109,7 @@ S.post({ action: 'roster', key: 'secret', room: 'Y3.2', op: 'rename', from: 'ข
 assert.ok(S.get({ action: 'roster', room: 'Y3.2' }).names.includes('ขิม'));
 S.post({ action: 'roster', key: 'secret', room: 'Y3.2', op: 'rename', from: 'ขิม', to: 'ขิม ก' });
 S.post({ action: 'roster', key: 'secret', room: 'Y3.2', op: 'rename', from: 'ท้าย', to: 'ท้ายสุด' });
-assert.deepStrictEqual(S.get({ action: 'roster', room: 'Y3.2' }).names, ['กาย', 'ขิม ก', 'ซ่อนไว้', 'มายด์ ก', 'จีน', 'ท้ายสุด']);
+assert.deepStrictEqual(S.get({ action: 'roster', room: 'Y3.2' }).names, ['กาย', 'ขิม ก', 'ซ่อนไว้', 'ท้ายสุด', 'มายด์ ก', 'จีน']);
 st = S.get({ action: 'state', room: 'Y3.2', name: 'ขิม ก' });
 assert.deepStrictEqual([st.status, st.rounds, Object.keys(st.drafts)], [{ y3w1: 'done' }, { y3w1: 3 }, ['y3w2']]);
 assert.deepStrictEqual(S.get({ action: 'state', room: 'Y3.2', name: 'ขิม' }).status, {});
@@ -122,6 +122,10 @@ assert.strictEqual(tabs.Submissions.find(r => r[4] === 'Y3.4')[5], 'Loukpear + y
 S.post({ action: 'roster', key: 'secret', room: 'Y3.4', op: 'add', names: ['yuki'] });
 S.post({ action: 'roster', key: 'secret', room: 'Y3.4', op: 'rename', from: 'yuki', to: 'Yuki' });
 assert.deepStrictEqual(S.get({ action: 'roster', room: 'Y3.4' }).names, ['Yuki']);
+// Roster จริงไม่ได้ใส่ order (เรียงตามแถว) → ชื่อใหม่ต้องต่อท้าย ไม่ขึ้นบนสุด
+const real = { Submissions: [['time']], Roster: [['room', 'nickname', 'active', 'order'], ['Y3.1', 'PRAB'], ['Y3.1', 'NANA']] }, R = load(real, { TEACHER_KEY: 'k' });
+R.post({ action: 'roster', key: 'k', room: 'Y3.1', op: 'add', names: ['ZED', 'ANN'] });
+assert.deepStrictEqual(R.get({ action: 'roster', room: 'Y3.1' }).names, ['PRAB', 'NANA', 'ZED', 'ANN']);
 // แท็บ Unlocks/Roster ยังไม่มี → สร้างเอง
 const fresh = { Submissions: [['time']] }, F = load(fresh, { TEACHER_KEY: 'k' });
 F.post({ action: 'setUnlock', key: 'k', rooms: ['Y4.1'], acts: { y4w1: true } });

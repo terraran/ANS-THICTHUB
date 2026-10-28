@@ -225,11 +225,14 @@ function rosterOp_(b) {
   const sh = tab_(TAB.roster), v = sh.getDataRange().getValues();
   const find = name => v.findIndex((r, n) => n > 0 && String(r[0]).trim() === room && nameKey_(r[1]) === nameKey_(name));
   if (b.op === 'add') {
-    let order = v.reduce((m, r, n) => n > 0 && String(r[0]).trim() === room && r[3] !== '' && !isNaN(r[3]) ? Math.max(m, Number(r[3])) : m, 0);
+    // ชื่อใหม่ต่อท้ายเสมอ: ถ้าห้องนี้มีแถวที่ไม่ใส่ order (เรียงตามแถว) ก็เว้น order ไว้เหมือนกัน
+    const mine = v.filter((r, n) => n > 0 && String(r[0]).trim() === room);
+    const blank = mine.some(r => r[3] === '' || r[3] === undefined || isNaN(r[3]));
+    let order = mine.reduce((m, r) => blank ? m : Math.max(m, Number(r[3])), 0);
     (Array.isArray(b.names) ? b.names : []).map(cleanName_).filter(String).forEach(name => {
       const i = find(name);
       if (i > 0) { if (isOff_(v[i][2])) { sh.getRange(i + 1, 3, 1, 1).setValues([[true]]); v[i][2] = true; } return; }
-      const row = [room, name, true, ++order];
+      const row = [room, name, true, blank ? '' : ++order];
       sh.appendRow(row); v.push(row);
     });
   } else if (b.op === 'active') {
