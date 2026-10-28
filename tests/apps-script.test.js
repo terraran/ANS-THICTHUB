@@ -1,32 +1,6 @@
 // ทดสอบ apps-script/Code.gs ด้วย Sheet จำลอง (ไม่ต่อ Google): node tests/apps-script.test.js
-const fs = require('fs'), path = require('path'), vm = require('vm'), assert = require('assert');
-
-function load(tabs, props = {}) {
-  const sheet = name => ({
-    getDataRange: () => ({ getValues: () => tabs[name].map(r => r.slice()) }),
-    appendRow: r => tabs[name].push(r),
-    getRange: (r, c) => ({ setValues: v => { v[0].forEach((x, i) => { tabs[name][r - 1][c - 1 + i] = x; }); return { setFontWeight() {} }; } }),
-    deleteRow: i => tabs[name].splice(i - 1, 1),
-    setFrozenRows() {}
-  });
-  const ss = {
-    getSheetByName: n => tabs[n] ? sheet(n) : null,
-    getSheets: () => [sheet(Object.keys(tabs)[0])],
-    insertSheet: n => { tabs[n] = [[]]; return sheet(n); }
-  };
-  const ctx = {
-    SpreadsheetApp: { getActiveSpreadsheet: () => ss },
-    LockService: { getScriptLock: () => ({ waitLock() {}, releaseLock() {} }) },
-    PropertiesService: { getScriptProperties: () => ({ getProperty: k => props[k] || null }) },
-    ContentService: { createTextOutput: s => ({ s, setMimeType() { return this; } }), MimeType: { JSON: 'json' } },
-    Logger: { log() {} }
-  };
-  vm.createContext(ctx);
-  vm.runInContext(fs.readFileSync(path.join(__dirname, '../apps-script/Code.gs'), 'utf8'), ctx);
-  ctx.get = p => JSON.parse(ctx.doGet({ parameter: p }).s);
-  ctx.post = b => ctx.doPost({ postData: { contents: JSON.stringify(b) } }).s;
-  return ctx;
-}
+const assert = require('assert');
+const load = require('./fake-gas');
 const row = (act, room, names, round = 1) => ['Y3', 1, 't', room, names, 'TH', '10/16', '-', '0/8', '', '', 'r', JSON.stringify({ v: 2, act, round }), '-', round];
 
 const tabs = {
@@ -87,4 +61,70 @@ assert.deepStrictEqual(S.get({ key: 'wrong', level: 'Y3', week: '1' }), { error:
 assert.strictEqual(S.get({ key: 'secret', level: 'Y3', week: '1' }).rows.length, 5);
 assert.deepStrictEqual(load(tabs).get({ key: '', level: 'Y3', week: '1' }), { error: 'key' }, 'no key set → locked');
 assert.strictEqual(S.get({ action: 'roster' }).ok, false);
+
+// ---------- มุมครู: ทุก action ต้องมีรหัส ----------
+for (const action of ['whoami', 'dashboard', 'submissions'])
+  for (const key of [undefined, '', 'wrong']) assert.deepStrictEqual(S.get({ action, key, room: 'Y3.2', act: 'y3w1' }), { ok: false, error: 'key' }, action + key);
+assert.deepStrictEqual(load(tabs).get({ action: 'whoami', key: '' }), { ok: false, error: 'key' }, 'no TEACHER_KEY → locked');
+assert.deepStrictEqual(S.get({ action: 'whoami', key: 'secret' }), { ok: true });
+
+let db = S.get({ action: 'dashboard', key: 'secret', room: 'Y3.2' });
+assert.deepStrictEqual(db.roster, [{ name: 'กาย', active: true }, { name: 'ขิม', active: true }, { name: 'ซ่อนไว้', active: false }, { name: 'ท้าย', active: true }]);
+assert.deepStrictEqual(db.open, { y3w1: true });
+assert.deepStrictEqual(db.subs.map(s => [s.act, s.members, s.score, s.round]),
+  [['y3w1', ['ขิม', 'กาย'], '10/16', 1], ['y3w1', ['ขิม'], '10/16', 2], ['y3w1', ['ขิม', 'กาย'], '10/16', 3]]);
+assert.deepStrictEqual(db.drafts.map(d => [d.name, d.act]), [['ท้าย', 'y4w1']]);
+let subs = S.get({ action: 'submissions', key: 'secret', room: 'Y3.2', act: 'y3w1' }).rows;
+assert.strictEqual(subs.length, 3);
+assert.deepStrictEqual([subs[2].data.round, subs[2].lang, subs[2].members], [3, 'TH', ['ขิม', 'กาย']]);
+assert.strictEqual(S.get({ action: 'submissions', key: 'secret', room: 'Y3.2', act: 'y4w1' }).rows.length, 0);
+
+// เปิด/ปิด: รหัสผิด = ไม่เขียน · เขียนแถวรายห้อง (แก้แถวเดิม ไม่ซ้ำ) · ใช้กับทุกห้องในชั้น
+const nUnlock = tabs.Unlocks.length;
+assert.strictEqual(S.post({ action: 'setUnlock', key: 'wrong', rooms: ['Y3.2'], acts: { y3w2: true } }), 'key');
+assert.strictEqual(tabs.Unlocks.length, nUnlock);
+S.post({ action: 'setUnlock', key: 'secret', rooms: ['Y3.2'], acts: { adventure: true, y3w1: false } });
+assert.deepStrictEqual(S.get({ action: 'state', room: 'Y3.2', name: 'ขิม' }).open, { adventure: true });
+assert.strictEqual(tabs.Unlocks.length, nUnlock + 1, 'adventure row reused, y3w1 row added');
+S.post({ action: 'setUnlock', key: 'secret', rooms: ['Y3.1', 'Y3.2', 'Y3.3', 'Y3.4'], acts: { adventure: true, y3w1: true, y3w2: false } });
+for (const r of ['Y3.1', 'Y3.3']) assert.deepStrictEqual(S.get({ action: 'dashboard', key: 'secret', room: r }).open, r === 'Y3.1' ? { adventure: true, y3w1: true, popup60: true } : { adventure: true, y3w1: true }, r);
+assert.strictEqual(tabs.Unlocks.filter(r => r[0] === 'Y3.2' && r[1] === 'y3w1').length, 1);
+
+// รายชื่อ: เพิ่มหลายชื่อ (ซ้ำ = ข้าม, ซ้ำแต่ซ่อน = แสดงกลับ, ช่องว่างเกินถูกตัด) · ซ่อน · แสดง
+assert.strictEqual(S.post({ action: 'roster', key: 'wrong', room: 'Y3.2', op: 'add', names: ['แอบ'] }), 'key');
+S.post({ action: 'roster', key: 'secret', room: 'Y3.2', op: 'add', names: ['  มายด์   ก ', 'ขิม', 'ซ่อนไว้', '', 'จีน'] });
+assert.deepStrictEqual(S.get({ action: 'roster', room: 'Y3.2' }).names, ['กาย', 'ขิม', 'ซ่อนไว้', 'มายด์ ก', 'จีน', 'ท้าย']);
+S.post({ action: 'roster', key: 'secret', room: 'Y3.2', op: 'active', name: 'จีน', active: false });
+assert.ok(!S.get({ action: 'roster', room: 'Y3.2' }).names.includes('จีน'));
+assert.deepStrictEqual(S.get({ action: 'dashboard', key: 'secret', room: 'Y3.2' }).roster.find(x => x.name === 'จีน'), { name: 'จีน', active: false });
+S.post({ action: 'roster', key: 'secret', room: 'Y3.2', op: 'active', name: 'จีน', active: true });
+assert.ok(S.get({ action: 'roster', room: 'Y3.2' }).names.includes('จีน'));
+S.post({ action: 'roster', key: 'secret', room: 'Y3.1', op: 'add', names: ['ขิม'] });
+assert.deepStrictEqual(S.get({ action: 'roster', room: 'Y3.1' }).names, ['ขิม', 'อื่น'], 'same name in another room is fine');
+
+// แก้ชื่อ: งานที่ส่ง (ทั้งแถวเก่าที่มีแต่ชื่อ และแถวที่มี members) + งานค้าง + เพื่อนคู่ในงานค้าง ตามไปชื่อใหม่ · ห้องอื่นไม่เปลี่ยน
+S.post({ action: 'draft', room: 'Y3.2', act: 'y3w2', members: ['ขิม', 'ท้าย'], data: { step: 1, partner: 'ท้าย' } });
+S.post({ action: 'draft', room: 'Y3.1', act: 'y3w2', members: ['ขิม'], data: { step: 1 } });
+S.post({ action: 'roster', key: 'secret', room: 'Y3.2', op: 'rename', from: 'ขิม', to: 'กาย' });   // ซ้ำคนอื่น = ไม่ทำ
+assert.ok(S.get({ action: 'roster', room: 'Y3.2' }).names.includes('ขิม'));
+S.post({ action: 'roster', key: 'secret', room: 'Y3.2', op: 'rename', from: 'ขิม', to: 'ขิม ก' });
+S.post({ action: 'roster', key: 'secret', room: 'Y3.2', op: 'rename', from: 'ท้าย', to: 'ท้ายสุด' });
+assert.deepStrictEqual(S.get({ action: 'roster', room: 'Y3.2' }).names, ['กาย', 'ขิม ก', 'ซ่อนไว้', 'มายด์ ก', 'จีน', 'ท้ายสุด']);
+st = S.get({ action: 'state', room: 'Y3.2', name: 'ขิม ก' });
+assert.deepStrictEqual([st.status, st.rounds, Object.keys(st.drafts)], [{ y3w1: 'done' }, { y3w1: 3 }, ['y3w2']]);
+assert.deepStrictEqual(S.get({ action: 'state', room: 'Y3.2', name: 'ขิม' }).status, {});
+assert.strictEqual(tabs.Submissions[1][5], 'ขิม ก + กาย');
+assert.deepStrictEqual(S.get({ action: 'last', room: 'Y3.2', name: 'กาย', act: 'y3w1' }).last.members, ['ขิม ก', 'กาย']);
+assert.deepStrictEqual(S.get({ action: 'draft', room: 'Y3.2', name: 'ขิม ก', act: 'y3w2' }).draft.data, { step: 1, partner: 'ท้ายสุด' });
+assert.ok(S.get({ action: 'draft', room: 'Y3.1', name: 'ขิม', act: 'y3w2' }).draft, 'other room untouched');
+assert.strictEqual(tabs.Submissions.find(r => r[4] === 'Y3.4')[5], 'Loukpear + yuki ');
+// แก้แค่ตัวพิมพ์/ช่องว่างของชื่อตัวเองได้
+S.post({ action: 'roster', key: 'secret', room: 'Y3.4', op: 'add', names: ['yuki'] });
+S.post({ action: 'roster', key: 'secret', room: 'Y3.4', op: 'rename', from: 'yuki', to: 'Yuki' });
+assert.deepStrictEqual(S.get({ action: 'roster', room: 'Y3.4' }).names, ['Yuki']);
+// แท็บ Unlocks/Roster ยังไม่มี → สร้างเอง
+const fresh = { Submissions: [['time']] }, F = load(fresh, { TEACHER_KEY: 'k' });
+F.post({ action: 'setUnlock', key: 'k', rooms: ['Y4.1'], acts: { y4w1: true } });
+F.post({ action: 'roster', key: 'k', room: 'Y4.1', op: 'add', names: ['เอ', 'บี'] });
+assert.deepStrictEqual(JSON.parse(JSON.stringify([fresh.Unlocks, fresh.Roster.slice(1)])),[[['room', 'activityId', 'open'], ['Y4.1', 'y4w1', true]], [['Y4.1', 'เอ', true, 1], ['Y4.1', 'บี', true, 2]]]);
 console.log('apps-script tests: ok');

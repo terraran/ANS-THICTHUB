@@ -154,3 +154,5 @@ main{min-width:0}
 .body.full{grid-template-columns:minmax(0,1fr)}
 .map{grid-template-columns:minmax(0,1fr)}
 .bubble{grid-template-columns:minmax(0,1fr) 150px minmax(0,1fr) 150px minmax(0,1fr)}
+/* มุมครูเปิดดูงานที่ส่งแล้ว (view=1): ดูอย่างเดียว ไม่มีปุ่มกลับคลัง/ทำคู่/แก้ส่งใหม่ */
+.viewonly #toLib,.viewonly .steps,.viewonly #pairBtn,.viewonly #saved,.viewonly #res .btns,.viewonly #resume,.viewonly #msgBtn{display:none!important}

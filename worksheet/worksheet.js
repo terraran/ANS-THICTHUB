@@ -1,6 +1,7 @@
 // ใบงานกลาง: worksheet/?act=y3w1#room=Y3.2&name=ขิม&lang=th&round=2&draft=1
 // draft=1 = มีงานค้าง ให้โหลดมาทำต่อ · done=1 = ส่งแล้ว ให้โหลดงานที่ส่งล่าสุดมาแสดงผลตรวจ
 // เนื้อหามาจาก content/<act>.json · ข้อมูลการ์ดในคลัง (frq, afterGame) มาจาก ../data/activities.json
+// view=1 (worksheet/?act=y3w1&view=1) = มุมครูเปิดดูงานที่ส่งแล้วแบบดูอย่างเดียว ข้อมูลงานส่งมาทาง postMessage (ดู bootView)
 // map: "tree" (ค่าเริ่มต้น Tree Map 2 กลุ่ม binA/binB) · "bubble" (Double Bubble: กล่อง a / m=เหมือนกัน / b) · "flow" (Flow Map: กล่องตาม bins)
 // ขั้น 2: มี signs = กดป้ายสัญญาณบนการ์ดกลุ่ม b · มี write = เขียนตัวอย่าง/วิธีรับมือ (เลือกสถานการณ์ได้ถ้ามี write.choose)
 (() => {
@@ -34,7 +35,8 @@ const UI = {
 const H = new URLSearchParams(location.hash.slice(1));
 const me = { room: H.get('room') || '', name: H.get('name') || '' };
 if (!me.room || !me.name) { const s = store.get('me'); if (s) Object.assign(me, s); }
-const actId = new URLSearchParams(location.search).get('act') || '';
+const Q = new URLSearchParams(location.search);
+const actId = Q.get('act') || '', viewOnly = Q.get('view') === '1';
 let L = (H.get('lang') || store.get('lang')) === 'en' ? 'en' : 'th';
 let C = null, A = null, game = null;   // เนื้อหาใบงาน · ข้อมูลการ์ดในคลัง · เกมหลังส่ง
 let step = 1, placed = {}, signs = {}, hes = '', sel = null, round = Math.max(1, parseInt(H.get('round'), 10) || 1);
@@ -126,7 +128,7 @@ function cardEl(c){
 }
 
 function applyLang(){
-  const U = UI[L]; document.documentElement.lang = L; store.set('lang', L);
+  const U = UI[L]; document.documentElement.lang = L; if (!viewOnly) store.set('lang', L);
   $('#lth').classList.toggle('on', L === 'th'); $('#len').classList.toggle('on', L === 'en');
   $('#lLib').textContent = U.lib;
   $('#toLib').href = libHref();
@@ -377,18 +379,25 @@ $('#play').onclick = () => {
 addEventListener('message', e => { if (e.data === 'closeGame') wrap.style.display = 'none'; });
 
 // ---- เริ่ม ----
+async function loadContent(){
+  if (!/^[a-z0-9_-]+$/i.test(actId)) throw new Error('act');
+  const [c, acts] = await Promise.all([fetch(`content/${actId}.json`).then(r => { if (!r.ok) throw new Error('act'); return r.json(); }),
+                                       fetch('../data/activities.json').then(r => r.json())]);
+  C = c; A = acts.activities.find(a => a.id === actId) || null;
+  game = A && A.afterGame ? acts.activities.find(a => a.id === A.afterGame) || null : null;
+}
+// งานที่ส่งกับการ์ดชุดเก่า: แสดงด้วยการ์ดที่เด็กเห็นตอนส่ง (ดูจาก retired ในไฟล์เนื้อหา)
+function useCardsOf(last){
+  const ids = Object.keys(last.data.place), all = C.cards.concat(C.retired || []);
+  if (ids.some(id => !C.cards.some(c => c.id === id))) { oldSet = true; C = Object.assign({}, C, { cards: ids.map(id => all.find(c => c.id === id)).filter(Boolean) }); }
+}
 async function boot(){
+  if (viewOnly) return bootView();
   if (!me.room || !me.name) return showMsg(UI[L].noMe);
   store.set('me', me);
   $('#meName').textContent = me.name; $('#meAv').textContent = initial(me.name);
   $('#meAv').style.background = AV[1];
-  try {
-    if (!/^[a-z0-9_-]+$/i.test(actId)) throw new Error('act');
-    const [c, acts] = await Promise.all([fetch(`content/${actId}.json`).then(r => { if (!r.ok) throw new Error('act'); return r.json(); }),
-                                         fetch('../data/activities.json').then(r => r.json())]);
-    C = c; A = acts.activities.find(a => a.id === actId) || null;
-    game = A && A.afterGame ? acts.activities.find(a => a.id === A.afterGame) || null : null;
-  } catch (e) { return showMsg(UI[L].noAct); }
+  try { await loadContent(); } catch (e) { return showMsg(UI[L].noAct); }
   const want = H.get('draft') === '1' ? 'draft' : H.get('done') === '1' ? 'last' : '';
   let saved = null;
   if (want && HubAPI.configured()) {
@@ -397,11 +406,7 @@ async function boot(){
     $('#loading').classList.add('hide');
   }
   const last = want === 'last' && saved && saved.data && saved.data.place ? saved : null;
-  if (last) {
-    // งานที่ส่งกับการ์ดชุดเก่า: แสดงด้วยการ์ดที่เด็กเห็นตอนส่ง (ดูจาก retired ในไฟล์เนื้อหา)
-    const ids = Object.keys(last.data.place), all = C.cards.concat(C.retired || []);
-    if (ids.some(id => !C.cards.some(c => c.id === id))) { oldSet = true; C = Object.assign({}, C, { cards: ids.map(id => all.find(c => c.id === id)).filter(Boolean) }); }
-  }
+  if (last) useCardsOf(last);
   buildMap();
   shuffle(C.cards).forEach(c => pool.appendChild(cardEl(c)));
   let start = 1;
@@ -411,6 +416,29 @@ async function boot(){
   }
   setStep(start);
   if (last) showSubmitted(last);
+}
+// มุมครู: ใบงานบอกหน้าแม่ว่า 'viewReady' → หน้าแม่ตอบ { view: { data, time, members }, room, lang, hide }
+// ไม่บันทึก ไม่ส่ง ไม่จำชื่อในเครื่อง · hide = ซ่อนชื่อเด็กเป็น •••
+function bootView(){
+  document.body.classList.add('viewonly');
+  let started = false;
+  addEventListener('message', async e => {
+    const m = e.data;
+    if (e.origin !== location.origin || !m || !m.view || !m.view.data || started) return;
+    started = true;
+    const last = m.view, who = last.members || [];
+    L = m.lang === 'en' ? 'en' : 'th'; me.room = m.room || ''; me.name = who[0] || '';
+    try { await loadContent(); } catch (err) { return showMsg(UI[L].noAct); }
+    useCardsOf(last);
+    buildMap();
+    C.cards.forEach(c => pool.appendChild(cardEl(c)));
+    setStep(1); showSubmitted(last);
+    const nm = n => m.hide ? '•••' : n, av = n => m.hide ? '?' : initial(n);
+    $('#meName').textContent = nm(me.name); $('#meAv').textContent = av(me.name); $('#meAv').style.background = AV[1];
+    if (partner) { $('#pName').textContent = nm(partner); $('#pAv').textContent = av(partner); }
+    parent.postMessage('viewShown', location.origin);
+  });
+  parent.postMessage('viewReady', location.origin);
 }
 boot();
 })();

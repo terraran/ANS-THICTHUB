@@ -14,7 +14,7 @@ window.HubAPI = (() => {
     await fetch(C.endpoint, { method: 'POST', mode: 'no-cors', keepalive: true, headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) });
   }
   return {
-    configured,
+    configured, get, post,   // get/post ตรง ๆ ใช้ในมุมครู (ใส่ key เอง)
     roster: room => get({ action: 'roster', room }).then(j => j.names),
     state: (room, name) => get({ action: 'state', room, name }),
     submit: (row, members) => post({ action: 'submit', row, members }),

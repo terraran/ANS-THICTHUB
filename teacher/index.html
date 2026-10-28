@@ -3,11 +3,44 @@
 <title>มุมครู · ANS ICT Hub</title>
 <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;600;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/hub.css">
-</head><body>
-<!-- มุมครูจริงทำใน Phase 3 (รหัสครู, ตารางส่งงาน, เปิด/ปิดกิจกรรม, แชร์ผลงาน, รายชื่อ) -->
-<div class="page" style="justify-content:center">
- <h1 style="font-size:44px">มุมครู</h1>
- <p class="msg">กำลังสร้าง · ตอนนี้เปิด/ปิดกิจกรรมและแก้รายชื่อได้ใน Google Sheet</p>
- <a class="btn" href="../">◀ หน้าแรก</a>
+<link rel="stylesheet" href="teacher.css">
+</head><body class="tpage">
+<!-- รหัสครูไม่อยู่ในไฟล์ใด ๆ: ครูพิมพ์ตอนเข้า · ตรวจกับ Script แล้วจำไว้ใน sessionStorage (ปิดแท็บแล้วหาย) -->
+<form id="login" class="login hide" autocomplete="off">
+ <h1>มุมครู</h1>
+ <label for="key">รหัสครู</label>
+ <input id="key" type="password" required autocomplete="current-password">
+ <button class="tbtn go" id="enter">เข้ามุมครู ➜</button>
+ <p id="keyMsg" class="kmsg" role="status"></p>
+ <a href="../">◀ หน้าแรก</a>
+</form>
+
+<div id="app" class="tapp hide">
+ <nav class="tnav">
+  <div class="tt">มุมครู</div>
+  <div class="ts">ANS ICT Hub</div>
+  <div id="tabs" class="tabs"></div>
+  <div class="sp"></div>
+  <a href="../" id="logout">ออกจากมุมครู</a>
+ </nav>
+ <main class="tmain">
+  <div class="rooms" id="rooms"></div>
+  <div id="note" class="note hide" role="status"></div>
+  <section id="view"></section>
+ </main>
 </div>
+
+<div id="viewer" class="viewer hide" role="dialog" aria-modal="true" aria-labelledby="vTitle">
+ <div class="vbar">
+  <button class="tbtn" id="vClose">✕ ปิด</button>
+  <b id="vTitle"></b>
+  <span class="sp"></span>
+  <button class="tbtn line" id="vHide" aria-pressed="false">ซ่อนชื่อ</button>
+  <button class="tbtn dark" id="vPng">บันทึก PNG</button>
+ </div>
+ <div class="vframes" id="vFrames"></div>
+</div>
+<script src="../config.js"></script>
+<script src="../assets/api.js"></script>
+<script src="teacher.js"></script>
 </body></html>
