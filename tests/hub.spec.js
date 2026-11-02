@@ -381,7 +381,7 @@ test('เนื้อหาสัปดาห์ 2: การ์ดทุกใ�
     expect(C.act).toBe(id);
     expect(new Set(C.cards.map(c => c.id)).size).toBe(C.cards.length);
     for (const c of C.cards) { expect(bins).toContain(c.bin); expect(c.text.th && c.text.en && c.why.th && c.why.en).toBeTruthy(); }
-    for (const b of bins) expect(C.cards.some(c => c.bin === b)).toBe(true);
+    if (C.cards.length) for (const b of bins) expect(C.cards.some(c => c.bin === b)).toBe(true);
     for (const f of C.write.fields) if (f.in) expect(bins).toContain(f.in);
   }
   const y3 = content('y3w2');
@@ -389,7 +389,18 @@ test('เนื้อหาสัปดาห์ 2: การ์ดทุกใ�
   for (const b of ['a', 'm', 'b']) expect(y3.cards.filter(c => c.bin === b)).toHaveLength(1);   // ตัวอย่างกล่องละ 1
   expect(y3.add.min).toBe(3);
   expect(y3.noReason).toBe(true);
-  expect(content('y4w2').write.choose).toHaveLength(3);
+  // Y4: ไม่มีการ์ด · เลือก 1 จาก 3 เรื่อง แต่ละเรื่องมีการ์ตูน 4 ฉาก + คำถามปิดท้าย · เขียนเองครบ 4 กล่อง
+  const y4 = content('y4w2');
+  expect(y4.cards).toEqual([]);
+  expect(y4.noReason).toBe(true);
+  expect(y4.bins.map(b => b.id)).toEqual(['s1', 's2', 's3', 's4']);
+  expect(y4.write.fields.map(f => f.in)).toEqual(['s1', 's2', 's3', 's4']);
+  expect(y4.write.choose).toHaveLength(3);
+  for (const c of y4.write.choose) {
+    expect(c.scenes).toHaveLength(4);
+    expect(c.text.th && c.text.en && c.ask.th && c.ask.en).toBeTruthy();
+    for (const sc of c.scenes) { expect(sc.say.th && sc.say.en).toBeTruthy(); expect(sc.art.length).toBeGreaterThan(0); if (sc.phone) expect(sc.phone.text.th && sc.phone.text.en).toBeTruthy(); }
+  }
   const acts = JSON.parse(fs.readFileSync(path.join(__dirname, '../data/activities.json'), 'utf8')).activities;
   for (const id of ['y3w2', 'y4w2']) expect(acts.find(a => a.id === id)).toMatchObject({ week: 2, kind: 'sheet', path: 'worksheet/?act=' + id });
 });
@@ -539,51 +550,90 @@ test('Y3 สัปดาห์ 2: ลากเส้นจากฟองไป�
   await ctx.close();
 });
 
-test('Y4 สัปดาห์ 2 Flow Map: ต้องเลือกสถานการณ์ · เขียนในกล่อง · ภาษาอังกฤษ · งานค้างทำต่อได้', async ({ page, browser }) => {
+test('Y4 สัปดาห์ 2 Flow Map: เลือกเรื่อง → ดูการ์ตูนจบ → เขียนเองทั้ง 4 กล่อง → เด้งคำถาม FoR → ส่ง · งานค้างทำต่อได้', async ({ page, browser }) => {
   const errs = []; page.on('pageerror', e => errs.push(e.message));
+  await page.emulateMedia({ reducedMotion: 'reduce' });
   const api = mockApi(page, { open: { y4w2: true } });
   await page.goto('/worksheet/?act=y4w2#room=Y4.1&name=' + encodeURIComponent('เมษา') + '&lang=en');
-  const C = content('y4w2');
-  await expect(page.locator('#s1')).toHaveText('1 Order');
-  await expect(page.locator('.frow .bin')).toHaveCount(4);
-  await expect(page.locator('.frow .arrow')).toHaveCount(3);
-  await expect(page.locator('.bin[data-bin="s1"] h2')).toHaveText('👀 1 Spot');
-  await expect(page.locator('[data-f="w1"]')).toBeHidden();      // ช่องเขียนยังไม่โผล่ในขั้น 1
-  await placeAll(page, C, { x4: 's3' });                         // "ถามเพื่อนในเกม" หลอกตาว่าเป็นสอบถาม
-  await page.click('#next');
-  await expect(page.locator('#wch')).toBeVisible();
+  const C = content('y4w2'), p2s = C.write.choose.find(c => c.id === 'p2');
+  await expect(page.locator('#s1')).toHaveText('1 Watch');
+  await expect(page.locator('#s3')).toHaveText('3 Look back');
+  await expect(page.locator('#s4')).toBeHidden();
+  await expect(page.locator('#stag')).toHaveText('Step 1 / 3');
+  await expect(page.locator('#poolWrap')).toBeHidden();             // ไม่มีการ์ดให้ลาก
+  await expect(page.locator('.cardx')).toHaveCount(0);
+  await expect(page.locator('#map')).toBeHidden();
+  await expect(page.locator('#story')).toBeVisible();
   await expect(page.locator('.pick')).toHaveCount(3);
-  for (const f of C.write.fields) await page.fill(`.bin[data-bin="${f.in}"] [data-f="${f.id}"]`, 'We will not reply ' + f.id);
-  await expect(page.locator('#next')).toBeDisabled();            // ยังไม่ได้เลือกสถานการณ์
-  await page.click('.pick[data-p="p3"]');
-  await expect(page.locator('.pick[data-p="p3"]')).toHaveClass(/on/);
+  await expect(page.locator('#next')).toBeDisabled();
+  await page.click('.pick[data-p="p2"]');
+  await expect(page.locator('.scn .say')).toHaveText(p2s.scenes[0].say.en);
+  await shot(page, 'y4w2-1-scene1');
+  await expect(page.locator('.dot[data-i="1"]')).toHaveClass(/on/, { timeout: 6000 });   // เล่นต่อฉากถัดไปเอง
+  await expect(page.locator('.scn .pmsg')).toHaveText(p2s.scenes[1].phone.text.en);
+  await shot(page, 'y4w2-2-scene2');
+  await expect(page.locator('#next')).toBeDisabled();             // ยังดูไม่จบ
+  await page.click('.dot[data-i="4"]');
+  await expect(page.locator('.scn .say.big')).toHaveText(p2s.ask.en);
   await expect(page.locator('#next')).toBeEnabled();
+  await page.click('#next');
+  await expect(page.locator('#stag')).toHaveText('Step 2 / 3');
+  await expect(page.locator('#story')).toBeHidden();
+  await expect(page.locator('#wch')).toBeHidden();
+  await expect(page.locator('#strip .mini')).toHaveCount(4);
+  await expect(page.locator('#strip .sttl')).toHaveText(p2s.icon + p2s.text.en);
+  await expect(page.locator('.frow .bin')).toHaveCount(4);
+  await expect(page.locator('.bin.x')).toHaveCount(0);
+  await expect(page.locator('#next')).toBeDisabled();
+  for (const f of C.write.fields) await page.fill(`.bin[data-bin="${f.in}"] [data-f="${f.id}"]`, 'We will help ' + f.id);
+  await expect(page.locator('#next')).toBeEnabled();
+  await shot(page, 'y4w2-3-write');
   await page.click('#toLib');                                     // ออกกลางทาง = บันทึกงานค้าง
-  await expect.poll(() => { const d = api.drafts['Y4.1|เมษา|y4w2']; return d && d.data.write.pick; }).toBe('p3');
+  await expect.poll(() => { const d = api.drafts['Y4.1|เมษา|y4w2']; return d && d.data.write.f.w4; }).toBe('We will help w4');
 
-  // อีกเครื่อง: ทำต่อ กลับมาขั้น 2 พร้อมสถานการณ์และข้อความเดิม
-  const ctx = await browser.newContext({ viewport: { width: 1366, height: 768 } });
+  // อีกเครื่อง: ทำต่อที่ขั้น 2 · กลับไปดูการ์ตูนอีกครั้งได้โดยไม่ต้องดูใหม่จนจบ
+  const ctx = await browser.newContext({ viewport: { width: 1366, height: 768 }, reducedMotion: 'reduce' });
   const p2 = await ctx.newPage();
   mockApi(p2, { open: { y4w2: true } }, api);
   await p2.goto('/worksheet/?act=y4w2#room=Y4.1&name=' + encodeURIComponent('เมษา') + '&lang=en&draft=1');
   await expect(p2.locator('#s2')).toHaveClass(/on/);
-  await expect(p2.locator('.pick[data-p="p3"]')).toHaveClass(/on/);
-  await expect(p2.locator('[data-f="w4"]')).toHaveValue('We will not reply w4');
+  await expect(p2.locator('[data-f="w3"]')).toHaveValue('We will help w3');
+  await p2.click('#again');
+  await expect(p2.locator('#s1')).toHaveClass(/on/);
+  await expect(p2.locator('.pick[data-p="p2"]')).toHaveClass(/on/);
+  await expect(p2.locator('#next')).toBeEnabled();
   await p2.click('#next');
-  await p2.click('.cardx[data-id="x4"]');
-  await p2.fill('#reason', 'Friends in the game seemed helpful');
-  await p2.click('#toFor');
-  await p2.click('#skip');
+  await p2.click('#next');                                        // ขั้น 2 เสร็จ = เด้งคำถาม FoR
+  await expect(p2.locator('#forPanel')).toBeVisible();
+  await expect(p2.locator('#stag')).toHaveText('Step 3 / 3');
+  await p2.fill('#fr', 'Skipping a step is not safe');
+  await shot(p2, 'y4w2-4-for');
+  await p2.click('#check');
   await expect(p2.locator('#sent')).toHaveClass(/ok/);
-  await expect(p2.locator('#result')).toHaveText(`${C.cards.length - 1}/${C.cards.length} correct`);
-  await expect(p2.locator('.cardx[data-id="x4"] .exp')).toContainText('Belongs in "🚫 Do not do this"');
+  await expect(p2.locator('#result')).toHaveText('✍️');
+  await expect(p2.locator('#task')).toContainText('Your teacher will read it');
+  await expect(p2.locator('#strip .mini')).toHaveCount(4);
+  await expect(p2.locator('[data-f="w1"]')).toHaveJSProperty('readOnly', true);
+  await shot(p2, 'y4w2-5-sent');
   const row = api.posts[0].row;
   expect(row.slice(0, 2)).toEqual(['Y4', 2]);
   expect(row[5]).toBe('EN');
-  expect(row[9]).toContain('🙋 3 สอบถาม: We will not reply w3');
+  expect(row[6]).toBe('✓');
+  expect(row[7]).toBe('-');
+  expect(row[9]).toContain('🙋 3 สอบถาม: We will help w3');
+  expect(row[9]).toContain('ใบเฟิร์นกับเพชรฟรี');
   const d = JSON.parse(row[12]);
-  expect(d).toMatchObject({ act: 'y4w2', map: 'flow', write: { pick: 'p3' }, fr: '' });
+  expect(d).toMatchObject({ act: 'y4w2', map: 'flow', place: {}, write: { pick: 'p2' }, fr: 'Skipping a step is not safe' });
   await ctx.close();
+
+  // เปิดงานที่ส่งแล้ว (done=1): เห็นเรื่องที่เลือก + Flow Map ที่เขียน · แก้แล้วส่งใหม่ได้
+  await page.goto('/worksheet/?act=y4w2#room=Y4.1&name=' + encodeURIComponent('เมษา') + '&lang=en&done=1');
+  await expect(page.locator('#result')).toHaveText('✍️');
+  await expect(page.locator('[data-f="w2"]')).toHaveValue('We will help w2');
+  await expect(page.locator('#story')).toBeHidden();
+  await page.click('#edit');
+  await expect(page.locator('#story')).toBeVisible();
+  await expect(page.locator('#next')).toBeEnabled();
   expect(errs).toEqual([]);
 });
 

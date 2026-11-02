@@ -240,10 +240,10 @@ async function drawShare(force){
     (compare ? `<div class="note">เทียบ 2 ชิ้น: กดเลือกผลงาน ${cmpSel.length ? 'อีก 1 ชิ้น' : '2 ชิ้น'}</div>` : '') +
     `<div class="share"><div class="subs">${shareGroups.map((g, i) => { const r = g.rows[g.rows.length - 1];
       return `<button class="sub" data-g="${i}" aria-pressed="${cmpSel.includes(i)}"><span class="nm">${who(g.label)}</span>
-        <span class="info">จัดถูก ${esc(r.score)} · รอบที่ ${r.data.round || 1}${g.rows.length > 1 ? ` · ส่ง ${g.rows.length} ครั้ง` : ''}</span></button>`; }).join('')}</div>
+        <span class="info">${C.cards.length ? 'จัดถูก ' + esc(r.score) : 'ส่งแล้ว'} · รอบที่ ${r.data.round || 1}${g.rows.length > 1 ? ` · ส่ง ${g.rows.length} ครั้ง` : ''}</span></button>`; }).join('')}</div>
      <div class="side">
-      <div class="panel miss"><h3>การ์ดที่จัดผิดบ่อย <small>(${latest.length} ผลงาน รอบล่าสุด)</small></h3>${miss.length ? miss.map(x =>
-        `<div><span>${esc(plain(th(x.c.text)))}<br><small>ควรอยู่ใน "${esc(binName(x.c.bin))}"</small></span><span class="p">${x.bad}/${x.n}</span></div>`).join('') : '<small>ทุกงานจัดถูกหมด 🎉</small>'}</div>
+      ${C.cards.length ? `<div class="panel miss"><h3>การ์ดที่จัดผิดบ่อย <small>(${latest.length} ผลงาน รอบล่าสุด)</small></h3>${miss.length ? miss.map(x =>
+        `<div><span>${esc(plain(th(x.c.text)))}<br><small>ควรอยู่ใน "${esc(binName(x.c.bin))}"</small></span><span class="p">${x.bad}/${x.n}</span></div>`).join('') : '<small>ทุกงานจัดถูกหมด 🎉</small>'}</div>` : ''}
       <div class="panel fr"><h3>คำตอบ Frame of Reference <small>(ตอบ ${frs.length}/${shareGroups.length})</small></h3><div class="q">${esc(frq)}</div>${frs.length ? `<ul>${frs.map(g =>
         `<li><b>${who(g.label)}:</b> ${esc(g.rows[g.rows.length - 1].data.fr)}</li>`).join('')}</ul>` : '<small>ยังไม่มีใครตอบ</small>'}</div>
      </div></div>`;

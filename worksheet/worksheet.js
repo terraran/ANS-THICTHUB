@@ -7,6 +7,7 @@
 // ขั้น 2: มี signs = กดป้ายสัญญาณบนการ์ดกลุ่ม b · มี write = เขียนตัวอย่าง/วิธีรับมือ (เลือกสถานการณ์ได้ถ้ามี write.choose)
 // add = ขั้น 1 เด็กพิมพ์การ์ดของตัวเองเพิ่มลงกล่องไหนก็ได้ (อย่างน้อย add.min ใบ ไม่ตรวจถูกผิด)
 // write.fields[].hd = หัวข้อเหนือช่อง (แค่แสดง) · noReason = ไม่มีขั้นให้เหตุผล: ขั้น 2 เสร็จแล้วเด้งคำถาม Frame of Reference เลย (หัวขั้นเหลือ 3 ขั้น)
+// write.choose[].scenes = การ์ตูนสั้น: ขั้น 1 เลือกเรื่องแล้วดูให้จบ · cards: [] = ไม่มีการ์ด ไม่ตรวจถูกผิด ครูอ่านที่เด็กเขียน
 (() => {
 const $ = s => document.querySelector(s);
 const { store, initial, esc, AV } = HubUtil;
@@ -22,7 +23,8 @@ const UI = {
         saved: tm => `💾 บันทึกอัตโนมัติแล้ว ${tm}`, resumed: tm => `↻ ทำต่อจากที่บันทึกไว้ ${tm}`, restart: 'เริ่มใหม่ ↺', confirmRestart: 'ลบงานที่ทำไว้ แล้วเริ่มใหม่ไหม?',
         loading: 'กำลังโหลดงานที่ทำค้างไว้...', pairAdd: '+ ทำกับเพื่อน', pairChange: 'เปลี่ยนเพื่อน', pairHd: r => `ทำงานคู่กับใคร? (${r})`,
         solo: 'ทำคนเดียว', pairFt: 'กดส่งครั้งเดียว ใบงานนับให้ทั้งสองคน', rosterErr: 'โหลดรายชื่อไม่สำเร็จ ลองใหม่อีกครั้ง',
-        addPh: 'พิมพ์เพิ่ม 1 ข้อ...', addTo: 'ใส่ใน', addN: (n, m) => n >= m ? `เพิ่มแล้ว ${n} ใบ ✓ เพิ่มอีกได้` : `เพิ่มแล้ว ${n} ใบ · อีก ${m - n} ใบ`, del: 'ลบ', myOwn: 'การ์ดที่เราเพิ่ม:', addBubble: '➕ เพิ่มฟอง' },
+        addPh: 'พิมพ์เพิ่ม 1 ข้อ...', addTo: 'ใส่ใน', addN: (n, m) => n >= m ? `เพิ่มแล้ว ${n} ใบ ✓ เพิ่มอีกได้` : `เพิ่มแล้ว ${n} ใบ · อีก ${m - n} ใบ`, del: 'ลบ', myOwn: 'การ์ดที่เราเพิ่ม:', addBubble: '➕ เพิ่มฟอง',
+        replay: '↺ ดูอีกครั้ง', watchAgain: '▶ ดูการ์ตูนอีกครั้ง', pickStory: '👆 เลือกเรื่องด้านบนก่อนนะ', doneWrite: 'ส่ง Flow Map ให้ครูแล้ว ครูจะอ่านที่เราเขียน' },
   en: { steps: ['1 Sort', '2 Find signs', '3 Explain', '4 Look back'], stepTag: (n, m) => `Step ${n} / ${m}`, lib: 'Activities', week: n => `Week ${n}`,
         next: 'Next step ➜', back: '◀ Back', check: 'Check and send to teacher ✔', skip: 'Skip and send', edit: '✏️ Fix and send again', lib2: 'Back to activities',
         pickHint: '👆 Tap the card you were least sure about', picked: 'The card we were least sure about:', reason: 'What makes you think that?', reasonPh: 'Type your reason...',
@@ -34,7 +36,8 @@ const UI = {
         saved: tm => `💾 Saved ${tm}`, resumed: tm => `↻ Continuing from ${tm}`, restart: 'Start over ↺', confirmRestart: 'Delete your saved work and start over?',
         loading: 'Loading your saved work...', pairAdd: '+ Work with a friend', pairChange: 'Change friend', pairHd: r => `Who are you working with? (${r})`,
         solo: 'Work alone', pairFt: 'Send once and it counts for both of you', rosterErr: 'Could not load names. Try again.',
-        addPh: 'Type 1 more...', addTo: 'Put in', addN: (n, m) => n >= m ? `${n} added ✓ you can add more` : `${n} added · ${m - n} to go`, del: 'Delete', myOwn: 'Cards we added:', addBubble: '➕ Add bubble' }
+        addPh: 'Type 1 more...', addTo: 'Put in', addN: (n, m) => n >= m ? `${n} added ✓ you can add more` : `${n} added · ${m - n} to go`, del: 'Delete', myOwn: 'Cards we added:', addBubble: '➕ Add bubble',
+        replay: '↺ Watch again', watchAgain: '▶ Watch the cartoon again', pickStory: '👆 Pick a story above first', doneWrite: 'Your Flow Map was sent. Your teacher will read it.' }
 };
 
 const H = new URLSearchParams(location.hash.slice(1));
@@ -47,6 +50,7 @@ let C = null, A = null, game = null;   // เนื้อหาใบงาน �
 let step = 1, placed = {}, signs = {}, hes = '', sel = null, round = Math.max(1, parseInt(H.get('round'), 10) || 1);
 let wr = { pick: '', f: {} };   // ขั้นเขียน: สถานการณ์ที่เลือก + ข้อความแต่ละช่อง
 let own = [];                    // การ์ดที่เด็กเพิ่มเอง [{id, text, bin}]
+let scene = 0, seen = false, sceneTimer = 0;   // การ์ตูนขั้น 1: ฉากที่เล่นอยู่ · ดูจบแล้วหรือยัง
 let checked = false, sendState = '', scale = 1, sending = false, dirty = false, partner = '', sentAt = null, oldSet = false;
 const app = $('#app'), pool = $('#pool'), stage = $('#stage');
 const t = o => HubUtil.t(o, L);
@@ -70,10 +74,13 @@ const WEB = () => C.map === 'bubble';
 const ownDone = () => !isAdd() || (own.length >= (C.add.min || 3) && (!WEB() || own.every(o => o.bin)));
 const skip3 = () => !!C.noReason;
 const stepNo = n => skip3() && n === 4 ? 3 : n;   // เลขขั้นที่เด็กเห็น
+const STORY = () => !!(C.write && C.write.choose && C.write.choose.some(c => c.scenes));
+const story = () => STORY() && C.write.choose.find(c => c.id === wr.pick);
+const storyDone = () => !STORY() || (!!wr.pick && seen);
 
 // สร้างแผนภาพตามชนิด (tree ใช้ HTML เดิมใน index.html)
 function buildMap(){
-  stage.classList.toggle('popfor', skip3()); app.classList.toggle('bubblemap', C.map === 'bubble');
+  stage.classList.toggle('popfor', skip3()); app.classList.toggle('bubblemap', C.map === 'bubble'); app.classList.toggle('nocards', !C.cards.length);
   const m = $('#map'), box = b => `<div class="bin ${b.id}" data-bin="${b.id}"><h2></h2><div class="list"></div>` +
     (C.write ? C.write.fields.filter(f => f.in === b.id).map(fieldHtml).join('') : '') + '</div>';
   if (WEB()) {
@@ -108,9 +115,17 @@ function buildMap(){
     el.addEventListener('pointerdown', e => e.stopPropagation());
   });
   $('#choose').addEventListener('click', e => {
-    const b = e.target.closest('.pick'); if (!b || step !== 2 || checked) return;
-    wr.pick = b.dataset.p; paintPick(); dirty = true; update();
+    const b = e.target.closest('.pick'); if (!b || step !== (STORY() ? 1 : 2) || checked) return;
+    const again = wr.pick !== b.dataset.p;
+    wr.pick = b.dataset.p; paintPick(); dirty = true;
+    if (STORY() && again) { seen = false; playScene(0); }
+    update();
   });
+  if (STORY()) {
+    $('#sdots').addEventListener('click', e => { const d = e.target.closest('[data-i]'); if (d && story()) playScene(+d.dataset.i); });
+    $('#replay').onclick = () => { if (story()) playScene(0); };
+    $('#again').onclick = () => setStep(1);
+  }
 }
 // ---- การ์ดที่เด็กเพิ่มเอง (ขั้น 1) ----
 function ownEl(o){
@@ -223,6 +238,36 @@ const writeSummary = () => {
   return (p ? plain(th(p.text)) + ' | ' : '') + w.fields.map(f => plain(th(f.label || binLabel(f.in)) || f.id) + ': ' + (wr.f[f.id] || '').trim()).join(' | ');
 };
 
+// ---- การ์ตูนสั้นขั้น 1 (write.choose[].scenes) · เล่นต่อเองทีละฉาก · ฉากสุดท้ายคือคำถาม ask ----
+const sceneHtml = (sc, i) => `<div class="scn bg-${sc.bg || 'day'}${sc.fx ? ' fx-' + sc.fx : ''}" data-n="${i}">` +
+  `<div class="art">${(sc.art || []).map((a, k) => `<span style="--k:${k}">${a}</span>`).join('')}</div>` +
+  (sc.phone ? `<div class="phone"><div class="pfrom">${esc(sc.phone.from || '')}</div><div class="pmsg">${esc(t(sc.phone.text))}</div></div>` : '') +
+  `<div class="say">${esc(t(sc.say))}</div></div>`;
+function paintScene(){
+  const s = story();
+  if (!s) { $('#scene').innerHTML = `<div class="scn bg-calm"><div class="art"><span>🎬</span></div><div class="say">${UI[L].pickStory}</div></div>`; $('#sdots').innerHTML = ''; $('#replay').classList.add('hide'); return; }
+  const n = s.scenes.length;
+  $('#scene').innerHTML = scene < n ? sceneHtml(s.scenes[scene], scene)
+    : `<div class="scn bg-ask" data-n="ask"><div class="art"><span>🧒</span><span style="--k:1">💭</span></div><div class="say big">${esc(t(s.ask))}</div></div>`;
+  $('#sdots').innerHTML = s.scenes.map((x, i) => `<button type="button" class="dot${i === scene ? ' on' : i < scene ? ' past' : ''}" data-i="${i}">${i + 1}</button>`).join('') +
+    `<button type="button" class="dot${scene >= n ? ' on' : ''}" data-i="${n}">❓</button>`;
+  $('#replay').textContent = UI[L].replay; $('#replay').classList.remove('hide');
+}
+function playScene(i){
+  clearTimeout(sceneTimer);
+  const s = story(); scene = i;
+  if (s && i >= s.scenes.length) { scene = s.scenes.length; if (!seen) { seen = true; update(); } }
+  paintScene();
+  if (s && scene < s.scenes.length && step === 1 && !checked) sceneTimer = setTimeout(() => playScene(scene + 1), s.scenes[scene].ms || 4000);
+}
+// ขั้นเขียน: แถบเรื่องย่อ 4 ฉาก ให้ดูระหว่างเขียน
+function paintStrip(){
+  const s = story(); if (!s) { $('#strip').innerHTML = ''; return; }
+  $('#strip').innerHTML = `<div class="sttl"><span class="pic">${s.icon || ''}</span>${esc(t(s.text))}</div>` +
+    s.scenes.map(sc => `<div class="mini bg-${sc.bg || 'day'}"><span class="ma">${(sc.art || []).join('')}</span><span class="ms">${esc(t(sc.say))}</span></div>`).join('');
+  $('#again').textContent = UI[L].watchAgain;
+}
+
 function showMsg(text){
   $('#msgTxt').textContent = text; $('#msgBtn').textContent = UI[L].goLib;
   $('#msgBtn').href = me.room && me.name ? libHref() : '../';
@@ -259,12 +304,13 @@ function applyLang(){
   $('#stag').textContent = U.stepTag(stepNo(Math.min(step, 4)), skip3() ? 3 : 4);
   let task = t(C['task' + step]) || '';
   if (step === 3) task += hes ? '' : `<br><b>${U.pickHint}</b>`;
-  if (checked) task = `<b>${U.round(round)}</b> · ${U.doneTask}`;
+  if (checked) task = `<b>${U.round(round)}</b> · ${C.cards.length ? U.doneTask : U.doneWrite}`;
   $('#task').innerHTML = task;
   if ($('#root')) $('#root').textContent = t(C.root);
   if ($('#topA')) { $('#topA').textContent = t(C.topicA); $('#topB').textContent = t(C.topicB); }
   document.querySelectorAll('.bin').forEach(el => el.querySelector('h2').textContent = t(binLabel(el.dataset.bin)));
   paintWrite();
+  if (STORY()) { paintStrip(); if (step === 1 && !checked) paintScene(); }
   if (C.add) {
     $('#addTx').placeholder = t(C.add.ph) || U.addPh;
     document.querySelectorAll('.ab').forEach(b => b.textContent = b.dataset.b ? `${U.addTo} ${t(binLabel(b.dataset.b))}` : U.addBubble);
@@ -286,7 +332,7 @@ function applyLang(){
     el.querySelectorAll('.chip').forEach(ch => ch.textContent = t(C.signs[ch.dataset.s - 1].short));
     el.querySelector('.exp').innerHTML = checked ? (placed[c.id] === c.bin ? '' : `<b>${U.should} "${t(binLabel(c.bin))}"</b> · `) + t(c.why) : '';
   });
-  if (checked) { $('#result').textContent = U.result(score(), C.cards.length); $('#think').innerHTML = t(C.think); showSent(); }
+  if (checked) { $('#result').textContent = C.cards.length ? U.result(score(), C.cards.length) : '✍️'; $('#think').innerHTML = t(C.think); showSent(); }
 }
 // คำถาม FoR: ครูตั้งได้ใบงานละ 1 ข้อใน activities.json · ค่าเริ่มต้นคือคำถามหลักข้อ 1 ของโรงเรียน
 const frq = () => (A && A.frq) || { th: 'เรารู้ได้อย่างไรว่าการ์ดไหนอยู่กลุ่มไหน?', en: 'How do we know which group each card belongs to?' };
@@ -329,7 +375,7 @@ function place(el, bin){ bin.querySelector('.list').appendChild(el); placed[el.d
 function update(){
   if (!C) return;
   if (dirty && !checked) scheduleSave();
-  if (step === 1) $('#next').disabled = Object.keys(placed).length !== C.cards.length || !ownDone();
+  if (step === 1) $('#next').disabled = Object.keys(placed).length !== C.cards.length || !ownDone() || !storyDone();
   if (C.add) { $('#addN').textContent = UI[L].addN(own.length, C.add.min || 3);
     const full = own.length >= (C.add.max || 9);
     document.querySelectorAll('.ab').forEach(b => b.disabled = full || !$('#addTx').value.trim()); $('#addTx').disabled = full; }
@@ -342,7 +388,7 @@ $('#fr').addEventListener('input', () => { dirty = true; });
 
 function setStep(n){
   step = n; [1, 2, 3, 4].forEach(i => $('#s' + i).classList.toggle('on', i === stepNo(n) && !checked));
-  app.classList.toggle('full', n >= 2 || WEB()); app.classList.toggle('pickmode', n === 3 && !checked && !skip3()); app.classList.toggle('adding', n === 1 && !checked);
+  app.classList.toggle('full', n >= 2 || WEB() || !C.cards.length); app.classList.toggle('pickmode', n === 3 && !checked && !skip3()); app.classList.toggle('adding', n === 1 && !checked);
   $('#next').classList.toggle('hide', n >= 3); $('#back').classList.toggle('hide', checked || n === 1);
   $('#drawer').classList.toggle('hide', !(n === 3 && hes && !checked));
   $('#res').classList.toggle('hide', !checked);
@@ -351,9 +397,16 @@ function setStep(n){
   $('#adder').classList.toggle('hide', !adder);
   if (C.write) {
     const box = !!C.write.choose || C.write.fields.some(f => !f.in);   // มีอะไรให้แสดงนอกแผนภาพไหม
-    $('#writer').classList.toggle('hide', !(adder || (box && (n === 2 || checked))));
+    $('#writer').classList.toggle('hide', !(adder || (box && (n === 2 || checked || (STORY() && n === 1)))));
     $('#wgrid').classList.toggle('hide', adder || !C.write.fields.some(f => !f.in));
     document.querySelectorAll('[data-f]').forEach(el => { el.readOnly = n !== 2 || checked; });
+  }
+  if (STORY()) {   // ขั้น 1 = เลือกเรื่อง + ดูการ์ตูน (ซ่อนแผนภาพ) · ขั้นอื่น = แถบเรื่องย่อเหนือ Flow Map
+    const watch = n === 1 && !checked;
+    $('#story').classList.toggle('hide', !watch); $('#map').classList.toggle('hide', watch);
+    $('#wch').classList.toggle('hide', !watch); $('#stripRow').classList.toggle('hide', watch || !story());
+    $('#again').classList.toggle('hide', checked);
+    if (watch) playScene(seen && story() ? story().scenes.length : 0); else clearTimeout(sceneTimer);
   }
   if (n === 2 && !isWrite()) C.cards.forEach(c => { if (placed[c.id] !== 'b') delete signs[c.id]; const el = cardOf(c.id); el && el.querySelectorAll('.chip').forEach(ch => ch.classList.toggle('on', !!(signs[c.id] && signs[c.id].has(+ch.dataset.s)))); });
   if (n === 4) setTimeout(() => $('#fr').focus(), 0);
@@ -387,7 +440,7 @@ function buildRow(fr){
   const data = { v: 3, act: C.act, round, place: placed, signs: sg, hes, reason, fr, frq: th(frq()) };
   if (isWrite()) Object.assign(data, { map: C.map, write: wr });
   if (isAdd()) Object.assign(data, { map: C.map, own });
-  return [C.level, C.week, th(C.title), me.room, members().join(' + '), L.toUpperCase(), `${score()}/${C.cards.length}`,
+  return [C.level, C.week, th(C.title), me.room, members().join(' + '), L.toUpperCase(), C.cards.length ? `${score()}/${C.cards.length}` : '✓',
           wrong.join(' | ') || '-', isWrite() ? '-' : `${exact}/${C.cards.filter(c => c.bin === 'b').length}`, chosen, hc ? plain(th(hc.text)) : '', reason, JSON.stringify(data), fr || '-', round];
 }
 const members = () => [me.name, partner].filter(Boolean);
@@ -464,7 +517,7 @@ function restore(d){
   layout();
   Object.keys(d.signs || {}).forEach(id => { if (placed[id] === 'b') { signs[id] = new Set(d.signs[id]); cardOf(id).querySelectorAll('.chip').forEach(ch => ch.classList.toggle('on', signs[id].has(+ch.dataset.s))); } });
   if (C.write && d.write) {
-    wr = { pick: d.write.pick || '', f: Object.assign({}, d.write.f) };
+    wr = { pick: d.write.pick || '', f: Object.assign({}, d.write.f) }; seen = !!wr.pick;
     Object.keys(wr.f).forEach(id => { const el = fieldEl(id); if (el) el.value = wr.f[id]; }); paintPick();
   }
   if (d.hes && cardOf(d.hes)) { hes = d.hes; cardOf(hes).classList.add('hes'); }
@@ -472,7 +525,7 @@ function restore(d){
   setPartner(d.partner && d.partner !== me.name ? d.partner : '');
   // ไปขั้นที่ไกลที่สุดที่ทำได้จริง (กันข้อมูลไม่ครบ)
   let n = 1;
-  if (Object.keys(placed).length === C.cards.length && ownDone()) n = 2;
+  if (Object.keys(placed).length === C.cards.length && ownDone() && storyDone()) n = 2;
   if (n === 2 && step2Done()) n = 3;
   const s = Math.min(Math.max(1, d.step || 1), n === 3 && (skip3() || (hes && $('#reason').value.trim().length >= 5)) ? 4 : n);
   return skip3() && s === 3 ? 2 : s;
