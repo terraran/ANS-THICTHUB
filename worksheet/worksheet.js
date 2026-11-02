@@ -186,18 +186,21 @@ function layout(){
     linksOf(binFor(el)).forEach(tp => { lines += `<line class="${checked && !right(el) ? 'bad' : ''}" x1="${x}" y1="${y}" x2="${TOPIC[tp][0]}" y2="${TOPIC[tp][1]}"/>`; });
   };
   const roomy = !g[''].length;                         // มีฟองลอยว่าง ๆ อยู่ = เว้นบน/ล่างไว้ให้
+  const many = C.cards.length > 10;                    // ฟองเยอะ = ฟองลอยเรียงแถวบน/ล่างแถวละ 6 ฟองที่ต่อแล้วอยู่แถบกลาง
   ['a', 'b'].forEach(side => {
-    const xs = g[side], max = Math.min(roomy ? 70 : 60, 20 * (xs.length - 1)), dir = side === 'a' ? -1 : 1;
+    const xs = g[side], max = Math.min(roomy ? 70 : many ? 36 : 60, 20 * (xs.length - 1)), dir = side === 'a' ? -1 : 1;
     xs.forEach((el, i) => { const r = sp(xs.length, i, -max, max) * Math.PI / 180;
       put(el, TOPIC[side][0] + dir * 20 * Math.cos(r), 50 + 42 * Math.sin(r)); });
   });
   const h = Math.min(roomy ? 38 : 22, 13 * (g.m.length - 1));
   g.m.forEach((el, i) => put(el, 50, sp(g.m.length, i, 50 - h, 50 + h)));
   // ฟองที่ยังไม่ต่อเส้น ลอยอยู่แถวบน/ล่างของแผนภาพ
-  const FREE = [[50, 11], [35, 13], [65, 13], [50, 89], [35, 87], [65, 87], [20, 11], [80, 11], [20, 89], [80, 89]];
+  const FREE = many
+    ? [[41, 9], [59, 9], [41, 91], [59, 91], [25, 9], [75, 9], [25, 91], [75, 91], [9, 9], [91, 9], [9, 91], [91, 91]]
+    : [[50, 11], [35, 13], [65, 13], [50, 89], [35, 87], [65, 87], [20, 11], [80, 11], [20, 89], [80, 89]];
   g[''].forEach((el, i) => { const [x, y] = FREE[i % FREE.length]; put(el, x, y + 4 * Math.floor(i / FREE.length)); });
   $('#links').innerHTML = lines;
-  $('#web').classList.toggle('tight', Math.max(g.a.length, g.m.length, g.b.length) > 5);
+  $('#web').classList.toggle('tight', Math.max(g.a.length, g.m.length, g.b.length) > 5 || many);
 }
 // ลากจากฟองไปปล่อยบนหัวข้อ = ต่อ/ตัดเส้น · แตะเฉย ๆ = เลือกฟอง แล้วแตะหัวข้อทีหลัง
 const topicAt = ev => { const x = document.elementFromPoint(ev.clientX, ev.clientY); return x && x.closest('.topic'); };
