@@ -277,16 +277,16 @@
    }
   },
   {
-   "id": "m2",
-   "icon": "💬",
-   "bin": "m",
+   "id": "b5",
+   "icon": "🏫",
+   "bin": "b",
    "text": {
-    "th": "คนในเกมอาจถามเราได้",
-    "en": "Someone in a game might ask us about it"
+    "th": "บอกได้ว่าเราไปที่ไหนทุกวัน",
+    "en": "Tells where we go every day"
    },
    "why": {
-    "th": "คนในเกมถามได้ทั้งการ์ตูนที่ชอบ และชื่อโรงเรียน แต่เราต้องคิดก่อนตอบ",
-    "en": "People in a game can ask about our favourite cartoon or our school. We must think before we answer."
+    "th": "ชื่อโรงเรียนทำให้คนแปลกหน้ารู้ว่าจะไปเจอเราได้ที่ไหน",
+    "en": "Our school name tells strangers where they could find us."
    }
   },
   {
@@ -316,16 +316,16 @@
    }
   },
   {
-   "id": "m3",
-   "icon": "🤔",
-   "bin": "m",
+   "id": "a5",
+   "icon": "🌈",
+   "bin": "a",
    "text": {
-    "th": "ถ้ามีคนถาม แล้วเราไม่แน่ใจ ถามผู้ใหญ่ได้เสมอ",
-    "en": "If someone asks and we are not sure, we can always ask an adult"
+    "th": "เปลี่ยนได้ง่าย ๆ",
+    "en": "Can change easily"
    },
    "why": {
-    "th": "ไม่ว่าข้อมูลแบบไหน ถ้าไม่แน่ใจก็ถามผู้ใหญ่ก่อนได้ทุกครั้ง",
-    "en": "With any kind of info, if we are not sure, we can ask an adult first."
+    "th": "วันนี้ชอบสีฟ้า พรุ่งนี้ชอบสีเขียวก็ได้ แต่ชื่อจริงกับที่อยู่บ้านเปลี่ยนไม่ได้ง่าย ๆ",
+    "en": "Today we like blue, tomorrow green. Our real name and address do not change so easily."
    }
   },
   {
@@ -365,6 +365,34 @@
    "why": {
     "th": "ชื่อในเกมจากสิ่งที่ชอบ เช่น แมวสีฟ้า ไม่ได้บอกว่าเราเป็นใคร",
     "en": "A game name from things we like, like Blue Cat, does not tell who we are."
+   }
+  }
+ ],
+ "retired": [
+  {
+   "id": "m2",
+   "icon": "💬",
+   "bin": "m",
+   "text": {
+    "th": "คนในเกมอาจถามเราได้",
+    "en": "Someone in a game might ask us about it"
+   },
+   "why": {
+    "th": "คนในเกมถามได้ทั้งการ์ตูนที่ชอบ และชื่อโรงเรียน แต่เราต้องคิดก่อนตอบ",
+    "en": "People in a game can ask about our favourite cartoon or our school. We must think before we answer."
+   }
+  },
+  {
+   "id": "m3",
+   "icon": "🤔",
+   "bin": "m",
+   "text": {
+    "th": "ถ้ามีคนถาม แล้วเราไม่แน่ใจ ถามผู้ใหญ่ได้เสมอ",
+    "en": "If someone asks and we are not sure, we can always ask an adult"
+   },
+   "why": {
+    "th": "ไม่ว่าข้อมูลแบบไหน ถ้าไม่แน่ใจก็ถามผู้ใหญ่ก่อนได้ทุกครั้ง",
+    "en": "With any kind of info, if we are not sure, we can ask an adult first."
    }
   }
  ]

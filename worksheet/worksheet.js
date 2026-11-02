@@ -89,6 +89,8 @@ function buildMap(){
       '<div class="topic a" id="topA" data-topic="a"></div><div class="topic b" id="topB" data-topic="b"></div><div id="web"></div>';
     m.addEventListener('click', e => {
       if (step !== 1 || checked || e.target.closest('#web .cardx')) return;
+      const hit = e.target.closest('.hit');                // แตะเส้น = ตัดเส้นนั้นทิ้ง
+      if (hit) { toggleLink(lineEls[hit.dataset.i], hit.dataset.t); select(null); return; }
       const tp = e.target.closest('.topic');
       if (tp && sel) toggleLink(sel, tp.dataset.topic); else if (!tp) select(null);
     });
@@ -152,6 +154,7 @@ function addOwn(text, bin, id){
 
 // ---- Double Bubble: ฟองลอยรอบหัวข้อ 2 วง · เส้นเชื่อมฟองกับหัวข้อ ----
 const TOPIC = { a: [31, 50], b: [69, 50] };          // จุดกลางหัวข้อ (% ของแผนภาพ)
+let lineEls = [];                                     // ฟองของเส้นแต่ละเส้น (ใช้ตอนแตะเส้น)
 const linksOf = bin => bin === 'm' ? ['a', 'b'] : bin ? [bin] : [];
 const binOf = set => set.has('a') && set.has('b') ? 'm' : set.has('a') ? 'a' : set.has('b') ? 'b' : '';
 const ownOf = el => el.dataset.own ? own.find(o => o.id === el.dataset.own) : null;
@@ -179,11 +182,15 @@ function layout(){
   $('#web').querySelectorAll('.cardx').forEach(el => { const b = binFor(el); g[b].push(el); el.classList.toggle('free', !b); });
   const sp = (n, i, lo, hi) => n < 2 ? (lo + hi) / 2 : lo + (hi - lo) * i / (n - 1);
   const right = el => { const c = C.cards.find(x => x.id === el.dataset.id); return !c || placed[c.id] === c.bin; };
-  let lines = '';
+  let lines = '', hits = ''; lineEls = [];
   const put = (el, x, y) => {
     el.style.left = x + '%'; el.style.top = y + '%';
     if (!el.style.animationDelay) el.style.animationDelay = (-Math.random() * 3).toFixed(2) + 's';
-    linksOf(binFor(el)).forEach(tp => { lines += `<line class="${checked && !right(el) ? 'bad' : ''}" x1="${x}" y1="${y}" x2="${TOPIC[tp][0]}" y2="${TOPIC[tp][1]}"/>`; });
+    linksOf(binFor(el)).forEach(tp => {
+      lines += `<line class="${checked && !right(el) ? 'bad' : ''}" x1="${x}" y1="${y}" x2="${TOPIC[tp][0]}" y2="${TOPIC[tp][1]}"/>`;
+      hits += `<polyline class="hit" data-i="${lineEls.length}" data-t="${tp}" points="${x},${y} ${TOPIC[tp][0]},${TOPIC[tp][1]}"/>`;
+      lineEls.push(el);
+    });
   };
   const roomy = !g[''].length;                         // มีฟองลอยว่าง ๆ อยู่ = เว้นบน/ล่างไว้ให้
   const many = C.cards.length > 10;                    // ฟองเยอะ = ฟองลอยเรียงแถวบน/ล่างแถวละ 6 ฟองที่ต่อแล้วอยู่แถบกลาง
@@ -199,7 +206,7 @@ function layout(){
     ? [[41, 9], [59, 9], [41, 91], [59, 91], [25, 9], [75, 9], [25, 91], [75, 91], [9, 9], [91, 9], [9, 91], [91, 91]]
     : [[50, 11], [35, 13], [65, 13], [50, 89], [35, 87], [65, 87], [20, 11], [80, 11], [20, 89], [80, 89]];
   g[''].forEach((el, i) => { const [x, y] = FREE[i % FREE.length]; put(el, x, y + 4 * Math.floor(i / FREE.length)); });
-  $('#links').innerHTML = lines;
+  $('#links').innerHTML = lines + hits;
   $('#web').classList.toggle('tight', Math.max(g.a.length, g.m.length, g.b.length) > 5 || many);
 }
 // ลากจากฟองไปปล่อยบนหัวข้อ = ต่อ/ตัดเส้น · แตะเฉย ๆ = เลือกฟอง แล้วแตะหัวข้อทีหลัง

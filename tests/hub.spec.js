@@ -386,7 +386,7 @@ test('เนื้อหาสัปดาห์ 2: การ์ดทุกใ�
   }
   const y3 = content('y3w2');
   expect(y3.map).toBe('bubble');
-  for (const b of ['a', 'm', 'b']) expect(y3.cards.filter(c => c.bin === b)).toHaveLength(4);   // 12 ฟอง กล่องละ 4
+  expect(['a', 'b', 'm'].map(b => y3.cards.filter(c => c.bin === b).length)).toEqual([5, 5, 2]);   // 12 ฟอง: บอกได้ 5 ส่วนตัว 5 เหมือนกัน 2
   expect(y3.add).toBeUndefined();                                  // ไม่ต้องพิมพ์ฟองเอง
   for (const k of ['share', 'priv']) expect(y3.write.fields.filter(f => f.id.startsWith(k))).toHaveLength(5);   // ยกตัวอย่างหัวข้อละ 5
   expect(y3.noReason).toBe(true);
@@ -442,11 +442,17 @@ test('Y3 สัปดาห์ 2 Double Bubble: ฟองลอยในแผ�
   await page.click('#topA'); await page.click('#topB');
   await expect(page.locator('#web .cardx[data-id="a1"]')).toHaveClass(/free/);
   await expect(page.locator('#links line')).toHaveCount(0);
-  await page.click('.cardx[data-id="a1"]');                      // แตะฟองที่เลือกอยู่ซ้ำ = เลิกเลือก
+  await page.click('#topA');                                      // ต่อใหม่ แล้วแตะที่เส้น = เส้นหายไป ฟองกลับไปลอย
+  await expect(page.locator('#links line')).toHaveCount(1);
+  await page.waitForTimeout(700);                                 // รอฟองเลื่อนเข้าที่ก่อนวัดตำแหน่งเส้น
+  const fb = await page.locator('.cardx[data-id="a1"]').boundingBox(), tb = await page.locator('#topA').boundingBox();
+  await page.mouse.click((fb.x + fb.width + tb.x) / 2, tb.y + tb.height / 2);   // แตะกลางเส้นระหว่างฟองกับหัวข้อ
+  await expect(page.locator('#links line')).toHaveCount(0);
+  await expect(page.locator('#web .cardx[data-id="a1"]')).toHaveClass(/free/);
   await expect(page.locator('#map')).not.toHaveClass(/picking/);
 
   await linkAll(page, C, { m1: 'b' });                           // ตั้งใจต่อ "เกี่ยวกับตัวเรา" ไปฝั่งส่วนตัวอย่างเดียว
-  await expect(page.locator('#links line')).toHaveCount(15);
+  await expect(page.locator('#links line')).toHaveCount(13);
   await expect(page.locator('#next')).toBeEnabled();
   await shot(page, '1-link');
   await page.click('#next');                                     // ขั้น 2 ยกตัวอย่าง
@@ -499,7 +505,7 @@ test('Y3 สัปดาห์ 2 Double Bubble: ฟองลอยในแผ�
   await page.click('#lib2');
   await page.click('.card[data-act="y3w2"] a.btn');
   await expect(page.locator('#result')).toHaveText('ถูก 11/12 ใบ');
-  await expect(page.locator('#links line')).toHaveCount(15);
+  await expect(page.locator('#links line')).toHaveCount(13);
   await expect(page.locator('[data-f="share2"]')).toHaveValue('การ์ตูนที่ชอบ');
   await page.click('#edit');
   await expect(page.locator('#web .cardx.free')).toHaveCount(0);
@@ -533,7 +539,7 @@ test('Y3 สัปดาห์ 2: ลากเส้นจากฟองไป�
   await p2.goto('/worksheet/?act=y3w2#room=Y3.2&name=' + encodeURIComponent('ขิม') + '&draft=1');
   await expect(p2.locator('#s2')).toHaveClass(/on/);
   await expect(p2.locator('#web .cardx')).toHaveCount(12);
-  await expect(p2.locator('#links line')).toHaveCount(16);
+  await expect(p2.locator('#links line')).toHaveCount(14);
   await expect(p2.locator('[data-f="share1"]')).toHaveValue('สีที่ชอบ');
   await ctx.close();
 });
