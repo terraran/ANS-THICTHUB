@@ -388,7 +388,7 @@ test('เนื้อหาสัปดาห์ 2: การ์ดทุกใ�
   expect(y3.map).toBe('bubble');
   expect(['a', 'b', 'm'].map(b => y3.cards.filter(c => c.bin === b).length)).toEqual([5, 5, 2]);   // 12 ฟอง: บอกได้ 5 ส่วนตัว 5 เหมือนกัน 2
   expect(y3.add).toBeUndefined();                                  // ไม่ต้องพิมพ์ฟองเอง
-  for (const k of ['share', 'priv']) expect(y3.write.fields.filter(f => f.id.startsWith(k))).toHaveLength(5);   // ยกตัวอย่างหัวข้อละ 5
+  for (const k of ['share', 'priv']) expect(y3.write.fields.filter(f => f.id.startsWith(k))).toHaveLength(3);   // ยกตัวอย่างหัวข้อละ 3
   expect(y3.noReason).toBe(true);
   // Y4: ไม่มีการ์ด · เลือก 1 จาก 3 เรื่อง แต่ละเรื่องมีการ์ตูน 4 ฉาก + คำถามปิดท้าย · เขียนเองครบ 4 กล่อง
   const y4 = content('y4w2');
@@ -414,7 +414,7 @@ async function linkAll(page, C, wrong = {}) {
   for (const c of C.cards) { await page.click(`.cardx[data-id="${c.id}"]`); for (const tp of TOPICS[wrong[c.id] || c.bin]) await page.click(tp) }
 }
 
-test('Y3 สัปดาห์ 2 Double Bubble: ฟองลอยในแผนภาพ ต่อเส้นครบ 12 ฟอง → ยกตัวอย่างหัวข้อละ 5 → เด้งคำถาม FoR → ส่ง → เปิดดูงานที่ส่ง', async ({ page }) => {
+test('Y3 สัปดาห์ 2 Double Bubble: ฟองลอยในแผนภาพ ต่อเส้นครบ 12 ฟอง → ยกตัวอย่างหัวข้อละ 3 → เด้งคำถาม FoR → ส่ง → เปิดดูงานที่ส่ง', async ({ page }) => {
   const errs = []; page.on('pageerror', e => errs.push(e.message));
   await page.emulateMedia({ reducedMotion: 'reduce' });           // ฟองไม่ลอย ให้คลิกได้แม่น
   const api = mockApi(page, { open: { y3w1: true, y3w2: true } });
@@ -461,12 +461,11 @@ test('Y3 สัปดาห์ 2 Double Bubble: ฟองลอยในแผ�
   await expect(page.locator('#writer')).toBeVisible();
   await expect(page.locator('#map')).not.toHaveClass(/picking/);
   await expect(page.locator('#next')).toBeDisabled();
-  await expect(page.locator('#wgrid [data-f]')).toHaveCount(10);
-  const ex = { share1: 'สีที่ชอบ', priv1: 'ที่อยู่บ้าน', share2: 'การ์ตูนที่ชอบ', priv2: 'รหัสผ่าน', share3: 'อาหารที่ชอบ', priv3: 'เบอร์โทร',
-    share4: 'กีฬาที่ชอบ', priv4: 'ชื่อโรงเรียน', share5: 'สัตว์ที่ชอบ', priv5: 'ชื่อจริง' };
-  for (const [k, v] of Object.entries(ex).slice(0, 9)) await page.fill(`[data-f="${k}"]`, v);
-  await expect(page.locator('#next')).toBeDisabled();             // ต้องครบ 10 ช่อง
-  await page.fill('[data-f="priv5"]', ex.priv5);
+  await expect(page.locator('#wgrid [data-f]')).toHaveCount(6);
+  const ex = { share1: 'สีที่ชอบ', priv1: 'ที่อยู่บ้าน', share2: 'การ์ตูนที่ชอบ', priv2: 'รหัสผ่าน', share3: 'อาหารที่ชอบ', priv3: 'เบอร์โทร' };
+  for (const [k, v] of Object.entries(ex).slice(0, 5)) await page.fill(`[data-f="${k}"]`, v);
+  await expect(page.locator('#next')).toBeDisabled();             // ต้องครบ 6 ช่อง
+  await page.fill('[data-f="priv3"]', ex.priv3);
   await shot(page, '2-examples');
   await page.click('#next');                                     // เด้งคำถาม FoR เลย
   await expect(page.locator('#forPanel')).toBeVisible();

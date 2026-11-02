@@ -56,8 +56,8 @@
   "en": "<b>Step 1</b> Tap a bubble, then tap a topic (or drag a line to it). <b>Different</b>: link to one topic. <b>Same</b>: link to both. Link all 12 bubbles."
  },
  "task2": {
-  "th": "<b>ขั้นที่ 2</b> พิมพ์ <b>ตัวอย่างข้อมูล</b> ของแต่ละหัวข้อลงในช่องด้านล่าง หัวข้อละ 5 อย่าง",
-  "en": "<b>Step 2</b> Type <b>examples</b> for each topic into the boxes below, 5 for each topic."
+  "th": "<b>ขั้นที่ 2</b> พิมพ์ <b>ตัวอย่างข้อมูล</b> ของแต่ละหัวข้อลงในช่องด้านล่าง หัวข้อละ 3 อย่าง",
+  "en": "<b>Step 2</b> Type <b>examples</b> for each topic into the boxes below, 3 for each topic."
  },
  "think": {
   "th": "🤔 ถ้ามีคนในเกมถามว่าเราเรียนโรงเรียนอะไร เราจะตอบหรือทำอย่างไร?",
@@ -146,66 +146,6 @@
     "ph": {
      "th": "ตัวอย่างที่ 3...",
      "en": "Example 3..."
-    }
-   },
-   {
-    "id": "share4",
-    "label": {
-     "th": "🟢 ตัวอย่างข้อมูลที่บอกได้",
-     "en": "🟢 Examples we can share"
-    },
-    "hd": {
-     "th": "",
-     "en": ""
-    },
-    "ph": {
-     "th": "ตัวอย่างที่ 4...",
-     "en": "Example 4..."
-    }
-   },
-   {
-    "id": "priv4",
-    "label": {
-     "th": "🔴 ตัวอย่างข้อมูลส่วนตัว",
-     "en": "🔴 Examples of private info"
-    },
-    "hd": {
-     "th": "",
-     "en": ""
-    },
-    "ph": {
-     "th": "ตัวอย่างที่ 4...",
-     "en": "Example 4..."
-    }
-   },
-   {
-    "id": "share5",
-    "label": {
-     "th": "🟢 ตัวอย่างข้อมูลที่บอกได้",
-     "en": "🟢 Examples we can share"
-    },
-    "hd": {
-     "th": "",
-     "en": ""
-    },
-    "ph": {
-     "th": "ตัวอย่างที่ 5...",
-     "en": "Example 5..."
-    }
-   },
-   {
-    "id": "priv5",
-    "label": {
-     "th": "🔴 ตัวอย่างข้อมูลส่วนตัว",
-     "en": "🔴 Examples of private info"
-    },
-    "hd": {
-     "th": "",
-     "en": ""
-    },
-    "ph": {
-     "th": "ตัวอย่างที่ 5...",
-     "en": "Example 5..."
     }
    }
   ]
