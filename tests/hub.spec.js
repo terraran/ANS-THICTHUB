@@ -384,61 +384,159 @@ test('เนื้อหาสัปดาห์ 2: การ์ดทุกใ�
     for (const b of bins) expect(C.cards.some(c => c.bin === b)).toBe(true);
     for (const f of C.write.fields) if (f.in) expect(bins).toContain(f.in);
   }
-  expect(content('y3w2').map).toBe('bubble');
+  const y3 = content('y3w2');
+  expect(y3.map).toBe('bubble');
+  for (const b of ['a', 'm', 'b']) expect(y3.cards.filter(c => c.bin === b)).toHaveLength(1);   // ตัวอย่างกล่องละ 1
+  expect(y3.add.min).toBe(3);
+  expect(y3.noReason).toBe(true);
   expect(content('y4w2').write.choose).toHaveLength(3);
   const acts = JSON.parse(fs.readFileSync(path.join(__dirname, '../data/activities.json'), 'utf8')).activities;
   for (const id of ['y3w2', 'y4w2']) expect(acts.find(a => a.id === id)).toMatchObject({ week: 2, kind: 'sheet', path: 'worksheet/?act=' + id });
 });
+// SHOTS=<โฟลเดอร์> npx playwright test = เก็บภาพหน้าจอไว้ให้ครูดู
+const shot = (page, name) => process.env.SHOTS ? page.screenshot({ path: path.join(process.env.SHOTS, name + '.png') }) : null;
+// Double Bubble: แตะฟอง แล้วแตะหัวข้อ (m = แตะทั้งสองหัวข้อ)
+const TOPICS = { a: ['#topA'], b: ['#topB'], m: ['#topA', '#topB'] };
+async function linkAll(page, C, wrong = {}) {
+  await expect(page.locator('#web .cardx.free')).toHaveCount(C.cards.length);
+  for (const c of C.cards) { await page.click(`.cardx[data-id="${c.id}"]`); for (const tp of TOPICS[wrong[c.id] || c.bin]) await page.click(tp); }
+}
+async function addBubble(page, text, bin) {
+  await page.fill('#addTx', text); await page.click('.ab.add');
+  for (const tp of TOPICS[bin]) await page.click(tp);       // ฟองใหม่ถูกเลือกไว้แล้ว แตะหัวข้อได้เลย
+}
 
-test('Y3 สัปดาห์ 2 Double Bubble: จัดลง 3 กล่อง → เขียนตัวอย่าง → ส่ง → เปิดดูงานที่ส่ง', async ({ page }) => {
+test('Y3 สัปดาห์ 2 Double Bubble: ฟองลอยในแผนภาพ ต่อเส้น 3 ฟอง + เพิ่มเอง 3 ฟอง → ยกตัวอย่าง → เด้งคำถาม FoR → ส่ง → เปิดดูงานที่ส่ง', async ({ page }) => {
   const errs = []; page.on('pageerror', e => errs.push(e.message));
+  await page.emulateMedia({ reducedMotion: 'reduce' });           // ฟองไม่ลอย ให้คลิกได้แม่น
   const api = mockApi(page, { open: { y3w1: true, y3w2: true } });
   await page.goto('/#/lib/Y3.2/' + encodeURIComponent('ขิม'));
   await page.click('.card[data-act="y3w2"] a.btn');
   const C = content('y3w2');
   await expect(page.locator('#s1')).toHaveText('1 เปรียบเทียบ');
-  await expect(page.locator('#topA')).toHaveText('ข้อมูลที่บอกได้');
-  await expect(page.locator('.bin')).toHaveCount(3);
-  await placeAll(page, C, { m1: 'b' });                         // ตั้งใจวาง "เกี่ยวกับตัวเรา" ผิดฝั่ง
-  await page.click('#next');                                    // ขั้น 2 เขียนตัวอย่าง
+  await expect(page.locator('#s3')).toHaveText('3 คิดย้อนกลับ');
+  await expect(page.locator('#s4')).toBeHidden();                 // ไม่มีขั้นให้เหตุผล
+  await expect(page.locator('#stag')).toHaveText('ขั้น 1 / 3');
+  await expect(page.locator('#topA')).toHaveText('ข้อมูล\nที่บอกได้');
+  await expect(page.locator('.bin')).toHaveCount(0);
+  await expect(page.locator('#poolWrap')).toBeHidden();               // ไม่มีกองการ์ดด้านซ้าย ฟองลอยในแผนภาพเลย
+  await expect(page.locator('#web .cardx.free')).toHaveCount(3);
+  // แตะฟอง → หัวข้อเรืองแสง · แตะหัวข้อ → ฟองลอยไปข้าง ๆ หัวข้อ มีเส้นเชื่อม · แตะหัวข้อเดิมอีกครั้ง = ตัดเส้น กลับกองซ้าย
+  await page.click('.cardx[data-id="a1"]');
+  await expect(page.locator('#map')).toHaveClass(/picking/);
+  await page.click('#topB');
+  await expect(page.locator('#web .cardx[data-id="a1"]')).not.toHaveClass(/free/);
+  await expect(page.locator('#links line')).toHaveCount(1);
+  await page.click('#topA');                                      // ต่อทั้งคู่ = เหมือนกัน (เส้น 2 เส้น อยู่ตรงกลาง)
+  await expect(page.locator('#links line')).toHaveCount(2);
+  expect(await page.evaluate(() => document.querySelector('.cardx[data-id="a1"]').style.left)).toBe('50%');
+  await page.click('#topA'); await page.click('#topB');
+  await expect(page.locator('#web .cardx[data-id="a1"]')).toHaveClass(/free/);
+  await expect(page.locator('#links line')).toHaveCount(0);
+
+  await linkAll(page, C, { m1: 'b' });                           // ตั้งใจต่อ "เกี่ยวกับตัวเรา" ไปฝั่งส่วนตัวอย่างเดียว
+  await expect(page.locator('#links line')).toHaveCount(3);
+  await expect(page.locator('#next')).toBeDisabled();             // ยังไม่ได้เพิ่มฟองเอง
+  await expect(page.locator('.ab.add')).toBeDisabled();
+  await addBubble(page, 'บอกครูได้', 'a');
+  await expect(page.locator('#addTx')).toHaveValue('');
+  await addBubble(page, 'ต้องระวัง', 'm');
+  await page.fill('#addTx', 'ลองผิด'); await page.press('#addTx', 'Enter');   // Enter = เพิ่มฟอง
+  await expect(page.locator('#web .cardx.own.free')).toHaveText('✏️ลองผิด✕');
+  await expect(page.locator('#next')).toBeDisabled();             // ฟองที่ยังไม่ต่อเส้นไม่นับ
+  await page.click('.cardx.own:has-text("ลองผิด") .del');
+  await addBubble(page, 'คนแปลกหน้าเอาไปใช้หลอกเราได้', 'b');
+  await expect(page.locator('#addN')).toHaveText('เพิ่มแล้ว 3 ใบ ✓ เพิ่มอีกได้');
+  await expect(page.locator('#next')).toBeEnabled();
+  await shot(page, '1-link');
+  await page.click('#next');                                     // ขั้น 2 ยกตัวอย่าง
+  await expect(page.locator('#stag')).toHaveText('ขั้น 2 / 3');
+  await expect(page.locator('#adder')).toBeHidden();
   await expect(page.locator('#writer')).toBeVisible();
-  await expect(page.locator('#wch')).toBeHidden();
+  await expect(page.locator('#map')).not.toHaveClass(/picking/);
   await expect(page.locator('#next')).toBeDisabled();
   const ex = { share1: 'สีที่ชอบ', share2: 'การ์ตูนที่ชอบ', priv1: 'ที่อยู่บ้าน', priv2: 'รหัสผ่าน' };
   for (const [k, v] of Object.entries(ex)) await page.fill(`[data-f="${k}"]`, v);
-  await page.click('#next');                                    // ขั้น 3
-  await expect(page.locator('#writer')).toBeHidden();
-  await page.click('.cardx[data-id="m1"]');
-  await page.fill('#reason', 'เพราะที่อยู่ก็เป็นเรื่องของเรา');
-  await page.click('#toFor');
+  await shot(page, '2-examples');
+  await page.click('#next');                                     // เด้งคำถาม FoR เลย
+  await expect(page.locator('#forPanel')).toBeVisible();
+  await expect(page.locator('#s3')).toHaveClass(/on/);
   await expect(page.locator('#frq')).toHaveText('เรารู้ได้อย่างไรว่าลักษณะไหนเหมือนกัน ลักษณะไหนต่างกัน?');
+  await page.click('#forBack');
+  await expect(page.locator('#forPanel')).toBeHidden();
+  await expect(page.locator('#stag')).toHaveText('ขั้น 2 / 3');
+  await page.click('#next');
   await page.fill('#fr', 'เรารู้เพราะดูว่าทำให้คนอื่นหาเราเจอไหม');
+  await shot(page, '3-for');
   await page.click('#check');
   await expect(page.locator('#sent')).toHaveClass(/ok/);
-  await expect(page.locator('#result')).toHaveText('ถูก 8/9 ใบ');
+  await expect(page.locator('#result')).toHaveText('ถูก 2/3 ใบ');
+  await expect(page.locator('#links line.bad')).toHaveCount(1);   // เส้นของฟองที่ผิดเป็นสีแดง
+  await page.hover('.cardx[data-id="m1"]');
+  await expect(page.locator('.cardx[data-id="m1"] .exp')).toBeVisible();
   await expect(page.locator('.cardx[data-id="m1"] .exp')).toContainText('ควรอยู่ใน "🤝 เหมือนกัน"');
-  await expect(page.locator('#writer')).toBeVisible();          // ผลตรวจแสดงตัวอย่างที่เขียนไว้ (แก้ไม่ได้)
+  await expect(page.locator('.cardx.own .mark')).toHaveCount(0);  // ฟองที่เพิ่มเองไม่ตรวจถูกผิด
   await expect(page.locator('[data-f="priv2"]')).toHaveJSProperty('readOnly', true);
+  await expect(page.locator('#mine')).toHaveText('🧭 คิดย้อนกลับ: เรารู้เพราะดูว่าทำให้คนอื่นหาเราเจอไหม');
+  await shot(page, '4-result');
 
   const row = api.posts[0].row;
   expect(row).toHaveLength(15);
-  expect(row.slice(0, 7)).toEqual(['Y3', 2, 'ข้อมูลนี้ บอกได้ หรือ ไม่ควรบอก?', 'Y3.2', 'ขิม', 'TH', '8/9']);
+  expect(row.slice(0, 7)).toEqual(['Y3', 2, 'ข้อมูลนี้ บอกได้ หรือ ไม่ควรบอก?', 'Y3.2', 'ขิม', 'TH', '2/3']);
   expect(row[7]).toBe('เป็นเรื่องเกี่ยวกับตัวเรา');
   expect(row[8]).toBe('-');
-  expect(row[9]).toContain('รหัสผ่าน');
+  expect(row[9]).toBe('เพิ่มเอง 🟢 บอกได้ เท่านั้น: บอกครูได้ | 🤝 เหมือนกัน: ต้องระวัง | 🔴 ส่วนตัว เท่านั้น: คนแปลกหน้าเอาไปใช้หลอกเราได้ || '
+    + '🟢 ตัวอย่างข้อมูลที่บอกได้: สีที่ชอบ | 🔴 ตัวอย่างข้อมูลส่วนตัว: ที่อยู่บ้าน | 🟢 ตัวอย่างข้อมูลที่บอกได้: การ์ตูนที่ชอบ | 🔴 ตัวอย่างข้อมูลส่วนตัว: รหัสผ่าน');
+  expect(row[10]).toBe(''); expect(row[11]).toBe('');
   const d = JSON.parse(row[12]);
-  expect(d).toMatchObject({ v: 3, act: 'y3w2', map: 'bubble', hes: 'm1', write: { pick: '', f: ex }, signs: {} });
-  expect(d.place.m1).toBe('b');
+  expect(d).toMatchObject({ v: 3, act: 'y3w2', map: 'bubble', hes: '', write: { pick: '', f: ex }, signs: {} });
+  expect(d.place).toEqual({ m1: 'b', a1: 'a', b1: 'b' });
+  expect(d.own.map(o => [o.text, o.bin])).toEqual([['บอกครูได้', 'a'], ['ต้องระวัง', 'm'], ['คนแปลกหน้าเอาไปใช้หลอกเราได้', 'b']]);
 
-  // เปิดอีกครั้งจากคลัง = เห็นงานที่ส่ง พร้อมตัวอย่างที่เขียน
+  // เปิดอีกครั้งจากคลัง = เห็นงานที่ส่ง พร้อมเส้นเชื่อม ฟองที่เพิ่มเอง และตัวอย่าง
   await page.click('#lib2');
   await page.click('.card[data-act="y3w2"] a.btn');
-  await expect(page.locator('#result')).toHaveText('ถูก 8/9 ใบ');
+  await expect(page.locator('#result')).toHaveText('ถูก 2/3 ใบ');
+  await expect(page.locator('#links line')).toHaveCount(7);
+  await expect(page.locator('#web .cardx.own')).toHaveCount(3);
   await expect(page.locator('[data-f="share2"]')).toHaveValue('การ์ตูนที่ชอบ');
   await page.click('#edit');
-  await expect(page.locator('#writer')).toBeHidden();
-  await expect(page.locator('#pool .cardx')).toHaveCount(0);
+  await expect(page.locator('#web .cardx.free')).toHaveCount(0);
+  await expect(page.locator('#links line.bad')).toHaveCount(0);
+  await expect(page.locator('#adder')).toBeVisible();
+  await expect(page.locator('#next')).toBeEnabled();
   expect(errs).toEqual([]);
+});
+
+test('Y3 สัปดาห์ 2: ลากเส้นจากฟองไปหาหัวข้อได้ · งานค้างเก็บเส้นและฟองที่เพิ่มเอง · เปิดอีกเครื่องกลับมาขั้น 2', async ({ page, browser }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  const api = mockApi(page, { open: { y3w2: true } });
+  await page.goto('/worksheet/?act=y3w2#room=Y3.2&name=' + encodeURIComponent('ขิม'));
+  // ลากจากฟองไปปล่อยบนหัวข้อ
+  const from = await page.locator('.cardx[data-id="b1"]').boundingBox(), to = await page.locator('#topB').boundingBox();
+  await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2); await page.mouse.down();
+  await page.mouse.move(to.x + 20, to.y + to.height / 2, { steps: 8 });
+  await expect(page.locator('#dragLine')).toBeVisible();
+  await expect(page.locator('#topB')).toHaveClass(/hover/);
+  await page.mouse.up();
+  await expect(page.locator('#dragLine')).toBeHidden();
+  await expect(page.locator('#web .cardx[data-id="b1"]')).not.toHaveClass(/free/);
+  await expect(page.locator('#links line')).toHaveCount(1);
+  await linkAll(page, Object.assign({}, content('y3w2'), { cards: content('y3w2').cards.filter(c => c.id !== 'b1') }));
+  for (const [tx, b] of [['หนึ่ง', 'a'], ['สอง', 'b'], ['สาม', 'm']]) await addBubble(page, tx, b);
+  await page.click('#next');
+  await page.fill('[data-f="share1"]', 'สีที่ชอบ');
+  await page.click('#toLib');
+  await expect.poll(() => { const d = api.drafts['Y3.2|ขิม|y3w2']; return d && d.data.own.length; }).toBe(3);
+  const ctx = await browser.newContext({ viewport: { width: 1366, height: 768 }, reducedMotion: 'reduce' });
+  const p2 = await ctx.newPage();
+  mockApi(p2, { open: { y3w2: true } }, api);
+  await p2.goto('/worksheet/?act=y3w2#room=Y3.2&name=' + encodeURIComponent('ขิม') + '&draft=1');
+  await expect(p2.locator('#s2')).toHaveClass(/on/);
+  await expect(p2.locator('#web .cardx')).toHaveCount(6);
+  await expect(p2.locator('#links line')).toHaveCount(8);
+  await expect(p2.locator('[data-f="share1"]')).toHaveValue('สีที่ชอบ');
+  await ctx.close();
 });
 
 test('Y4 สัปดาห์ 2 Flow Map: ต้องเลือกสถานการณ์ · เขียนในกล่อง · ภาษาอังกฤษ · งานค้างทำต่อได้', async ({ page, browser }) => {

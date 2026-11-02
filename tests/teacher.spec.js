@@ -102,7 +102,7 @@ test('ตารางส่งงาน: ค่าเริ่มต้น = ส
   const row = n => page.locator('.grid tbody tr', { has: page.locator(`td:first-child:text-is("${n}")`) });
   await expect(page.locator('.grid tbody tr')).toHaveCount(4);                     // ชื่อที่ซ่อนไม่อยู่ในตาราง
   await expect(row('ขิม').locator('td').nth(1)).toHaveText('16/16 · รอบ 2');
-  await expect(row('ขิม').locator('td').nth(2)).toHaveText('8/9');
+  await expect(row('ขิม').locator('td').nth(2)).toHaveText('2/3');
   await expect(row('ชิน').locator('td').nth(2)).toHaveText('ทำค้าง');
   await expect(row('กาย').locator('td').nth(2)).toHaveText('ยังไม่เริ่ม');
   // เปลี่ยนเป็นสัปดาห์ 1 → ทำคู่กับ
@@ -210,8 +210,8 @@ test('แชร์ผลงาน: จัดกลุ่มคน/คู่ · �
   await expect(page.locator('.miss div')).toHaveCount(1);
   await expect(page.locator('.miss .p')).toHaveText('1/1');
   await page.locator('.sub').first().click();
-  await expect(frame(page).locator('#map.bubble')).toBeVisible();
-  await expect(frame(page).locator('#result')).toHaveText('ถูก 8/9 ใบ');
+  await expect(frame(page).locator('#map.web')).toBeVisible();
+  await expect(frame(page).locator('#result')).toHaveText('ถูก 2/3 ใบ');
   await expect(frame(page).locator('[data-f="share1"]')).toHaveValue('ตัวอย่าง share1');
   expect(errs).toEqual([]);
 });
@@ -261,7 +261,7 @@ test('รายชื่อนักเรียน: เพิ่ม · วา�
   expect(S.get({ action: 'state', room: 'Y3.2', name: 'ขิม ก' }).rounds).toEqual({ y3w1: 2, y3w2: 1 });
   // ตารางส่งงานตามชื่อใหม่
   await page.click('#tabs button:has-text("ตารางส่งงาน")');
-  await expect(page.locator('.grid tbody tr', { has: page.locator('td:first-child:text-is("ขิม ก")') }).locator('td').nth(2)).toHaveText('8/9');
+  await expect(page.locator('.grid tbody tr', { has: page.locator('td:first-child:text-is("ขิม ก")') }).locator('td').nth(2)).toHaveText('2/3');
   expect(errs).toEqual([]);
 });
 

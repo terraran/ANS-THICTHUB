@@ -111,14 +111,11 @@ textarea{font-family:inherit;font-size:22px;width:100%;padding:8px 12px;border:2
 #loading{position:absolute;inset:62px 0 0 0;background:#f1f5f9cc;z-index:45;display:flex;align-items:center;justify-content:center}
 .mine{font-size:16px;color:#334155;margin-top:4px;line-height:1.35}
 .mine b{color:#b45309}
-/* Double Bubble Map (map: "bubble") · Flow Map (map: "flow") */
+/* Flow Map (map: "flow") · Double Bubble อยู่ท้ายไฟล์ */
 .chips:empty{display:none!important}
 .map{flex:1;min-height:0;display:grid;gap:12px}
 .map .bin .cardx{width:100%}
 .map .bin h2{font-size:19px}
-.bubble{grid-template-columns:1fr 150px 1fr 150px 1fr;align-items:stretch}
-.bubble .bin{border-style:dashed;border-radius:28px}
-.bubble .cardx{border-radius:34px;padding:6px 14px}
 .bin.m{border-color:#7c3aed}.bin.m h2{background:#7c3aed}
 .topic{align-self:center;width:150px;height:150px;border-radius:50%;display:flex;align-items:center;justify-content:center;text-align:center;padding:12px;color:#fff;font-weight:800;font-size:20px;line-height:1.25;border:6px solid #fff;box-shadow:0 0 0 4px currentColor}
 .topic.a{background:var(--a);color:var(--a)}.topic.b{background:var(--b);color:var(--b)}
@@ -153,6 +150,64 @@ main{min-width:0}
 .body{grid-template-columns:560px minmax(0,1fr)}
 .body.full{grid-template-columns:minmax(0,1fr)}
 .map{grid-template-columns:minmax(0,1fr)}
-.bubble{grid-template-columns:minmax(0,1fr) 150px minmax(0,1fr) 150px minmax(0,1fr)}
 /* มุมครูเปิดดูงานที่ส่งแล้ว (view=1): ดูอย่างเดียว ไม่มีปุ่มกลับคลัง/ทำคู่/แก้ส่งใหม่ */
 .viewonly #toLib,.viewonly .steps,.viewonly #pairBtn,.viewonly #saved,.viewonly #res .btns,.viewonly #resume,.viewonly #msgBtn{display:none!important}
+/* การ์ดที่เด็กเพิ่มเอง + ช่องเพิ่มการ์ด (add) */
+.cardx.own{cursor:default;border-style:dashed;border-color:var(--accent);background:#f0f9ff}
+.cardx .del{display:none;flex:none;min-height:0;width:32px;height:32px;padding:0;border-radius:50%;background:#fee2e2;color:#b91c1c;font-size:15px;box-shadow:none;align-items:center;justify-content:center}
+.adding .cardx.own .del{display:flex}
+.adder{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.adder input{flex:1;min-width:280px;font:inherit;font-size:20px;padding:8px 18px;border:3px solid var(--line);border-radius:999px;user-select:text;-webkit-user-select:text}
+.adder input:focus{outline:none;border-color:var(--accent)}
+.addbins{display:flex;gap:8px}
+.ab{font-size:17px;padding:6px 16px;color:#fff;border-radius:999px}
+.ab.a{background:var(--a)}.ab.m{background:#7c3aed}.ab.b{background:var(--b)}
+.ab:disabled{opacity:.45;color:#fff}
+.ab.a:disabled{background:var(--a)}.ab.m:disabled{background:#7c3aed}.ab.b:disabled{background:var(--b)}
+.addn{font-size:16px;color:var(--muted);flex-basis:100%}
+/* Double Bubble (map: "bubble"): หัวข้อ 2 วง · ฟองลอยได้ · เส้นเชื่อม (SVG เป็น % ของแผนภาพ) */
+.topic{white-space:pre-line}
+.web{display:block;position:relative;background:#fff;border:3px solid var(--line);border-radius:28px;overflow:hidden}
+.links{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.links line{stroke:#64748b;stroke-width:3;stroke-linecap:round;vector-effect:non-scaling-stroke}
+.links line.bad{stroke:#dc2626;stroke-dasharray:7 7}
+.web .topic{position:absolute;top:50%;transform:translate(-50%,-50%);z-index:2;cursor:pointer;width:170px;height:170px;font-size:21px;box-shadow:0 0 0 6px #fff,0 0 0 10px currentColor;transition:box-shadow .2s}
+.web .topic.a{left:31%}.web .topic.b{left:69%}
+.web.picking .topic{animation:glow 1.1s ease-in-out infinite}
+.web .topic.hover{box-shadow:0 0 0 6px #fff,0 0 0 10px currentColor,0 0 0 22px #facc15aa}
+#web{position:absolute;inset:0;pointer-events:none}
+#web .cardx{position:absolute;width:176px;min-height:66px;border-radius:999px;padding:8px 16px;justify-content:center;text-align:center;gap:6px;pointer-events:auto;z-index:3;cursor:pointer;
+  transform:translate(-50%,-50%);transition:left .6s cubic-bezier(.34,1.56,.64,1),top .6s cubic-bezier(.34,1.56,.64,1);animation:float 3.2s ease-in-out infinite}
+#web .cardx .tx{font-size:16px}
+#web .cardx .ic{font-size:22px}
+#web.tight .cardx{width:150px;min-height:56px;padding:5px 12px}
+#web.tight .cardx .tx{font-size:14px}
+#web .cardx.boing{animation:boing .55s ease-out,float 3.2s ease-in-out .55s infinite}
+#web .cardx.sel{animation:wobc .6s ease-in-out infinite;z-index:6}
+#web .cardx:hover{z-index:8}
+#web .cardx .exp{position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%);width:290px;background:#fff;border:2px solid var(--line);border-radius:14px;padding:6px 10px;font-size:15px;text-align:left;box-shadow:0 6px 16px #0002;display:none!important}
+.checked #web .cardx:hover .exp{display:block!important}
+#web .cardx.own{background:#f0f9ff}
+#web .cardx.free{border-style:dashed;border-color:#94a3b8;box-shadow:0 6px 14px #0f172a1f;animation:drift 5.5s ease-in-out infinite}
+#web .cardx.free.sel{animation:wobc .6s ease-in-out infinite}
+#dragLine{position:absolute;left:0;top:0;width:1600px;height:900px;pointer-events:none;z-index:60}
+#dragLine line{stroke:#f59e0b;stroke-width:5;stroke-linecap:round;stroke-dasharray:2 10}
+.ab.add{background:var(--accent)}.ab.add:disabled{background:var(--accent)}
+.bubblemap .wgrid .wfield textarea{border-radius:999px;border:3px dashed var(--line);background:#f8fafc;height:52px;padding:10px 20px;font-size:18px;overflow:hidden}
+.bubblemap .wgrid .wfield:nth-child(odd) textarea{border-color:#86efac}
+.bubblemap .wgrid .wfield:nth-child(even) textarea{border-color:#fca5a5}
+.bubblemap .wgrid .wfield textarea:focus{outline:none;border-style:solid;background:#fff}
+@keyframes float{0%,100%{transform:translate(-50%,-50%)}50%{transform:translate(-50%,calc(-50% - 6px))}}
+@keyframes boing{0%{transform:translate(-50%,-50%) scale(.5)}55%{transform:translate(-50%,-50%) scale(1.15)}80%{transform:translate(-50%,-50%) scale(.95)}100%{transform:translate(-50%,-50%) scale(1)}}
+@keyframes wobc{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.08)}}
+@keyframes drift{0%,100%{transform:translate(-50%,-50%)}25%{transform:translate(calc(-50% + 10px),calc(-50% - 6px))}50%{transform:translate(calc(-50% + 3px),calc(-50% + 7px))}75%{transform:translate(calc(-50% - 9px),calc(-50% - 3px))}}
+@keyframes glow{0%,100%{box-shadow:0 0 0 6px #fff,0 0 0 10px currentColor}50%{box-shadow:0 0 0 6px #fff,0 0 0 10px currentColor,0 0 0 20px #facc1588}}
+/* เครื่องที่ปิดภาพเคลื่อนไหว: ไม่ลอยตลอดเวลา แต่ยังเด้งตอนต่อเส้น */
+@media (prefers-reduced-motion:reduce){#web .cardx,#web .cardx.sel,#web .cardx.free,#web .cardx.free.sel{animation:none}#web .cardx.boing{animation:boing .55s ease-out}}
+/* noReason: คำถาม Frame of Reference เด้งเป็นหน้าต่าง */
+.popfor #forPanel{background:#0f172acc}
+.popfor .forbox{border:none;border-radius:32px;box-shadow:0 20px 50px #0007;animation:popin .25s ease-out}
+@keyframes popin{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.popfor .forbox{animation-name:fadein}}
+@keyframes fadein{from{opacity:0}to{opacity:1}}
+.bubblemap .cardx .del{position:absolute;top:-10px;right:-4px;z-index:2;box-shadow:0 2px 0 #0002}
