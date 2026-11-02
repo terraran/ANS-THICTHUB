@@ -382,19 +382,21 @@ function choose(id, timeUp){
     const got = m.miss || timeUp ? 0 : 1; stars += got;
     m.hist.forEach(l => l.cur = false);
     m.hist.push({ k: 'me', s: m.step, x: id }, { k: 'f', s: m.step, x: 'a' });
-    res.className = 'res ' + (timeUp ? 'no' : got ? 'good' : 'part'); res.textContent = timeUp ? U().timeUp : got ? U().right : U().rightLate;
+    res.className = 'res hide ' + (timeUp ? 'no' : got ? 'good' : 'part'); res.textContent = timeUp ? U().timeUp : got ? U().right : U().rightLate;
     if (got) restart($('#hStar'), 'bump');
+    // ยังไม่ถึงรายงาน: เพื่อนพิมพ์ข้อความขั้นถัดไปต่อในแชทเดิมเลย ไม่ต้องกลับกล่องแชท · ถึงรายงานแล้วจึงมีปุ่มกลับ
     const then = () => {
       res.classList.remove('hide');
-      m.step++; m.after = true; m.pend = !isDone(m);
-      renderChat(false); hud();
-      $('#cNext').classList.remove('hide');
+      m.step++;
+      if (isDone(m)) { m.after = true; renderChat(false); hud(); $('#cNext').classList.remove('hide'); return; }
+      m.hist.push({ k: 'f', s: m.step, x: 'f', cur: true }); deal(m); hud();
+      playIn(m.hist.length - 1, () => { res.classList.add('hide'); startTimer(); }, false);
     };
     playIn(m.hist.length - 1, then, true);
   } else {
     m.miss = true; m.tried.push(id);
     m.hist.push({ k: 'mx', s: m.step, x: id }, { k: 'fx', s: m.step, x: id });
-    res.className = 'res no'; res.textContent = U().wrong;
+    res.className = 'res hide no'; res.textContent = U().wrong;
     playIn(m.hist.length - 1, () => { res.classList.remove('hide'); restart($('#sChat'), 'shake'); startTimer(); }, true);
   }
 }

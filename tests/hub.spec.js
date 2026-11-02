@@ -579,19 +579,28 @@ test('เกมกู้ภัยแชท (Y4): เพื่อนอยู่�
   await expect(page.locator(`.op[data-o="${wrong}"]`)).toHaveClass(/wrong/);
   await expect(page.locator(`.op[data-o="${wrong}"]`)).toBeDisabled();
   await expect(page.locator('#cRes')).toHaveClass(/no/);
-  // ตอบถูกทุกขั้นจนทุกคนปลอดภัย
+  // ตอบถูกทุกขั้นจนทุกคนปลอดภัย · ตอบถูกแล้วเพื่อนพิมพ์ขั้นถัดไปต่อในแชทเดิม กลับกล่องแชทแค่ตอนเพื่อนถึงรายงานแล้ว
+  let opened = 1;
   for (let guard = 0; guard < 20; guard++) {
     if (await page.locator('#sInbox').isVisible()) {
       const i = await page.evaluate(() => team.findIndex(m => m.step < 4));
-      await page.click(`.fbtn[data-i="${i}"]`); await page.click('#cChat');
+      await page.click(`.fbtn[data-i="${i}"]`); await page.click('#cChat'); opened++;
     }
     const r = await page.evaluate(() => team[cur].opts.find(o => /^r\d$/.test(o)));
     await page.click(`.op[data-o="${r}"]`); await page.click('#cChat');
+    if (await page.evaluate(() => team[cur].step < 4)) {
+      await expect(page.locator('#cNext')).toBeHidden();
+      await expect(page.locator('#cLines .ln.typing')).toBeVisible();   // ข้อความขั้นถัดไปกำลังมา
+      await page.click('#cChat');
+      await expect(page.locator('.op').first()).toBeEnabled();
+      continue;
+    }
     await expect(page.locator('#cNext')).toBeVisible();
     const last = await page.evaluate(() => team.every(m => m.step > 3));
     await page.click('#cNext');
     if (last) break;
   }
+  expect(opened).toBe(3);                                      // เปิดแชทเพื่อนคนละครั้งเดียว
   await expect(page.locator('#eStars')).toHaveText('ได้ดาว 8 จาก 9 ดวง');   // 9 ขั้น (4+3+2) เสียดาวข้อที่ตอบผิดไป 1
   await expect(page.locator('#eRank')).toHaveText('กู้ภัยระดับเงิน');
   expect(errs).toEqual([]);
@@ -621,7 +630,11 @@ test('เกมกู้ภัยแชท (Y4): ง่ายบอกขั้�
   await page.evaluate(() => { left = 1; });
   await expect(page.locator('#cRes')).toHaveText('Time is up! The right reply is now in the chat (no star)', { timeout: 6000 });
   await expect(page.locator('#hStar')).toHaveText('⭐ 0');
-  await expect(page.locator('#cNext')).toBeVisible({ timeout: 4000 });
-  await expect(page.locator('#cRes')).toBeVisible();
+  await expect(page.locator('#cRes')).toBeVisible({ timeout: 4000 });
   expect(await page.evaluate(() => team[0].step)).toBe(st0 + 1);
+  // เพื่อนยังไม่ถึงรายงาน: ข้อความถัดไปมาต่อในแชทเดิม แล้วเริ่มจับเวลาใหม่
+  await expect(page.locator('#cLines .ln.cur')).toHaveText(new RegExp(await page.evaluate(() => team[0].F.s[team[0].step].f.en.slice(0, 12))), { timeout: 4000 });
+  await expect(page.locator('#sChat')).toBeVisible();
+  await expect(page.locator('#cNext')).toBeHidden();
+  await expect(page.locator('#hTime')).toBeVisible();
 });
