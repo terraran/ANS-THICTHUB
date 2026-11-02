@@ -142,7 +142,9 @@ test('การ์ดที่ครูยังไม่เปิดถูก�
   await expect(page.locator('.card[data-act="y3w1"] .lockbox')).toBeVisible();
   await expect(page.locator('.card[data-act="y3w1"] a')).toHaveCount(0);
   await page.click('[data-tab="game"]');
-  await expect(page.locator('.card')).toHaveCount(1);   // Y3 เห็นแค่เกมผจญภัย
+  await expect(page.locator('.card')).toHaveCount(2);   // Y3 เห็นแค่เกมของ Y3 (ผจญภัย + ตั้งโปรไฟล์)
+  await expect(page.locator('.card[data-act="profile"] .lockbox')).toBeVisible();   // ครูยังไม่เปิด
+  await expect(page.locator('.card[data-act="profile"] button')).toHaveCount(0);
   await expect(page.locator('.card[data-act="adventure"] .st')).toHaveText('เล่นได้เลย');
   await page.click('.card[data-act="adventure"] button');
   await expect(page.locator('#gameWrap')).toBeVisible();
@@ -485,4 +487,141 @@ test('Y4 สัปดาห์ 2 Flow Map: ต้องเลือกสถา�
   expect(d).toMatchObject({ act: 'y4w2', map: 'flow', write: { pick: 'p3' }, fr: '' });
   await ctx.close();
   expect(errs).toEqual([]);
+});
+
+test('เกมสัปดาห์ 2: แถวเกมใน activities ชี้ไฟล์จริง · ล็อกด้วยใบงานคู่ · ใบงานพาไปเกม', async () => {
+  const A = JSON.parse(fs.readFileSync(path.join(__dirname, '../data/activities.json'), 'utf8')).activities;
+  for (const [sheet, game, level] of [['y3w2', 'profile', 'Y3'], ['y4w2', 'rescue', 'Y4']]) {
+    const g = A.find(a => a.id === game);
+    expect(g).toMatchObject({ kind: 'game', level, ownBack: true, requires: sheet, path: `games/${game}.html` });
+    expect(g.tag.th && g.tag.en && g.title.th && g.title.en).toBeTruthy();
+    expect(fs.existsSync(path.join(__dirname, '..', g.path))).toBe(true);
+    expect(A.find(a => a.id === sheet).afterGame).toBe(game);
+  }
+});
+
+test('เกมตั้งโปรไฟล์ (Y3): ช่องที่ต้องซ่อนไม่เท่ากัน · ปุ่มเหมือนกัน · ถามครู · เล่นจบได้ดาวเต็ม', async ({ page }) => {
+  const errs = []; page.on('pageerror', e => errs.push(e.message));
+  await page.route('**/fonts.googleapis.com/**', r => r.abort());
+  await page.goto('/games/profile.html');
+  await expect(page.locator('#gback')).toBeHidden();
+  await page.click('#goE');
+  // จำนวนช่องที่ต้องซ่อน 2, 3, 4 (สลับลำดับ) · ช่องชื่อเดียวกันไม่อยู่โปรไฟล์เดียวกัน
+  const P = await page.evaluate(() => profs.map(p => ({ n: p.rows.length, k: p.rows.filter(f => f.p).length, g: p.rows.filter(f => f.g).length })));
+  expect(P.map(p => p.k).sort()).toEqual([2, 3, 4]);
+  for (const p of P) { expect(p.n).toBe(6); expect(p.g).toBeLessThanOrEqual(1); }
+  // ปุ่มโชว์/ซ่อนทุกแถวหน้าตาเหมือนกัน ไม่บอกใบ้คำตอบ
+  const looks = await page.locator('.fr').evaluateAll(rs => rs.map(r => r.className + r.querySelector('.tg').innerHTML));
+  expect(new Set(looks).size).toBe(1);
+  // ถามครู: แตะช่อง → ครูบอกพร้อมเหตุผล · ตัวช่วยลดลง
+  await expect(page.locator('#pHelp')).toHaveText('🙋 ถามครู (เหลือ 3)');
+  await page.click('#pHelp'); await page.locator('.fr .lab').first().click();
+  await expect(page.locator('.fr').first().locator('.tip')).toContainText('ครูบอกว่า');
+  await expect(page.locator('#pHelp')).toHaveText('🙋 ถามครู (เหลือ 2)');
+  for (let i = 0; i < 3; i++) {
+    await expect(page.locator('#pPost')).toBeDisabled();
+    const rows = await page.evaluate(() => profs[idx].rows.map(f => [f.id, f.p]));
+    for (const [id, p] of rows) await page.click(`.fr[data-id="${id}"] .tg button[data-v="${p}"]`);
+    await page.click('#pPost');
+    await expect(page.locator('#pRes')).toHaveClass(/good/);
+    await expect(page.locator('.fr.right')).toHaveCount(6);
+    await page.click('#pNext');
+  }
+  await expect(page.locator('#eStars')).toHaveText('ได้ดาว 18 จาก 18 ดวง');
+  await expect(page.locator('#eRank')).toHaveText('ฮีโร่ระดับทอง');
+  // ตอบผิด: แถวแดงพร้อมเหตุผล · ภาษาอังกฤษ
+  await page.click('#len'); await page.click('#eTitle'); await page.click('#goN');
+  await expect(page.locator('#pHelp')).toHaveText('🙋 Ask the teacher (1 left)');
+  const rows = await page.evaluate(() => profs[0].rows.map(f => [f.id, f.p]));
+  for (const [id, p] of rows) await page.click(`.fr[data-id="${id}"] .tg button[data-v="${1 - p}"]`);
+  await page.click('#pPost');
+  await expect(page.locator('.fr.wrong')).toHaveCount(6);
+  await expect(page.locator('.fr.wrong .tip').first()).toContainText('✗');
+  await expect(page.locator('#pRes')).toHaveClass(/no/);
+  expect(errs).toEqual([]);
+});
+
+test('เกมตั้งโปรไฟล์ (Y3): โหมดยาก 8 ช่อง จับเวลา · เครื่องปิดภาพเคลื่อนไหวยังเห็นทุกแถว', async ({ page }) => {
+  await page.route('**/fonts.googleapis.com/**', r => r.abort());
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/games/profile.html');
+  await page.click('#goH');
+  await expect(page.locator('.fr')).toHaveCount(8);
+  await expect(page.locator('.fr').last()).toHaveCSS('opacity', '1');
+  await expect(page.locator('#hTime')).toBeVisible();
+  await expect(page.locator('#pHelper')).toBeHidden();
+  expect((await page.evaluate(() => profs.map(p => p.rows.filter(f => f.p).length))).sort()).toEqual([3, 4, 5]);
+  await page.evaluate(() => { left = 1; });                 // หมดเวลา = โพสต์เอง ช่องที่ไม่ได้เลือกนับว่าผิด
+  await expect(page.locator('#pRes')).toContainText('หมดเวลา!', { timeout: 3000 });
+  await expect(page.locator('.fr.wrong')).toHaveCount(8);
+});
+
+test('เกมกู้ภัยแชท (Y4): เพื่อนอยู่คนละขั้น · ตัวเลือกหน้าตาเหมือนกัน · ผิดแล้วเพื่อนเล่าผล · เล่นจบได้ดาว', async ({ page }) => {
+  const errs = []; page.on('pageerror', e => errs.push(e.message));
+  await page.route('**/fonts.googleapis.com/**', r => r.abort());
+  await page.goto('/games/rescue.html');
+  await expect(page.locator('#gback')).toBeHidden();
+  await page.click('#goN');
+  expect((await page.evaluate(() => team.map(m => m.step))).sort()).toEqual([0, 1, 2]);
+  await expect(page.locator('.fbtn.new')).toHaveCount(3);
+  await expect(page.locator('.track')).toHaveCount(0);       // ปกติ: ไม่บอกขั้นที่เพื่อนอยู่
+  // ตอบผิดก่อน 1 ครั้งกับเพื่อนคนแรก
+  await page.click('.fbtn[data-i="0"]'); await page.click('#cChat');
+  await expect(page.locator('.map .now')).toHaveCount(0);
+  const ops = page.locator('.op');
+  await expect(ops).toHaveCount(3);
+  const who = await page.evaluate(() => team[0].F.who);
+  for (const tx of await ops.allTextContents()) expect(tx).toContain(who);   // ทุกตัวเลือกพูดถึงคนหลอกเหมือนกัน
+  expect(new Set(await ops.evaluateAll(b => b.map(x => x.className))).size).toBe(1);
+  const wrong = await page.evaluate(() => team[0].opts.find(o => !/^r\d$/.test(o)));
+  await page.click(`.op[data-o="${wrong}"]`); await page.click('#cChat');
+  await expect(page.locator('.ln.me.x')).toHaveCount(1);
+  await expect(page.locator(`.op[data-o="${wrong}"]`)).toHaveClass(/wrong/);
+  await expect(page.locator(`.op[data-o="${wrong}"]`)).toBeDisabled();
+  await expect(page.locator('#cRes')).toHaveClass(/no/);
+  // ตอบถูกทุกขั้นจนทุกคนปลอดภัย
+  for (let guard = 0; guard < 20; guard++) {
+    if (await page.locator('#sInbox').isVisible()) {
+      const i = await page.evaluate(() => team.findIndex(m => m.step < 4));
+      await page.click(`.fbtn[data-i="${i}"]`); await page.click('#cChat');
+    }
+    const r = await page.evaluate(() => team[cur].opts.find(o => /^r\d$/.test(o)));
+    await page.click(`.op[data-o="${r}"]`); await page.click('#cChat');
+    await expect(page.locator('#cNext')).toBeVisible();
+    const last = await page.evaluate(() => team.every(m => m.step > 3));
+    await page.click('#cNext');
+    if (last) break;
+  }
+  await expect(page.locator('#eStars')).toHaveText('ได้ดาว 8 จาก 9 ดวง');   // 9 ขั้น (4+3+2) เสียดาวข้อที่ตอบผิดไป 1
+  await expect(page.locator('#eRank')).toHaveText('กู้ภัยระดับเงิน');
+  expect(errs).toEqual([]);
+});
+
+test('เกมกู้ภัยแชท (Y4): ง่ายบอกขั้น · ข้อความค่อย ๆ เด้ง (แม้ปิดภาพเคลื่อนไหว) · ยาก 4 คนจับเวลา · EN', async ({ page }) => {
+  await page.route('**/fonts.googleapis.com/**', r => r.abort());
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/games/rescue.html');
+  await page.click('#goE');
+  await expect(page.locator('.track')).toHaveCount(3);
+  await page.click('.fbtn[data-i="0"]');
+  await expect(page.locator('.op').first()).toBeDisabled();  // ล็อกจนข้อความเพื่อนมาครบ
+  await expect(page.locator('#cLines .ln.typing')).toBeVisible();
+  await expect(page.locator('#cLines .ln.cur')).toBeVisible({ timeout: 4000 });
+  await expect(page.locator('#cLines .ln.cur')).toHaveCSS('opacity', '1');
+  await expect(page.locator('.op').first()).toBeEnabled();
+  const s = await page.evaluate(() => team[0].step);
+  await expect(page.locator('.map span.now')).toHaveText(['👀 สังเกต', '🤔 สงสัย', '🙋 สอบถาม'][s]);
+  // ยาก: 4 คน · หมดเวลา = เฉลยข้อถูก ไม่ได้ดาว แล้วเพื่อนไปขั้นต่อไป
+  await page.click('#len'); await page.click('#cBackIn');
+  await page.evaluate(() => toTitle()); await page.click('#goH');
+  await expect(page.locator('.fbtn')).toHaveCount(4);
+  await page.click('.fbtn[data-i="0"]'); await page.click('#cChat');
+  await expect(page.locator('#hTime')).toBeVisible();
+  const st0 = await page.evaluate(() => team[0].step);
+  await page.evaluate(() => { left = 1; });
+  await expect(page.locator('#cRes')).toHaveText('Time is up! The right reply is now in the chat (no star)', { timeout: 6000 });
+  await expect(page.locator('#hStar')).toHaveText('⭐ 0');
+  await expect(page.locator('#cNext')).toBeVisible({ timeout: 4000 });
+  await expect(page.locator('#cRes')).toBeVisible();
+  expect(await page.evaluate(() => team[0].step)).toBe(st0 + 1);
 });

@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>หน่วยกู้ภัยแชท</title>
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#0b2545;--navy2:#13315c;--sel:#facc15;--act:#0284c7;--ok:#16a34a;--bad:#dc2626;--ink:#0f172a;--muted:#475569;--line:#cbd5e1}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--navy);color:#fff;font-family:Kanit,Tahoma,sans-serif}
+button{font-family:inherit;cursor:pointer;border:none;border-radius:14px;min-height:48px;font-size:20px;font-weight:600;padding:6px 20px;background:var(--act);color:#fff;box-shadow:0 4px 0 #0005}
+button:disabled{background:#94a3b8;color:#1e293b;box-shadow:none;cursor:not-allowed}
+.hide{display:none!important}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 16px;flex-wrap:wrap}
+.ctls{display:flex;gap:8px}
+.ctl{background:var(--navy2);border:2px solid #ffffff55;box-shadow:none;font-size:17px;min-height:44px;padding:4px 14px}
+.ctl.on{background:#fff;color:var(--navy)}
+.hud{display:flex;gap:10px;flex-wrap:wrap;font-size:18px}
+.hud span{background:var(--navy2);border-radius:20px;padding:4px 14px}
+.timer{background:#7f1d1d!important}
+.wrap{max-width:860px;margin:0 auto;padding:8px 16px 32px}
+/* title */
+.title{text-align:center;display:flex;flex-direction:column;align-items:center;gap:16px;padding-top:24px}
+.badge{font-size:84px;line-height:1}
+.title h1{margin:0;font-size:52px;font-weight:800}
+.title p{margin:0;font-size:21px;color:#bfdbfe;max-width:640px}
+.legend{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.legend span{background:var(--navy2);border-radius:20px;padding:4px 14px;font-size:17px}
+.modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(220px,100%),1fr));gap:14px;width:100%;margin-top:8px}
+.modes button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:14px;font-size:26px}
+.modes small{font-size:16px;font-weight:400;opacity:.9}
+#goE{background:var(--ok)}#goH{background:var(--bad)}
+.file{background:#fff;color:var(--ink);border-radius:24px;padding:22px;display:flex;flex-direction:column;gap:14px;box-shadow:0 10px 0 #020617;position:relative}
+.casehd{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.casehd b{background:var(--sel);color:var(--navy);border-radius:12px;padding:2px 14px;font-size:18px}
+.casehd span{color:var(--muted);font-size:17px}
+/* กล่องแชท */
+.inbox{display:flex;flex-direction:column;gap:10px}
+.fbtn{display:grid;grid-template-columns:auto 1fr auto;gap:4px 14px;align-items:center;text-align:left;background:#f8fafc;color:var(--ink);border:3px solid var(--line);box-shadow:0 3px 0 var(--line);padding:10px 14px;font-weight:400}
+.fbtn.new{border-color:#f97316;box-shadow:0 3px 0 #f97316;background:#fff7ed}
+.fbtn.done{background:#f0fdf4;border-color:#86efac;box-shadow:0 3px 0 #86efac}
+.fbtn .av{grid-row:1/3}
+.fbtn b{font-size:20px}
+.fbtn .pv{grid-column:2;font-size:17px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fbtn .st{grid-row:1/3;grid-column:3;font-size:16px;font-weight:600;border-radius:20px;padding:2px 12px;background:#e2e8f0;white-space:nowrap}
+.fbtn.new .st{background:#f97316;color:#fff}
+.fbtn.done .st{background:var(--ok);color:#fff}
+.track{display:flex;gap:4px;grid-column:2}
+.track i{font-style:normal;font-size:14px;border-radius:10px;padding:0 8px;background:#e2e8f0;color:var(--muted)}
+.track i.y{background:#bbf7d0;color:#14532d}.track i.now{background:var(--sel);color:var(--navy)}
+.av{flex:none;width:44px;height:44px;border-radius:50%;background:#db2777;color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800}
+/* แผนผัง 3 ส. */
+.map{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.map span{background:#f1f5f9;border:2px solid var(--line);border-radius:12px;padding:4px 6px;font-size:16px;text-align:center}
+.map span.now{background:#fde68a;border-color:#f59e0b;font-weight:600}
+.map span.y{background:#dcfce7;border-color:#86efac}
+#cBackIn{background:var(--navy2);font-size:17px;min-height:44px}
+/* หน้าต่างแชท */
+.chatwin{background:#1e293b;border-radius:18px;overflow:hidden;cursor:pointer}
+.chathd{background:#0f172a;color:#cbd5e1;font-size:16px;padding:8px 16px;display:flex;justify-content:space-between;gap:10px}
+.chathd .on{color:#4ade80}
+.lines{padding:14px 16px;display:flex;flex-direction:column;gap:10px;min-height:220px;max-height:440px;overflow-y:auto}
+.ln{display:flex;gap:10px;align-items:flex-end;max-width:85%}
+.ln .who{color:#93c5fd;font-size:14px;margin-bottom:2px}
+.bub{background:#fff;color:var(--ink);border-radius:16px 16px 16px 4px;padding:8px 14px;font-size:19px;line-height:1.35}
+.ln.me{align-self:flex-end}
+.ln.me .bub{background:#0284c7;color:#fff;border-radius:16px 16px 4px 16px}
+.ln.x .bub{background:#7f1d1d;color:#fecaca}
+.ln.old{opacity:.6}
+.ln.cur .bub{outline:4px solid var(--sel);outline-offset:2px}
+.typing .bub{display:flex;gap:5px;align-items:center;padding:12px 16px}
+.typing i{width:9px;height:9px;border-radius:50%;background:#64748b;animation:dot 1s infinite}
+.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+.skip{color:#64748b;font-size:14px;text-align:center;padding-bottom:8px}
+.ask{font-size:20px;font-weight:600}
+.opts{display:flex;flex-direction:column;gap:10px}
+.op{background:#f8fafc;color:var(--ink);border:3px solid var(--line);box-shadow:0 3px 0 var(--line);font-size:19px;text-align:left;font-weight:400;line-height:1.35;padding:8px 16px}
+.op:disabled{cursor:default;color:var(--ink)}
+.op.wrong{background:#fecaca;border-color:var(--bad);text-decoration:line-through;opacity:.8}
+.op.right{background:#bbf7d0;border-color:var(--ok)}
+.res{border-radius:14px;padding:12px 16px;font-size:19px;line-height:1.4}
+.res.good{background:#dcfce7;color:#14532d}.res.part{background:#fef3c7;color:#78350f}.res.no{background:#fee2e2;color:#7f1d1d}
+.go{align-self:flex-end}
+.tbar{height:10px;border-radius:6px;background:#e2e8f0;overflow:hidden}
+.tbar i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#f97316,#dc2626)}
+.pop{animation:pop .35s ease-out both}
+@keyframes dot{0%,60%,100%{transform:translateY(0);opacity:.5}30%{transform:translateY(-6px);opacity:1}}
+@keyframes pop{from{opacity:0;transform:translateY(14px) scale(.9)}to{opacity:1;transform:none}}
+@keyframes shake{0%,100%{transform:none}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+@keyframes bump{0%{transform:scale(1)}40%{transform:scale(1.35)}100%{transform:scale(1)}}
+.shake{animation:shake .45s}
+.bump{display:inline-block;animation:bump .5s}
+.final{text-align:center;align-items:center}
+.final .badge{font-size:110px}
+.final h2{margin:0;font-size:38px}
+.final p{margin:0;font-size:22px;color:var(--muted)}
+.btns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+@media (max-width:560px){.title h1{font-size:38px}.map span{font-size:13px}.op{font-size:17px}.fbtn .st{grid-row:auto;grid-column:2;justify-self:start}}
+/* เครื่องที่ปิดภาพเคลื่อนไหว: แชทยังเด้งทีละบรรทัด (แค่จางเข้า) · ปิดเฉพาะการสั่น/เด้ง */
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@keyframes blink{0%,60%,100%{opacity:.35}30%{opacity:1}}
+@media (prefers-reduced-motion:reduce){.pop{animation-name:fade}.typing i{animation-name:blink}.shake,.bump{animation:none}}
+</style></head><body>
+<div class="top">
+ <div class="hud hide" id="hud"><span id="hDone"></span><span id="hStar"></span><span id="hTime" class="timer hide"></span></div>
+ <div class="ctls"><button class="ctl hide" id="gback"></button><button class="ctl on" id="lth">TH</button><button class="ctl" id="len">EN</button></div>
+</div>
+<div class="wrap">
+ <section id="sTitle" class="title">
+  <div class="badge">🚑</div>
+  <h1 id="tTitle"></h1>
+  <p id="tSub"></p>
+  <div class="legend" id="tLegend"></div>
+  <div class="modes"><button id="goE"></button><button id="goN"></button><button id="goH"></button></div>
+ </section>
+ <section id="sInbox" class="file hide">
+  <div class="casehd"><b id="iTitle"></b><span id="iSub"></span></div>
+  <div class="inbox" id="iList"></div>
+ </section>
+ <section id="sChat" class="file hide">
+  <div class="casehd"><button id="cBackIn"></button><span id="cStep"></span></div>
+  <div class="map" id="cMap"></div>
+  <div class="chatwin" id="cChat"><div class="chathd"><span id="cRoom"></span><span class="on" id="cOnline"></span></div><div class="lines" id="cLines"></div><div class="skip" id="cSkip"></div></div>
+  <div class="tbar hide" id="tBar"><i id="tFill"></i></div>
+  <div class="ask" id="cAsk"></div>
+  <div class="opts" id="cOpts"></div>
+  <div class="res hide" id="cRes"></div>
+  <button class="go hide" id="cNext"></button>
+ </section>
+ <section id="sEnd" class="file final hide">
+  <div class="badge" id="eBadge"></div>
+  <h2 id="eRank"></h2>
+  <p id="eStars"></p>
+  <div class="btns"><button id="eAgain"></button><button id="eTitle" style="background:var(--navy2)"></button></div>
+ </section>
+</div>
+<script>
+const $ = s => document.querySelector(s);
+// 4 ขั้น (ตรงกับใบงาน Y4 สัปดาห์ 2): สังเกต → สงสัย → สอบถาม → รายงาน
+const STEPS = [{ th: '👀 สังเกต', en: '👀 Spot' }, { th: '🤔 สงสัย', en: '🤔 Doubt' }, { th: '🙋 สอบถาม', en: '🙋 Ask an adult' }, { th: '🚩 รายงาน', en: '🚩 Report' }];
+// คำตอบที่ถูกของแต่ละขั้น (สุ่ม 1 จาก 2) · {who} = ชื่อคนหลอก ใส่ทุกตัวเลือกให้หน้าตาเหมือนกัน
+const RIGHT = [
+  [{ th: 'ย้อนดูแชทกับ {who} หน่อย เขาขอให้เธอส่งอะไรมาบ้าง', en: 'Look back at the chat with {who}. What did they ask you to send?' },
+   { th: 'เธอรู้จัก {who} ตัวจริงไหม หรือรู้จักแค่ชื่อในเกม', en: 'Do you know {who} in real life, or only their game name?' }],
+  [{ th: 'หยุดก่อนนะ ยังไม่ต้องตอบ {who} และไม่ส่งอะไรเพิ่ม', en: 'Stop for now. Don’t answer {who} and don’t send anything more.' },
+   { th: 'ที่ {who} บอก ฟังดูดีเกินจริงไหม อย่าเพิ่งเชื่อนะ', en: 'Does what {who} says sound too good to be true? Don’t believe it yet.' }],
+  [{ th: 'ไปเล่าเรื่อง {who} ให้ครูฟังกัน เดี๋ยวเราไปเป็นเพื่อน', en: 'Let’s tell a teacher about {who}. I’ll come with you.' },
+   { th: 'เล่าให้พ่อแม่ฟังเลยว่า {who} ทำอะไร แล้วถามว่าทำไงต่อดี', en: 'Tell your parents what {who} did, and ask what to do next.' }],
+  [{ th: 'ให้ผู้ใหญ่ช่วยกดรายงานและบล็อก {who} ไปพร้อมกันนะ', en: 'Get the adult to help you report and block {who} together.' },
+   { th: 'เก็บแชทกับ {who} ไว้ก่อน ให้ผู้ใหญ่ดูเป็นหลักฐานตอนรายงาน', en: 'Keep the chat with {who} so the adult can use it as proof when reporting.' }]
+];
+// คำตอบที่ผิด = ข้ามขั้น หรือสิ่งที่ไม่ควรทำ · r = เพื่อนเล่าว่าเกิดอะไรขึ้นถ้าทำแบบนั้น
+const WRONG = {
+  reply: { th: 'ทักไปถาม {who} เลยว่า หลอกเธอใช่ไหม', en: 'Message {who} and ask: did you trick my friend?',
+    r: { th: 'ทักไปแล้ว {who} ตอบว่า "ไม่ได้หลอกนะ" แล้วชวนคุยต่ออีก 😣 ยิ่งตอบ เขายิ่งได้คุยกับเรา', en: 'I did. {who} said "Not a trick!" and kept chatting 😣 Replying lets them keep talking to us.' } },
+  players: { th: 'ถามคนในห้องแชทเกมดูว่า {who} ไว้ใจได้ไหม', en: 'Ask the people in the game chat if {who} can be trusted.',
+    r: { th: 'มีคนตอบว่าไว้ใจได้ แต่เราก็ไม่รู้ว่าคนนั้นเป็นใคร อาจเป็นพวกเดียวกับ {who} ก็ได้ 😟', en: 'Someone said yes, but we don’t know who they are either. They could be with {who} 😟' } },
+  blockAlone: { th: 'บล็อก {who} เองเลย ไม่ต้องให้ผู้ใหญ่รู้หรอก', en: 'Just block {who} yourself. No need for an adult to know.',
+    r: { th: 'บล็อกแล้ว แต่ {who} ยังมีข้อมูลที่เราส่งไปอยู่ และไม่มีผู้ใหญ่ช่วยแก้เลย 😟', en: 'I blocked them, but {who} still has what I sent, and no adult is helping fix it 😟' } },
+  again: { th: 'ส่งให้ {who} อีกรอบก็ได้ เผื่อเขาทำตามที่บอกจริง', en: 'Send it to {who} once more. Maybe they really will keep their promise.',
+    r: { th: 'ส่งไปแล้ว... {who} ไม่ให้อะไรเลย แถมขอเพิ่มอีก 😭', en: 'I sent it... {who} gave me nothing and asked for more 😭' } },
+  test: { th: 'ลองทำตามที่ {who} บอกอีกครั้ง จะได้รู้ว่าจริงไหม', en: 'Try doing what {who} says one more time, to see if it is real.',
+    r: { th: 'ลองแล้ว ไม่ได้อะไรเลย {who} ได้ข้อมูลของเราเพิ่มอีก 😭', en: 'I tried. I got nothing, and {who} got even more of my info 😭' } },
+  secret: { th: 'เราจะไม่บอกใครเรื่อง {who} นะ สัญญาเลย', en: 'I won’t tell anyone about {who}. I promise.',
+    r: { th: 'ขอบใจนะ... แต่ถ้าไม่มีใครรู้ ก็ไม่มีผู้ใหญ่ช่วยเราเลย และ {who} ยังหลอกคนอื่นต่อ 😢', en: 'Thanks... but if nobody knows, no adult can help, and {who} keeps tricking others 😢' } },
+  wait: { th: 'รอให้ครูถามก่อน แล้วค่อยเล่าเรื่อง {who} ก็ได้', en: 'Wait until the teacher asks, then tell them about {who}.',
+    r: { th: 'รอมาทั้งวัน ครูก็ยังไม่ถาม ระหว่างนี้ {who} ยังใช้ข้อมูลของเราได้อยู่ 😟', en: 'I waited all day and the teacher didn’t ask. Meanwhile {who} can still use my info 😟' } },
+  newAcc: { th: 'สมัครบัญชีใหม่ แล้วลืมเรื่อง {who} ไปเลย', en: 'Make a new account and forget about {who}.',
+    r: { th: 'สมัครใหม่แล้ว แต่ {who} ยังมีข้อมูลเก่าของเรา แล้วก็ไปหลอกคนอื่นต่อ 😟', en: 'I made a new one, but {who} still has my old info, and goes on to trick others 😟' } },
+  del: { th: 'ลบแชทกับ {who} ทิ้งให้หมด จะได้ลืม ๆ ไป', en: 'Delete the whole chat with {who} so you can forget it.',
+    r: { th: 'ลบหมดแล้ว... ผู้ใหญ่บอกว่าไม่มีหลักฐาน เลยรายงาน {who} ยากมาก 😣', en: 'I deleted it... the adult says there is no proof now, so reporting {who} is hard 😣' } },
+  scold: { th: 'ส่งข้อความว่า {who} กลับไปแรง ๆ ให้เข็ด', en: 'Send {who} an angry message to teach them a lesson.',
+    r: { th: 'ส่งไปแล้ว {who} ตอบกลับมารัว ๆ เลย ยิ่งคุยยิ่งแย่ 😣', en: 'I did. {who} sent message after message back. Talking made it worse 😣' } }
+};
+const WPOOL = [['reply', 'players', 'blockAlone'], ['again', 'test', 'reply'], ['secret', 'wait', 'blockAlone', 'newAcc'], ['del', 'scold', 'newAcc']];
+// เพื่อนที่โดนหลอก · s[ขั้น] = { f: เพื่อนเล่า/ถาม, a: เพื่อนตอบหลังเราตอบถูก } (เรื่องใหม่ ไม่ซ้ำการ์ดในใบงาน)
+const FRIENDS = [
+  { id: 'tonkhao', n: { th: 'ต้นข้าว', en: 'Tonkhao' }, who: 'SkinGiver', s: [
+    { f: { th: 'ช่วยด้วย 😭 เราเข้าเกมไม่ได้แล้ว เมื่อกี้ SkinGiver บอกว่าจะแจกสกินฟรี', en: 'Help 😭 I can’t log in any more. SkinGiver said they would give me a free skin.' },
+      a: { th: 'อ่านแล้ว... เขาขอชื่อผู้ใช้กับรหัสผ่าน แล้วเราก็ส่งไปเลย', en: 'I read it... they asked for my username and password, and I sent them.' } },
+    { f: { th: 'SkinGiver ทักมาอีก บอกว่าถ้าส่งรหัสของพี่ชายมาด้วย จะคืนบัญชีให้', en: 'SkinGiver messaged again. They say they’ll give my account back if I send my brother’s password too.' },
+      a: { th: 'จริงด้วย ไม่ส่งแล้ว ไม่ตอบด้วย', en: 'You’re right. I won’t send it, and I won’t reply.' } },
+    { f: { th: 'แต่เราไม่อยากให้ครูรู้อะ อายมาก เธออย่าบอกใครนะ', en: 'But I don’t want the teacher to know. It’s so embarrassing. Don’t tell anyone.' },
+      a: { th: 'ไปเล่าแล้ว ครูไม่ดุเลย บอกว่าดีแล้วที่มาเล่า', en: 'We told the teacher. They weren’t cross, and said telling was the right thing.' } },
+    { f: { th: 'ครูช่วยเปลี่ยนรหัสผ่านให้แล้ว แล้วแชทกับ SkinGiver ล่ะ ทำไงต่อ', en: 'The teacher helped me change my password. What do we do with the SkinGiver chat?' },
+      a: { th: 'เรียบร้อย! ครูช่วยรายงานแล้ว เกมปิดบัญชี SkinGiver ✅', en: 'Done! The teacher helped report it, and the game closed SkinGiver’s account ✅' } }] },
+  { id: 'baitoey', n: { th: 'ใบเตย', en: 'Baitoey' }, who: 'GemQueen', s: [
+    { f: { th: 'GemQueen ชมว่าเราเล่นเก่ง แล้วให้เพชรมา 100 เม็ด แต่เรารู้สึกแปลก ๆ', en: 'GemQueen said I play really well and gave me 100 gems, but it feels weird.' },
+      a: { th: 'เขาขอรูปหน้าเรา บอกว่าจะให้เพชรอีก... เราส่งไปแล้ว 1 รูป', en: 'They asked for a photo of my face for more gems... I already sent one.' } },
+    { f: { th: 'ตอนนี้เขาขอรูปตอนใส่ชุดนักเรียน บอกว่าจะให้ 1,000 เพชร', en: 'Now they want a photo of me in my school uniform, for 1,000 gems.' },
+      a: { th: 'ใช่ ดีเกินจริงไป ไม่ส่งแล้ว', en: 'Yeah, that’s too good to be true. I won’t send it.' } },
+    { f: { th: 'GemQueen บอกว่าเรื่องนี้เป็นความลับของเราสองคน ห้ามบอกแม่', en: 'GemQueen says this is a secret between us two. I mustn’t tell Mum.' },
+      a: { th: 'บอกแม่แล้ว แม่บอกว่าไม่ใช่ความผิดเรา และจะช่วยจัดการ', en: 'I told Mum. She said it isn’t my fault, and she’ll help sort it out.' } },
+    { f: { th: 'แม่นั่งข้าง ๆ แล้ว ถามว่าจะจัดการแชทกับ GemQueen ยังไงดี', en: 'Mum is sitting with me. She’s asking what to do with the GemQueen chat.' },
+      a: { th: 'แม่ช่วยรายงานแล้ว เกมกำลังตรวจสอบ GemQueen ✅', en: 'Mum helped me report it. The game is checking GemQueen ✅' } }] },
+  { id: 'phum', n: { th: 'ภูมิ', en: 'Phum' }, who: 'LuckyBox', s: [
+    { f: { th: 'เมื่อกี้ LuckyBox ส่งลิงก์มา บอกว่าเราถูกรางวัลแท็บเล็ต เรากดเข้าไปแล้ว 😟', en: 'LuckyBox sent me a link saying I won a tablet. I already tapped it 😟' },
+      a: { th: 'ในลิงก์ให้กรอกเบอร์โทรแม่กับที่อยู่บ้าน เรากรอกไปแล้ว', en: 'The link asked for Mum’s phone number and our address. I filled them in.' } },
+    { f: { th: 'LuckyBox บอกว่าต้องกดลิงก์ใหม่ภายใน 1 นาที ไม่งั้นรางวัลจะหาย', en: 'LuckyBox says I must tap a new link within 1 minute or I’ll lose the prize.' },
+      a: { th: 'โอเค ไม่กดแล้ว ปล่อยให้หมดเวลาไปเลย', en: 'OK, I won’t tap it. Let the time run out.' } },
+    { f: { th: 'เรากลัวพ่อโกรธ ที่ไปกรอกเบอร์แม่ให้คนแปลกหน้า', en: 'I’m scared Dad will be angry that I gave Mum’s number to a stranger.' },
+      a: { th: 'บอกพ่อแล้ว พ่อไม่โกรธ บอกว่าจะช่วยดูให้', en: 'I told Dad. He isn’t angry, and he’ll help look into it.' } },
+    { f: { th: 'พ่อถามว่า แชทกับลิงก์ของ LuckyBox ยังอยู่ไหม จะได้ช่วยจัดการ', en: 'Dad is asking if the LuckyBox chat and link are still there, so he can deal with it.' },
+      a: { th: 'พ่อช่วยรายงานลิงก์กับบัญชีของ LuckyBox แล้ว ✅', en: 'Dad helped report LuckyBox’s link and account ✅' } }] },
+  { id: 'praewa', n: { th: 'แพรวา', en: 'Praewa' }, who: 'BestBuddy', s: [
+    { f: { th: 'BestBuddy ส่งของในเกมให้ทุกวัน วันนี้บอกว่าจะส่งของขวัญจริงมาให้ที่บ้าน', en: 'BestBuddy sends me game items every day. Today they said they’ll send a real present to my home.' },
+      a: { th: 'อ๋อ เขาขอที่อยู่บ้านกับชื่อโรงเรียน เราบอกชื่อโรงเรียนไปแล้ว', en: 'Oh, they asked for my address and my school. I already told them my school.' } },
+    { f: { th: 'ตอนนี้เขาอยากให้เปิดกล้องวิดีโอคอล บอกว่าจะได้รู้ว่าส่งของถูกคน', en: 'Now they want me to turn on my camera for a video call, to make sure the present goes to the right person.' },
+      a: { th: 'จริงด้วย ไม่เปิดกล้องแล้ว ไม่ตอบด้วย', en: 'True. I won’t turn on my camera, and I won’t reply.' } },
+    { f: { th: 'BestBuddy บอกว่าเราเป็นเพื่อนลับกัน ห้ามบอกผู้ใหญ่', en: 'BestBuddy says we are secret friends and I mustn’t tell any adults.' },
+      a: { th: 'บอกครูแล้ว ครูบอกว่าเพื่อนจริงไม่ให้เราปิดบังผู้ใหญ่', en: 'I told the teacher. They said real friends don’t ask us to hide things from adults.' } },
+    { f: { th: 'ครูถามว่า จะจัดการกับบัญชี BestBuddy ยังไงดี', en: 'The teacher is asking what we should do about BestBuddy’s account.' },
+      a: { th: 'ครูช่วยรายงานแล้ว เกมกำลังตรวจสอบ BestBuddy ✅', en: 'The teacher helped report it. The game is checking BestBuddy ✅' } }] },
+  { id: 'oat', n: { th: 'โอ๊ต', en: 'Oat' }, who: 'Admin_Help', s: [
+    { f: { th: 'Admin_Help บอกว่าบัญชีเราจะโดนลบ ถ้าไม่ยืนยันภายใน 5 นาที', en: 'Admin_Help says my account will be deleted if I don’t confirm it in 5 minutes.' },
+      a: { th: 'เขาขอรหัสผ่าน กับรหัสที่ส่งมาทางมือถือแม่ เราให้ไปแล้ว', en: 'They asked for my password and the code sent to Mum’s phone. I gave them both.' } },
+    { f: { th: 'Admin_Help ทักมาอีก บอกว่ายังยืนยันไม่ครบ ขอรหัสอีกชุด', en: 'Admin_Help messaged again. They say it isn’t confirmed yet and want another code.' },
+      a: { th: 'ใช่ ผู้ดูแลเกมจริงไม่ขอรหัสผ่าน ไม่ตอบแล้ว', en: 'Right, real game staff never ask for passwords. I won’t reply.' } },
+    { f: { th: 'เราว่าไม่ต้องบอกใครหรอก เดี๋ยวเราสมัครบัญชีใหม่ก็ได้', en: 'I don’t think I need to tell anyone. I’ll just make a new account.' },
+      a: { th: 'บอกแม่แล้ว แม่จะช่วยเปลี่ยนรหัสผ่านให้', en: 'I told Mum. She’ll help me change my password.' } },
+    { f: { th: 'แม่ถามว่า ข้อความของ Admin_Help ยังอยู่ไหม', en: 'Mum is asking if Admin_Help’s messages are still there.' },
+      a: { th: 'แม่ช่วยรายงานบัญชีปลอมของ Admin_Help แล้ว ✅', en: 'Mum helped report Admin_Help’s fake account ✅' } }] }
+];
+const UI = {
+  th: { title: 'หน่วยกู้ภัยแชท', sub: 'เพื่อนหลายคนโดนหลอกในเกม แล้วส่ง SOS มาหาเรา! อ่านแชทว่าเพื่อนทำถึงขั้นไหนแล้ว แล้วช่วยด้วยขั้นต่อไปตามหลัก 3 ส.',
+        goE: 'ง่าย<small>บอกขั้นที่เพื่อนอยู่</small>', goN: 'ปกติ<small>ไม่บอกขั้น</small>', goH: 'ยาก<small>เพื่อน 4 คน · ข้อละ 25 วินาที</small>',
+        gback: '↩ กลับ', inbox: '📥 กล่องแชท', inboxSub: 'แตะชื่อเพื่อนเพื่อเปิดแชท', done: (a, b) => `ช่วยแล้ว ${a} / ${b} คน`, stars: n => `⭐ ${n}`, time: n => `⏱ ${n}`,
+        sos: '🆘 ข้อความใหม่', wait: 'รอเราตอบ', ok: '✅ ปลอดภัยแล้ว', backIn: '← กล่องแชท', room: 'แชทส่วนตัว', step: n => `ขั้นที่ ${n} / 4`,
+        ask: n => `ตอบ${n}ว่าอะไรดี?`, right: 'ถูกต้อง! ⭐', rightLate: 'ถูกแล้ว (ตอบผิดไปก่อน จึงไม่ได้ดาว)', timeUp: 'หมดเวลา! คำตอบที่ถูกส่งไปในแชทแล้ว (ไม่ได้ดาว)',
+        wrong: 'ยังไม่ใช่ ลองเลือกใหม่', skip: 'แตะแชทเพื่อข้าม',
+        backBtn: 'กลับกล่องแชท ➜', finish: 'ดูผล ➜', total: (a, b) => `ได้ดาว ${a} จาก ${b} ดวง`,
+        ranks: ['กู้ภัยฝึกหัด', 'กู้ภัยระดับเงิน', 'กู้ภัยระดับทอง'], again: 'เล่นอีกครั้ง ↻', toTitle: 'เลือกโหมดใหม่' },
+  en: { title: 'Chat Rescue Team', sub: 'Friends got tricked in a game and sent us an SOS! Read each chat, work out which step they are at, then help with the next 3 S step.',
+        goE: 'Easy<small>Shows each friend’s step</small>', goN: 'Normal<small>No step shown</small>', goH: 'Hard<small>4 friends · 25 seconds each</small>',
+        gback: '↩ Back', inbox: '📥 Chats', inboxSub: 'Tap a friend to open the chat', done: (a, b) => `Helped ${a} / ${b}`, stars: n => `⭐ ${n}`, time: n => `⏱ ${n}`,
+        sos: '🆘 New message', wait: 'Waiting for you', ok: '✅ Safe now', backIn: '← Chats', room: 'Private chat', step: n => `Step ${n} / 4`,
+        ask: n => `What should we reply to ${n}?`, right: 'Correct! ⭐', rightLate: 'Correct (no star, because of a wrong try first)', timeUp: 'Time is up! The right reply is now in the chat (no star)',
+        wrong: 'Not this one. Try again.', skip: 'Tap the chat to skip',
+        backBtn: 'Back to chats ➜', finish: 'See results ➜', total: (a, b) => `You got ${a} of ${b} stars`,
+        ranks: ['Trainee rescuer', 'Silver rescuer', 'Gold rescuer'], again: 'Play again ↻', toTitle: 'Choose a mode' }
+};
+const MODES = { easy: { n: 3, starts: [0, 1, 2], hint: true, time: 0 }, normal: { n: 3, starts: [0, 1, 2], hint: false, time: 0 }, hard: { n: 4, starts: [0, 0, 1, 2], hint: false, time: 25 } };
+let L = 'th', mode = null, team = [], cur = -1, stars = 0, timer = null, left = 0;
+let shownNew = true, typing = false, revealed = true, seq = 0, anim = -1;
+const t = o => o[L];
+const U = () => UI[L];
+const wait = ms => new Promise(r => setTimeout(r, ms));
+const restart = (el, cls) => { el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); };
+const fill = (s, F) => s.replace(/\{who\}/g, F.who);
+function shuffle(a){ a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+
+// เพื่อนแต่ละคนเริ่มคนละขั้น · ขั้นที่ผ่านมาแล้วแสดงเป็นแชทเก่า (เพื่อนเล่า → เราตอบถูก → เพื่อนตอบ)
+function buildTeam(){
+  const M = MODES[mode], starts = shuffle(M.starts);
+  return shuffle(FRIENDS).slice(0, M.n).map((F, i) => {
+    const m = { F, step: starts[i], hist: [], opts: null, tried: [], miss: false, pend: true, solved: false, after: false };
+    for (let s = 0; s < m.step; s++) m.hist.push({ k: 'f', s, x: 'f' }, { k: 'me', s, x: 'r' + Math.floor(Math.random() * 2) }, { k: 'f', s, x: 'a' });
+    return m;
+  });
+}
+// ตัวเลือก 3 ข้อ: ถูก 1 (ขั้นนี้) + ผิด 2 (ข้ามขั้น/ไม่ควรทำ) สลับตำแหน่ง
+function deal(m){ m.opts = shuffle(['r' + Math.floor(Math.random() * 2)].concat(shuffle(WPOOL[m.step]).slice(0, 2))); m.tried = []; m.miss = false; m.solved = false; }
+function lineText(m, l){
+  if (l.x === 'f' || l.x === 'a') return t(m.F.s[l.s][l.x]);
+  if (isRight(l.x)) return fill(t(RIGHT[l.s][+l.x[1]]), m.F);
+  if (l.k === 'fx') return fill(t(WRONG[l.x].r), m.F);
+  return fill(t(WRONG[l.x]), m.F);
+}
+const optText = (m, id) => isRight(id) ? fill(t(RIGHT[m.step][+id[1]]), m.F) : fill(t(WRONG[id]), m.F);
+const isDone = m => m.step > 3;
+const isRight = id => /^r\d$/.test(id);      // r0/r1 = คำตอบถูก (ไม่ชนกับ reply)
+function show(id){ ['sTitle', 'sInbox', 'sChat', 'sEnd'].forEach(s => $('#' + s).classList.toggle('hide', s !== id)); $('#hud').classList.toggle('hide', id === 'sTitle'); }
+
+function applyLang(){
+  document.documentElement.lang = L; document.title = U().title;
+  $('#lth').classList.toggle('on', L === 'th'); $('#len').classList.toggle('on', L === 'en');
+  $('#gback').textContent = U().gback;
+  $('#tTitle').textContent = U().title; $('#tSub').textContent = U().sub;
+  $('#tLegend').innerHTML = STEPS.map(s => `<span>${t(s)}</span>`).join('<span>➜</span>');
+  $('#goE').innerHTML = U().goE; $('#goN').innerHTML = U().goN; $('#goH').innerHTML = U().goH;
+  if (!$('#sInbox').classList.contains('hide')) renderInbox();
+  if (!$('#sChat').classList.contains('hide')) renderChat(false);
+  if (!$('#sEnd').classList.contains('hide')) renderEnd();
+  hud();
+}
+function hud(){
+  $('#hDone').textContent = U().done(team.filter(isDone).length, team.length);
+  $('#hStar').textContent = U().stars(stars);
+  $('#hTime').classList.toggle('hide', !(mode === 'hard' && timer));
+  $('#hTime').textContent = U().time(left);
+}
+
+function start(m){ mode = m; team = buildTeam(); stars = 0; cur = -1; toInbox(); }
+function toInbox(){ if (!revealed) finishIn(pendingThen); seq++; stopTimer(); if (team[cur]) team[cur].after = false; cur = -1; show('sInbox'); renderInbox(); hud(); }
+function renderInbox(){
+  $('#iTitle').textContent = U().inbox; $('#iSub').textContent = U().inboxSub;
+  $('#iList').innerHTML = team.map((m, i) => {
+    // pend = ข้อความขั้นใหม่ของเพื่อนยังไม่ได้เปิดอ่าน (จะเด้งเข้ามาตอนเปิดแชท)
+    const last = m.pend && !isDone(m) ? { k: 'f', s: m.step, x: 'f' } : m.hist[m.hist.length - 1], st = isDone(m) ? 'done' : m.pend ? 'new' : '';
+    const track = MODES[mode].hint ? `<span class="track">${STEPS.map((s, j) => `<i class="${j < m.step ? 'y' : j === m.step ? 'now' : ''}">${t(s)}</i>`).join('')}</span>` : '';
+    return `<button type="button" class="fbtn ${st}" data-i="${i}"><span class="av">${t(m.F.n)[0]}</span><b>${t(m.F.n)}</b>
+      <span class="st">${isDone(m) ? U().ok : m.pend ? U().sos : U().wait}</span><span class="pv">${lineText(m, last)}</span>${track}</button>`;
+  }).join('');
+}
+$('#iList').addEventListener('click', e => { const b = e.target.closest('.fbtn'); if (b) openChat(+b.dataset.i); });
+
+function openChat(i){
+  cur = i; const m = team[i];
+  show('sChat'); $('#cRes').classList.add('hide'); $('#cNext').classList.add('hide');
+  if (m.pend && !isDone(m)) { m.pend = false; m.hist.push({ k: 'f', s: m.step, x: 'f', cur: true }); deal(m); playIn(m.hist.length - 1, null, false); }
+  else { anim = -1; typing = false; revealed = true; renderChat(false); startTimer(); }
+}
+// ข้อความใหม่ของเพื่อนเด้งเข้ามา: (กำลังพิมพ์) → ข้อความ · ปุ่มคำตอบล็อกจนข้อความมาครบ · แตะแชทเพื่อข้าม
+let pendingThen = null;
+async function playIn(lineIdx, then, popPrev){
+  const my = ++seq;
+  anim = lineIdx; typing = false; revealed = false; pendingThen = then; renderChat(popPrev);
+  await wait(300); if (my !== seq || revealed) return;
+  typing = true; renderChat(false);
+  await wait(1100); if (my !== seq || revealed) return;
+  finishIn(then);
+}
+function finishIn(then){
+  if (revealed) return;
+  revealed = true; typing = false; anim = -1; pendingThen = null;
+  renderChat(true);
+  if (then) then(); else startTimer();
+}
+$('#cChat').onclick = () => { if (!revealed && !$('#sChat').classList.contains('hide')) { seq++; finishIn(pendingThen); } };
+
+function startTimer(){
+  stopTimer();
+  const m = team[cur]; if (!MODES[mode].time || !m || m.solved || isDone(m)) return;
+  left = MODES[mode].time;
+  const bar = $('#tBar'), f = $('#tFill');
+  bar.classList.remove('hide'); f.style.transition = 'none'; f.style.width = '100%'; void f.offsetWidth;
+  f.style.transition = `width ${left}s linear`; f.style.width = '0%';
+  timer = setInterval(() => { left--; hud(); if (left <= 0) choose(m.opts.find(o => isRight(o)), true); }, 1000);
+  hud();
+}
+function stopTimer(){
+  if (timer) clearInterval(timer); timer = null;
+  const f = $('#tFill'); f.style.width = getComputedStyle(f).width; f.style.transition = 'none';
+  $('#tBar').classList.add('hide'); hud();
+}
+
+function renderChat(popLast){
+  const m = team[cur], F = m.F, av = `<span class="av">${t(F.n)[0]}</span>`;
+  const upto = anim >= 0 ? anim : m.hist.length;     // ระหว่างเด้ง: ยังไม่แสดงบรรทัดที่กำลังพิมพ์
+  const rows = m.hist.slice(0, upto).map((l, i) => {
+    const txt = lineText(m, l), pop = popLast && i === upto - 1 ? ' pop' : '';
+    const old = l.s < m.step && !l.cur ? ' old' : '', curc = l.cur && !isDone(m) && l.s === m.step ? ' cur' : '';
+    if (l.k === 'me' || l.k === 'mx') return `<div class="ln me${l.k === 'mx' ? ' x' : ''}${old}${pop}"><div class="bub">${txt}</div></div>`;
+    return `<div class="ln${old}${curc}${pop}">${av}<div><div class="who">${t(F.n)}</div><div class="bub">${txt}</div></div></div>`;
+  });
+  $('#cRoom').textContent = '💬 ' + U().room; $('#cOnline').textContent = '● ' + t(F.n);
+  $('#cLines').innerHTML = rows.join('') + (typing ? `<div class="ln typing pop">${av}<div class="bub"><i></i><i></i><i></i></div></div>` : '');
+  $('#cLines').scrollTop = $('#cLines').scrollHeight;
+  $('#cSkip').textContent = revealed ? '' : U().skip;
+  $('#cBackIn').textContent = U().backIn;
+  const s = Math.min(m.step, 3);
+  $('#cStep').textContent = MODES[mode].hint && !isDone(m) ? U().step(s + 1) : '';
+  $('#cMap').innerHTML = STEPS.map((x, j) => `<span class="${MODES[mode].hint ? (j < m.step ? 'y' : j === m.step ? 'now' : '') : isDone(m) ? 'y' : ''}">${t(x)}</span>`).join('');
+  $('#cAsk').textContent = U().ask(t(F.n));
+  const showOpts = !isDone(m) && !m.after;
+  $('#cAsk').classList.toggle('hide', !showOpts); $('#cOpts').classList.toggle('hide', !showOpts);
+  if (showOpts) $('#cOpts').innerHTML = m.opts.map(id => {
+    const st = m.tried.includes(id) ? 'wrong' : m.solved && isRight(id) ? 'right' : '';
+    return `<button type="button" class="op ${st}" data-o="${id}" ${!revealed || m.solved || m.tried.includes(id) ? 'disabled' : ''}>${optText(m, id)}</button>`;
+  }).join('');
+  const last = team.every(isDone);
+  $('#cNext').textContent = last ? U().finish : U().backBtn;
+}
+$('#cOpts').addEventListener('click', e => { const b = e.target.closest('.op'); if (b && !b.disabled) choose(b.dataset.o, false); });
+
+// ถูก: เราตอบ → เพื่อนตอบ → เพื่อนขยับไปขั้นถัดไป (ข้อความขั้นใหม่จะมาใหม่ในกล่องแชท)
+// ผิด: เราตอบ → เพื่อนเล่าว่าเกิดอะไรขึ้น · ตัวเลือกนั้นถูกขีดฆ่า ให้เลือกใหม่ · ⭐ เฉพาะตอบถูกครั้งแรก
+function choose(id, timeUp){
+  const m = team[cur]; if (!revealed || m.solved || isDone(m)) return;
+  stopTimer();
+  const res = $('#cRes');
+  if (isRight(id)) {
+    m.solved = true;
+    const got = m.miss || timeUp ? 0 : 1; stars += got;
+    m.hist.forEach(l => l.cur = false);
+    m.hist.push({ k: 'me', s: m.step, x: id }, { k: 'f', s: m.step, x: 'a' });
+    res.className = 'res ' + (timeUp ? 'no' : got ? 'good' : 'part'); res.textContent = timeUp ? U().timeUp : got ? U().right : U().rightLate;
+    if (got) restart($('#hStar'), 'bump');
+    const then = () => {
+      res.classList.remove('hide');
+      m.step++; m.after = true; m.pend = !isDone(m);
+      renderChat(false); hud();
+      $('#cNext').classList.remove('hide');
+    };
+    playIn(m.hist.length - 1, then, true);
+  } else {
+    m.miss = true; m.tried.push(id);
+    m.hist.push({ k: 'mx', s: m.step, x: id }, { k: 'fx', s: m.step, x: id });
+    res.className = 'res no'; res.textContent = U().wrong;
+    playIn(m.hist.length - 1, () => { res.classList.remove('hide'); restart($('#sChat'), 'shake'); startTimer(); }, true);
+  }
+}
+$('#cBackIn').onclick = toInbox;
+$('#cNext').onclick = () => { if (team.every(isDone)) { seq++; show('sEnd'); renderEnd(); } else toInbox(); };
+
+function maxStars(){ return MODES[mode].starts.reduce((a, s) => a + 4 - s, 0); }
+function renderEnd(){
+  const max = maxStars(), r = stars >= max * 0.9 ? 2 : stars >= max * 0.7 ? 1 : 0;
+  $('#eBadge').textContent = ['🚑', '🥈', '🥇'][r];
+  $('#eRank').textContent = U().ranks[r];
+  $('#eStars').textContent = U().total(stars, max);
+  $('#eAgain').textContent = U().again; $('#eTitle').textContent = U().toTitle;
+  hud();
+}
+$('#eAgain').onclick = () => start(mode);
+function toTitle(){ seq++; stopTimer(); mode = null; show('sTitle'); }
+$('#eTitle').onclick = toTitle;
+
+$('#goE').onclick = () => start('easy'); $('#goN').onclick = () => start('normal'); $('#goH').onclick = () => start('hard');
+$('#lth').onclick = () => { L = 'th'; applyLang(); }; $('#len').onclick = () => { L = 'en'; applyLang(); };
+// เปิดใน iframe (Hub/ใบงาน): ปุ่มกลับส่ง 'closeGame' · รับภาษาจาก postMessage({lang})
+if (window.parent !== window) { $('#gback').classList.remove('hide'); $('#gback').onclick = () => { toTitle(); parent.postMessage('closeGame', '*'); }; }
+addEventListener('message', e => { if (e.data && e.data.lang) { L = e.data.lang === 'en' ? 'en' : 'th'; applyLang(); } });
+applyLang();
+</script>
+</body></html>

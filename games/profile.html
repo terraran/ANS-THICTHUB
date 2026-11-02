@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ตั้งโปรไฟล์ฮีโร่</title>
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#0b2545;--navy2:#13315c;--sel:#facc15;--act:#0284c7;--ok:#16a34a;--bad:#dc2626;--ink:#0f172a;--muted:#475569;--line:#cbd5e1}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--navy);color:#fff;font-family:Kanit,Tahoma,sans-serif}
+button{font-family:inherit;cursor:pointer;border:none;border-radius:14px;min-height:48px;font-size:20px;font-weight:600;padding:6px 20px;background:var(--act);color:#fff;box-shadow:0 4px 0 #0005}
+button:disabled{background:#94a3b8;color:#1e293b;box-shadow:none;cursor:not-allowed}
+.hide{display:none!important}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 16px;flex-wrap:wrap}
+.ctls{display:flex;gap:8px}
+.ctl{background:var(--navy2);border:2px solid #ffffff55;box-shadow:none;font-size:17px;min-height:44px;padding:4px 14px}
+.ctl.on{background:#fff;color:var(--navy)}
+.hud{display:flex;gap:10px;flex-wrap:wrap;font-size:18px}
+.hud span{background:var(--navy2);border-radius:20px;padding:4px 14px}
+.timer{background:#7f1d1d!important}
+.wrap{max-width:860px;margin:0 auto;padding:8px 16px 32px}
+/* title */
+.title{text-align:center;display:flex;flex-direction:column;align-items:center;gap:16px;padding-top:24px}
+.badge{font-size:84px;line-height:1}
+.title h1{margin:0;font-size:52px;font-weight:800}
+.title p{margin:0;font-size:21px;color:#bfdbfe;max-width:640px}
+.legend{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.legend span{background:var(--navy2);border-radius:20px;padding:4px 14px;font-size:17px}
+.modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(220px,100%),1fr));gap:14px;width:100%;margin-top:8px}
+.modes button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:14px;font-size:26px}
+.modes small{font-size:16px;font-weight:400;opacity:.9}
+#goE{background:var(--ok)}#goH{background:var(--bad)}
+/* play */
+.file{background:#fff;color:var(--ink);border-radius:24px;padding:22px;display:flex;flex-direction:column;gap:14px;box-shadow:0 10px 0 #020617;position:relative}
+.casehd{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.casehd b{background:var(--sel);color:var(--navy);border-radius:12px;padding:2px 14px;font-size:18px}
+.casehd span{color:var(--muted);font-size:17px}
+/* หัวโปรไฟล์ในเกม */
+.phd{display:flex;align-items:center;gap:14px;background:linear-gradient(120deg,#4f46e5,#0284c7);color:#fff;border-radius:18px;padding:12px 18px}
+.phd .av{font-size:52px;line-height:1;background:#ffffff33;border-radius:50%;width:72px;height:72px;display:flex;align-items:center;justify-content:center;flex:none}
+.phd h2{margin:0;font-size:26px}
+.phd small{font-size:16px;opacity:.9}
+.ask{font-size:20px;font-weight:600}
+.helper{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+#pHelp{background:#7c3aed;font-size:18px;min-height:44px}
+#pHelp.on{background:var(--sel);color:var(--navy)}
+.helper span{color:var(--muted);font-size:17px}
+.tbar{height:10px;border-radius:6px;background:#e2e8f0;overflow:hidden}
+.tbar i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#f97316,#dc2626)}
+.rows{display:flex;flex-direction:column;gap:10px}
+.fr{display:grid;grid-template-columns:1fr auto;gap:8px 12px;align-items:center;background:#f8fafc;border:3px solid var(--line);border-radius:16px;padding:10px 14px}
+.fr .lab{display:flex;align-items:center;gap:12px;min-width:0}
+.fr .ic{font-size:30px;flex:none}
+.fr small{display:block;color:var(--muted);font-size:16px}
+.fr .val{display:block;font-size:21px;font-weight:600;overflow-wrap:anywhere}
+.helping .fr .lab{cursor:pointer;outline:3px dashed #a78bfa;outline-offset:4px;border-radius:10px}
+.tg{display:flex;gap:6px}
+.tg button{background:#fff;color:var(--ink);border:3px solid var(--line);box-shadow:0 3px 0 var(--line);font-size:18px;min-height:46px;padding:4px 14px}
+.tg button[aria-pressed="true"]{background:#fde68a;border-color:#f59e0b;box-shadow:0 3px 0 #f59e0b}
+.tg button:disabled{cursor:default;color:var(--ink)}
+.tip{grid-column:1/-1;border-radius:12px;padding:6px 12px;font-size:17px;line-height:1.4}
+.tip.t{background:#ede9fe;color:#4c1d95}
+.fr.right{background:#dcfce7;border-color:var(--ok)}
+.fr.wrong{background:#fee2e2;border-color:var(--bad)}
+.fr.right .tip{background:#bbf7d0;color:#14532d}.fr.wrong .tip{background:#fecaca;color:#7f1d1d}
+.res{border-radius:14px;padding:12px 16px;font-size:19px;line-height:1.4}
+.res.good{background:#dcfce7;color:#14532d}.res.part{background:#fef3c7;color:#78350f}.res.no{background:#fee2e2;color:#7f1d1d}
+.res b{font-size:22px}
+.go{align-self:flex-end}
+.pop{animation:pop .35s ease-out both}
+@keyframes pop{from{opacity:0;transform:translateY(14px) scale(.95)}to{opacity:1;transform:none}}
+@keyframes shake{0%,100%{transform:none}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+@keyframes bump{0%{transform:scale(1)}40%{transform:scale(1.35)}100%{transform:scale(1)}}
+@keyframes stamp{0%{opacity:0;transform:rotate(-12deg) scale(3)}70%{opacity:1;transform:rotate(-12deg) scale(.92)}100%{opacity:1;transform:rotate(-12deg) scale(1)}}
+.shake{animation:shake .45s}
+.bump{display:inline-block;animation:bump .5s}
+.stamp{position:absolute;right:22px;top:92px;border:5px solid var(--ok);color:var(--ok);border-radius:12px;padding:2px 16px;font-size:28px;font-weight:800;transform:rotate(-12deg);animation:stamp .5s ease-out both;background:#ffffffd9;pointer-events:none}
+.final{text-align:center;align-items:center}
+.final .badge{font-size:110px}
+.final h2{margin:0;font-size:38px}
+.final p{margin:0;font-size:22px;color:var(--muted)}
+.btns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+@media (max-width:560px){.title h1{font-size:38px}.fr{grid-template-columns:1fr}.tg{justify-content:flex-end}.fr .val{font-size:19px}.stamp{top:auto;bottom:80px}}
+/* เครื่องที่ปิดภาพเคลื่อนไหว: แถวยังค่อย ๆ โผล่ (แค่จางเข้า) · ปิดเฉพาะการสั่น/เด้ง/ประทับตรา */
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@media (prefers-reduced-motion:reduce){.pop{animation-name:fade}.shake,.bump,.stamp{animation:none}}
+</style></head><body>
+<div class="top">
+ <div class="hud hide" id="hud"><span id="hNum"></span><span id="hStar"></span><span id="hTime" class="timer hide"></span></div>
+ <div class="ctls"><button class="ctl hide" id="gback"></button><button class="ctl on" id="lth">TH</button><button class="ctl" id="len">EN</button></div>
+</div>
+<div class="wrap">
+ <section id="sTitle" class="title">
+  <div class="badge">🦸</div>
+  <h1 id="tTitle"></h1>
+  <p id="tSub"></p>
+  <div class="legend" id="tLegend"></div>
+  <div class="modes"><button id="goE"></button><button id="goN"></button><button id="goH"></button></div>
+ </section>
+ <section id="sPlay" class="file hide">
+  <div class="stamp hide" id="pStamp"></div>
+  <div class="casehd"><b id="pNum"></b><span id="pCount"></span></div>
+  <div class="phd"><div class="av" id="pAv"></div><div><small id="pKind"></small><h2 id="pName"></h2></div></div>
+  <div class="tbar hide" id="tBar"><i id="tFill"></i></div>
+  <div class="ask" id="pAsk"></div>
+  <div class="helper" id="pHelper"><button id="pHelp"></button><span id="pHelpTip"></span></div>
+  <div class="rows" id="pRows"></div>
+  <div class="res hide" id="pRes"></div>
+  <button class="go" id="pPost" disabled></button>
+  <button class="go hide" id="pNext"></button>
+ </section>
+ <section id="sEnd" class="file final hide">
+  <div class="badge" id="eBadge"></div>
+  <h2 id="eRank"></h2>
+  <p id="eStars"></p>
+  <div class="btns"><button id="eAgain"></button><button id="eTitle" style="background:var(--navy2)"></button></div>
+ </section>
+</div>
+<script>
+const $ = s => document.querySelector(s);
+// ช่องในโปรไฟล์ · p = ข้อมูลส่วนตัว (ต้องซ่อน) · v = ค่าของตัวละคร 3 ตัว [th, en]
+// จับคู่เรื่องเดียวกันให้ดูคล้ายกัน (อาหารที่ชอบ ↔ ร้านที่ไปทุกเย็น) · g = ช่องชื่อเดียวกัน ห้ามอยู่โปรไฟล์เดียวกัน
+const FIELDS = [
+  { id: 'food', ic: '🍜', p: 0, l: { th: 'อาหารที่ชอบ', en: 'Favourite food' },
+    v: [['ข้าวมันไก่', 'Chicken rice'], ['ผัดกะเพรา', 'Basil stir-fry'], ['ไอศกรีมช็อกโกแลต', 'Chocolate ice cream']],
+    w: { th: 'รู้ว่าเราชอบกินอะไร ก็หาตัวเราไม่เจอ', en: 'Knowing our favourite food does not help anyone find us.' } },
+  { id: 'foodplace', ic: '🍜', p: 1, l: { th: 'ร้านที่ไปกินทุกเย็น', en: 'Where we eat every evening' },
+    v: [['ร้านป้าแดง ปากซอยมะลิ', 'Auntie Daeng’s shop, Mali Lane'], ['ร้านก๋วยเตี๋ยวหน้าวัดใหม่', 'The noodle shop by Wat Mai'], ['ร้านไอติมตรงข้ามโรงเรียน', 'The ice-cream shop opposite our school']],
+    w: { th: 'บอกคนแปลกหน้าว่าเราจะไปอยู่ที่ไหน ตอนไหน', en: 'It tells strangers where we will be, and when.' } },
+  { id: 'color', ic: '🎨', p: 0, l: { th: 'สีที่ชอบ', en: 'Favourite colour' },
+    v: [['ฟ้า', 'Blue'], ['ส้ม', 'Orange'], ['ชมพู', 'Pink']],
+    w: { th: 'คนที่ชอบสีเดียวกับเรามีเยอะมาก เอาไปปลอมเป็นเราไม่ได้', en: 'Lots of people like the same colour, so nobody can pretend to be us.' } },
+  { id: 'house', ic: '🏠', p: 1, l: { th: 'บ้านของเรา', en: 'Our home' },
+    v: [['บ้านสีเขียว เลขที่ 45', 'Green house, No. 45'], ['ตึกสีส้ม ห้อง 302', 'Orange building, Room 302'], ['บ้านสีชมพู หลังวัดใหม่', 'Pink house behind Wat Mai']],
+    w: { th: 'สีบ้านกับเลขที่ พาคนแปลกหน้ามาถึงหน้าบ้านเราได้', en: 'A house colour and number can lead a stranger to our door.' } },
+  { id: 'gname', ic: '🎮', p: 0, l: { th: 'ชื่อในเกม', en: 'Game name' },
+    v: [['StarCat', 'StarCat'], ['RocketBoy', 'RocketBoy'], ['PinkDragon', 'PinkDragon']],
+    w: { th: 'เป็นชื่อที่เราตั้งเองในเกม ไม่ใช่ชื่อจริง', en: 'It is a made-up game name, not our real name.' } },
+  { id: 'pass', ic: '🎮', p: 1, l: { th: 'รหัสผ่านเกม', en: 'Game password' },
+    v: [['cat1234', 'cat1234'], ['rocket99', 'rocket99'], ['dragon2560', 'dragon2560']],
+    w: { th: 'ใครรู้รหัสผ่าน ก็เข้าบัญชีเกมของเราได้', en: 'Anyone who knows it can get into our game account.' } },
+  { id: 'sport', ic: '⚽', p: 0, l: { th: 'กีฬาที่ชอบ', en: 'Favourite sport' },
+    v: [['ฟุตบอล', 'Football'], ['ว่ายน้ำ', 'Swimming'], ['แบดมินตัน', 'Badminton']],
+    w: { th: 'เป็นเรื่องที่เราชอบ ไม่ได้บอกว่าเราอยู่ที่ไหน', en: 'It is something we like, not where we are.' } },
+  { id: 'sportplace', ic: '⚽', p: 1, l: { th: 'ที่ซ้อมทุกวันเสาร์', en: 'Where we practise every Saturday' },
+    v: [['สนามบอลหลังตลาดสามแยก', 'The football field behind Sam Yaek market'], ['สระว่ายน้ำหมู่บ้านสุขใจ', 'The Sukjai village pool'], ['สนามแบดข้างโรงเรียน', 'The badminton court next to our school']],
+    w: { th: 'บอกที่ที่เราไปเป็นประจำ คนแปลกหน้าไปดักรอได้', en: 'It tells a stranger where we always go, so they could wait for us.' } },
+  { id: 'subject', ic: '📚', p: 0, l: { th: 'วิชาที่ชอบ', en: 'Favourite subject' },
+    v: [['ศิลปะ', 'Art'], ['คณิตศาสตร์', 'Maths'], ['ดนตรี', 'Music']],
+    w: { th: 'เด็กทั่วประเทศก็ชอบวิชานี้ได้ ใช้หาตัวเราไม่ได้', en: 'Children everywhere like it too. It cannot be used to find us.' } },
+  { id: 'school', ic: '📚', p: 1, l: { th: 'โรงเรียนและห้องเรียน', en: 'School and class' },
+    v: [['โรงเรียนบ้านสวน ป.3/2', 'Ban Suan School, P.3/2'], ['โรงเรียนวัดใหม่ ป.3/1', 'Wat Mai School, P.3/1'], ['โรงเรียนสามแยก ป.3/4', 'Sam Yaek School, P.3/4']],
+    w: { th: 'คนแปลกหน้าจะรู้ว่าไปหาเราได้ที่ไหนทุกวัน', en: 'A stranger would know where to find us every day.' } },
+  { id: 'avatar', ic: '📷', p: 0, g: 'photo', l: { th: 'รูปโปรไฟล์', en: 'Profile picture' },
+    v: [['รูปการ์ตูนแมวใส่หมวก', 'A cartoon cat in a hat'], ['รูปจรวดที่วาดเอง', 'A rocket we drew ourselves'], ['รูปมังกรการ์ตูนสีชมพู', 'A pink cartoon dragon']],
+    w: { th: 'เป็นรูปการ์ตูน ไม่เห็นหน้าจริงของเรา', en: 'It is a cartoon. It does not show our real face.' } },
+  { id: 'selfie', ic: '📷', p: 1, g: 'photo', l: { th: 'รูปโปรไฟล์', en: 'Profile picture' },
+    v: [['รูปหน้าเราตอนใส่ชุดนักเรียน', 'Our face in our school uniform'], ['รูปเรายืนอยู่หน้าบ้าน', 'Us standing in front of our house'], ['รูปหน้าเรากอดน้องหมา', 'Our face, hugging our dog']],
+    w: { th: 'รูปหน้าจริงบอกว่าเราเป็นใคร และอาจเห็นบ้านหรือโรงเรียนด้วย', en: 'A real photo shows who we are, and may show our home or school.' } },
+  { id: 'pet', ic: '🐶', p: 0, l: { th: 'สัตว์ที่ชอบ', en: 'Favourite animal' },
+    v: [['แมว', 'Cats'], ['ไดโนเสาร์', 'Dinosaurs'], ['หมา', 'Dogs']],
+    w: { th: 'เป็นแค่สิ่งที่เราชอบ คนแปลกหน้ารู้ก็ทำอะไรเราไม่ได้', en: 'It is just something we like. A stranger cannot use it against us.' } },
+  { id: 'dream', ic: '🌟', p: 0, l: { th: 'อยากเป็นอะไรตอนโต', en: 'What we want to be' },
+    v: [['นักบินอวกาศ', 'An astronaut'], ['นักวาดการ์ตูน', 'A cartoonist'], ['หมอ', 'A doctor']],
+    w: { th: 'เป็นความฝันของเรา ไม่ใช่ข้อมูลที่ใช้หาตัวเรา', en: 'It is our dream, not something that finds us.' } },
+  { id: 'realname', ic: '🙂', p: 1, l: { th: 'ชื่อจริง นามสกุล', en: 'Full real name' },
+    v: [['เด็กหญิงมะลิ ใจดี', 'Mali Jaidee'], ['เด็กชายภูผา แสงทอง', 'Phupha Saengthong'], ['เด็กหญิงน้ำฝน รักเรียน', 'Namfon Rakrian']],
+    w: { th: 'ชื่อจริงกับนามสกุล บอกว่าเราเป็นใครตัวจริง', en: 'Our full name tells people who we really are.' } },
+  { id: 'phone', ic: '📞', p: 1, l: { th: 'เบอร์โทรของแม่', en: 'Mum’s phone number' },
+    v: [['081-000-1234', '081-000-1234'], ['089-000-4321', '089-000-4321'], ['086-000-2233', '086-000-2233']],
+    w: { th: 'ใครได้เบอร์ไป ก็โทรหาครอบครัวเราได้', en: 'With it, anyone could call our family.' } },
+  { id: 'cake', ic: '🎂', p: 0, l: { th: 'เค้กวันเกิดที่อยากได้', en: 'Birthday cake we want' },
+    v: [['เค้กช็อกโกแลต', 'Chocolate cake'], ['เค้กสตรอว์เบอร์รี', 'Strawberry cake'], ['เค้กรูปมังกร', 'A dragon cake']],
+    w: { th: 'บอกแค่สิ่งที่ชอบ ไม่ได้บอกว่าเราเกิดวันไหน', en: 'It only says what we like, not when we were born.' } },
+  { id: 'bday', ic: '🎂', p: 1, l: { th: 'วันเกิด (วัน เดือน ปี)', en: 'Birthday (day, month, year)' },
+    v: [['12 มีนาคม 2560', '12 March 2017'], ['3 สิงหาคม 2560', '3 August 2017'], ['25 ธันวาคม 2559', '25 December 2016']],
+    w: { th: 'วันเกิดเต็ม ใช้ปลอมตัวเป็นเรา หรือเดารหัสผ่านได้', en: 'A full birthday can be used to pretend to be us, or to guess passwords.' } },
+  { id: 'trip', ic: '📍', p: 0, l: { th: 'ที่ที่อยากไปเที่ยว', en: 'A place we want to visit' },
+    v: [['ทะเล', 'The beach'], ['ดวงจันทร์', 'The Moon'], ['ภูเขาหิมะ', 'Snowy mountains']],
+    w: { th: 'เป็นที่ที่เราฝันอยากไป ไม่ใช่ที่ที่เราอยู่', en: 'It is a place we dream of, not where we are.' } },
+  { id: 'now', ic: '📍', p: 1, l: { th: 'ตอนนี้อยู่ที่', en: 'Where we are right now' },
+    v: [['สวนสาธารณะหน้าบ้าน', 'The park in front of our house'], ['ร้านเกมข้างตลาด', 'The game shop by the market'], ['สนามเด็กเล่นหลังโรงเรียน', 'The playground behind our school']],
+    w: { th: 'บอกว่าตอนนี้เราอยู่ไหน คนแปลกหน้าตามไปได้ทันที', en: 'It tells a stranger where to find us right now.' } }
+];
+const HEROES = [{ av: '🐱', n: 'StarCat' }, { av: '🚀', n: 'RocketBoy' }, { av: '🐲', n: 'PinkDragon' }];
+const UI = {
+  th: { title: 'ตั้งโปรไฟล์ฮีโร่', sub: 'ช่วยเพื่อนตั้งโปรไฟล์ในเกม! ช่องไหนโชว์ให้ทุกคนเห็นได้ ช่องไหนเป็นข้อมูลส่วนตัวต้องซ่อน',
+        legend: ['👁 โชว์ = ทุกคนในเกมเห็น', '🔒 ซ่อน = ไม่มีใครเห็น', '🙋 ไม่แน่ใจ ถามครูได้'],
+        goE: 'ง่าย<small>ถามครูได้ 3 ครั้ง</small>', goN: 'ปกติ<small>ถามครูได้ 1 ครั้ง</small>', goH: 'ยาก<small>8 ช่อง · 60 วินาที</small>',
+        gback: '↩ กลับ', num: n => `โปรไฟล์ ${n} / 3`, stars: n => `⭐ ${n}`, time: n => `⏱ ${n}`, kind: 'โปรไฟล์ในเกมของ',
+        count: (a, b) => `เลือกแล้ว ${a} / ${b} ช่อง`, ask: 'แต่ละช่อง จะโชว์ หรือ ซ่อน?', show: '👁 โชว์', hidev: '🔒 ซ่อน',
+        help: n => `🙋 ถามครู (เหลือ ${n})`, helpOn: 'แตะช่องที่ไม่แน่ใจ', helpNone: 'ใช้ตัวช่วยครบแล้ว',
+        teach: (p, w) => `🙋 ครูบอกว่า: ช่องนี้${p ? 'ควรซ่อน' : 'โชว์ได้'} เพราะ${w}`,
+        ok: (p, w) => `✓ ${p ? 'ซ่อนไว้ถูกแล้ว' : 'โชว์ได้ถูกแล้ว'} · ${w}`, bad: (p, w) => `✗ ช่องนี้${p ? 'ต้องซ่อน' : 'โชว์ได้'} · ${w}`,
+        post: 'โพสต์โปรไฟล์ 📤', next: 'โปรไฟล์ต่อไป ➜', finish: 'ดูผล ➜', stamp: 'โพสต์แล้ว',
+        good: 'ถูกทุกช่อง! ⭐', part: n => `ถูก ${n} ช่อง`, no: 'ยังไม่ถูกเลย ลองอ่านเหตุผลดูนะ', timeUp: 'หมดเวลา! ',
+        sum: (a, b) => `ช่องที่ต้องซ่อนในโปรไฟล์นี้มี ${a} ช่อง จาก ${b} ช่อง`,
+        total: (a, b) => `ได้ดาว ${a} จาก ${b} ดวง`, ranks: ['ฮีโร่ฝึกหัด', 'ฮีโร่ระดับเงิน', 'ฮีโร่ระดับทอง'], again: 'เล่นอีกครั้ง ↻', toTitle: 'เลือกโหมดใหม่' },
+  en: { title: 'Hero Profile Maker', sub: 'Help friends set up their game profiles! Which boxes can everyone see, and which private ones must we hide?',
+        legend: ['👁 Show = everyone in the game sees it', '🔒 Hide = nobody sees it', '🙋 Not sure? Ask the teacher'],
+        goE: 'Easy<small>Ask the teacher 3 times</small>', goN: 'Normal<small>Ask the teacher once</small>', goH: 'Hard<small>8 boxes · 60 seconds</small>',
+        gback: '↩ Back', num: n => `Profile ${n} / 3`, stars: n => `⭐ ${n}`, time: n => `⏱ ${n}`, kind: 'Game profile of',
+        count: (a, b) => `${a} / ${b} boxes chosen`, ask: 'Show or hide each box?', show: '👁 Show', hidev: '🔒 Hide',
+        help: n => `🙋 Ask the teacher (${n} left)`, helpOn: 'Tap the box you are not sure about', helpNone: 'No more help left',
+        teach: (p, w) => `🙋 The teacher says: ${p ? 'hide this one' : 'this one is OK to show'}. ${w}`,
+        ok: (p, w) => `✓ ${p ? 'Right to hide it' : 'Right to show it'} · ${w}`, bad: (p, w) => `✗ This one ${p ? 'must be hidden' : 'is OK to show'} · ${w}`,
+        post: 'Post the profile 📤', next: 'Next profile ➜', finish: 'See results ➜', stamp: 'POSTED',
+        good: 'All correct! ⭐', part: n => `${n} correct`, no: 'None correct yet. Read the reasons.', timeUp: 'Time is up! ',
+        sum: (a, b) => `This profile had ${a} private boxes out of ${b}`,
+        total: (a, b) => `You got ${a} of ${b} stars`, ranks: ['Trainee hero', 'Silver hero', 'Gold hero'], again: 'Play again ↻', toTitle: 'Choose a mode' }
+};
+const MODES = { easy: { rows: 6, priv: [2, 3, 4], help: 3, time: 0 }, normal: { rows: 6, priv: [2, 3, 4], help: 1, time: 0 }, hard: { rows: 8, priv: [3, 4, 5], help: 0, time: 60 } };
+let L = 'th', mode = null, profs = [], idx = 0, pick = {}, posted = false, stars = 0, results = [], timer = null, left = 0;
+let helpLeft = 0, helping = false, told = new Set(), fresh = false;
+const t = o => o[L];
+const U = () => UI[L];
+const restart = (el, cls) => { el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); };
+function shuffle(a){ a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+
+// 3 โปรไฟล์ · จำนวนช่องที่ต้องซ่อนไม่เท่ากัน (สลับลำดับ) · ช่องชื่อเดียวกัน (g) ไม่อยู่โปรไฟล์เดียวกัน
+function buildProfiles(){
+  const M = MODES[mode], ks = shuffle(M.priv);
+  return shuffle([0, 1, 2]).map((h, i) => {
+    const used = new Set(), take = (list, n) => {
+      const out = [];
+      for (const f of list) { if (out.length === n) break; if (f.g && used.has(f.g)) continue; if (f.g) used.add(f.g); out.push(f); }
+      return out;
+    };
+    const priv = take(shuffle(FIELDS.filter(f => f.p)), ks[i]);
+    const share = take(shuffle(FIELDS.filter(f => !f.p)), M.rows - ks[i]);
+    return { h, rows: shuffle(priv.concat(share)) };
+  });
+}
+function show(id){ ['sTitle', 'sPlay', 'sEnd'].forEach(s => $('#' + s).classList.toggle('hide', s !== id)); $('#hud').classList.toggle('hide', id === 'sTitle'); }
+
+function applyLang(){
+  document.documentElement.lang = L; document.title = U().title;
+  $('#lth').classList.toggle('on', L === 'th'); $('#len').classList.toggle('on', L === 'en');
+  $('#gback').textContent = U().gback;
+  $('#tTitle').textContent = U().title; $('#tSub').textContent = U().sub;
+  $('#tLegend').innerHTML = U().legend.map(s => `<span>${s}</span>`).join('');
+  $('#goE').innerHTML = U().goE; $('#goN').innerHTML = U().goN; $('#goH').innerHTML = U().goH;
+  if (!$('#sPlay').classList.contains('hide')) render();
+  if (!$('#sEnd').classList.contains('hide')) renderEnd();
+  hud();
+}
+function hud(){
+  $('#hNum').textContent = U().num(idx + 1);
+  $('#hStar').textContent = U().stars(stars);
+  $('#hTime').classList.toggle('hide', !(mode === 'hard' && timer));
+  $('#hTime').textContent = U().time(left);
+}
+
+function start(m){ mode = m; profs = buildProfiles(); idx = 0; stars = 0; results = []; nextProf(); }
+function nextProf(){
+  pick = {}; posted = false; helping = false; told = new Set(); helpLeft = MODES[mode].help; fresh = true;
+  stopTimer(); $('#tBar').classList.add('hide'); $('#pStamp').classList.add('hide');
+  show('sPlay'); render(); fresh = false; hud();
+  if (MODES[mode].time) {
+    left = MODES[mode].time;
+    const bar = $('#tBar'), fill = $('#tFill');
+    bar.classList.remove('hide'); fill.style.transition = 'none'; fill.style.width = '100%'; void fill.offsetWidth;
+    fill.style.transition = `width ${left}s linear`; fill.style.width = '0%';
+    timer = setInterval(() => { left--; hud(); if (left <= 0) post(true); }, 1000);
+    hud();
+  }
+}
+function stopTimer(){
+  if (timer) clearInterval(timer); timer = null;
+  const fill = $('#tFill'); fill.style.width = getComputedStyle(fill).width; fill.style.transition = 'none';
+}
+
+function render(){
+  const P = profs[idx], H = HEROES[P.h], n = P.rows.length, done = Object.keys(pick).length;
+  $('#pNum').textContent = U().num(idx + 1);
+  $('#pCount').textContent = U().count(done, n);
+  $('#pAv').textContent = H.av; $('#pKind').textContent = U().kind; $('#pName').textContent = H.n;
+  $('#pAsk').textContent = U().ask;
+  $('#pHelper').classList.toggle('hide', !MODES[mode].help || posted);
+  $('#pHelp').textContent = U().help(helpLeft); $('#pHelp').disabled = !helpLeft; $('#pHelp').classList.toggle('on', helping);
+  $('#pHelpTip').textContent = helping ? U().helpOn : helpLeft ? '' : U().helpNone;
+  $('#pRows').classList.toggle('helping', helping);
+  // แถวโผล่ทีละแถวตอนเริ่มโปรไฟล์ (เครื่องที่ปิดภาพเคลื่อนไหว = จางเข้า) · ปุ่มโชว์/ซ่อนหน้าตาเหมือนกันทุกช่อง
+  $('#pRows').innerHTML = P.rows.map((f, i) => {
+    const v = f.v[P.h][L === 'en' ? 1 : 0], c = pick[f.id], st = posted ? (c === f.p ? 'right' : 'wrong') : '';
+    const tip = posted ? U()[c === f.p ? 'ok' : 'bad'](f.p, t(f.w)) : told.has(f.id) ? U().teach(f.p, t(f.w)) : '';
+    const b = (val, label) => `<button type="button" data-v="${val}" aria-pressed="${c === val}" ${posted ? 'disabled' : ''}>${label}</button>`;
+    return `<div class="fr ${st} ${fresh ? 'pop' : ''}" data-id="${f.id}" style="${fresh ? `animation-delay:${i * 90}ms` : ''}">
+      <div class="lab"><span class="ic">${f.ic}</span><div><small>${t(f.l)}</small><span class="val">${v}</span></div></div>
+      <div class="tg">${b(0, U().show)}${b(1, U().hidev)}</div>
+      ${tip ? `<div class="tip ${posted ? '' : 't'}">${tip}</div>` : ''}</div>`;
+  }).join('');
+  $('#pPost').textContent = U().post; $('#pPost').disabled = done < n; $('#pPost').classList.toggle('hide', posted);
+  $('#pNext').textContent = idx === profs.length - 1 ? U().finish : U().next; $('#pNext').classList.toggle('hide', !posted);
+  $('#pStamp').textContent = U().stamp;
+  const r = results[idx];
+  $('#pRes').classList.toggle('hide', !posted);
+  if (posted) {
+    $('#pRes').className = 'res ' + r.k;
+    $('#pRes').innerHTML = `<b>${r.timeUp ? U().timeUp : ''}${r.k === 'good' ? U().good : r.k === 'part' ? U().part(r.got) : U().no}</b><br>${U().sum(P.rows.filter(f => f.p).length, n)}`;
+  }
+}
+$('#pRows').addEventListener('click', e => {
+  if (posted) return;
+  const row = e.target.closest('.fr'); if (!row) return;
+  const id = row.dataset.id, b = e.target.closest('.tg button');
+  if (helping) {                                   // ถามครู: แตะช่องที่ไม่แน่ใจ ครูบอกคำตอบพร้อมเหตุผล
+    if (b || told.has(id)) return;
+    told.add(id); helpLeft--; helping = false; render(); return;
+  }
+  if (!b) return;
+  pick[id] = +b.dataset.v; render();
+});
+$('#pHelp').onclick = () => { if (helpLeft && !posted) { helping = !helping; render(); } };
+
+// ⭐ ละ 1 ดวงต่อช่องที่ถูก · หมดเวลา = ช่องที่ยังไม่เลือกนับว่าผิด
+function post(timeUp){
+  if (posted) return;
+  stopTimer();
+  const P = profs[idx], got = P.rows.filter(f => pick[f.id] === f.p).length;
+  const k = got === P.rows.length ? 'good' : got ? 'part' : 'no';
+  stars += got; results[idx] = { k, got, timeUp: !!timeUp && k !== 'good' };
+  posted = true; helping = false; render(); hud();
+  $('#pStamp').classList.remove('hide'); restart($('#pStamp'), 'stamp');
+  if (k === 'good') restart($('#hStar'), 'bump'); else restart($('#sPlay'), 'shake');
+}
+$('#pPost').onclick = () => post(false);
+$('#pNext').onclick = () => { if (idx === profs.length - 1) { show('sEnd'); renderEnd(); } else { idx++; nextProf(); } };
+
+function maxStars(){ return profs.reduce((a, p) => a + p.rows.length, 0); }
+function renderEnd(){
+  const max = maxStars(), r = stars >= max * 0.9 ? 2 : stars >= max * 0.7 ? 1 : 0;
+  $('#eBadge').textContent = ['🦸', '🥈', '🥇'][r];
+  $('#eRank').textContent = U().ranks[r];
+  $('#eStars').textContent = U().total(stars, max);
+  $('#eAgain').textContent = U().again; $('#eTitle').textContent = U().toTitle;
+  hud();
+}
+$('#eAgain').onclick = () => start(mode);
+function toTitle(){ stopTimer(); mode = null; show('sTitle'); }
+$('#eTitle').onclick = toTitle;
+
+$('#goE').onclick = () => start('easy'); $('#goN').onclick = () => start('normal'); $('#goH').onclick = () => start('hard');
+$('#lth').onclick = () => { L = 'th'; applyLang(); }; $('#len').onclick = () => { L = 'en'; applyLang(); };
+// เปิดใน iframe (Hub/ใบงาน): ปุ่มกลับส่ง 'closeGame' · รับภาษาจาก postMessage({lang})
+if (window.parent !== window) { $('#gback').classList.remove('hide'); $('#gback').onclick = () => { toTitle(); parent.postMessage('closeGame', '*'); }; }
+addEventListener('message', e => { if (e.data && e.data.lang) { L = e.data.lang === 'en' ? 'en' : 'th'; applyLang(); } });
+applyLang();
+</script>
+</body></html>
