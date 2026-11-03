@@ -1,6 +1,6 @@
 :root{--ink:#1e293b;--muted:#64748b;--bg:#f1f5f9;--line:#cbd5e1;--a:#16a34a;--b:#dc2626;--accent:#0284c7;--navy:#0b2545;--send:#16a34a}
 *{box-sizing:border-box}
-html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--ink);font-family:Kanit,'Noto Sans Thai',Tahoma,sans-serif}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--ink);font-family:Sarabun,'Noto Sans Thai',Tahoma,sans-serif}
 body{user-select:none;-webkit-user-select:none}
 #stage{position:absolute;left:0;top:0;width:1600px;height:900px;transform-origin:0 0;display:grid;grid-template-rows:62px 1fr}
 header{background:var(--navy);color:#fff;padding:0 18px;display:flex;align-items:center;gap:14px}
@@ -256,3 +256,10 @@ main{min-width:0}
 @keyframes phonein{from{opacity:0;transform:translateY(-20%)}}
 @keyframes sayin{from{opacity:0;transform:translateY(16px)}}
 @media (prefers-reduced-motion:reduce){.scn,.scn *{animation:none!important}}
+/* ชี้เมาส์แล้วการ์ด/ฟอง/ปุ่มเลือกเรื่องขยายขึ้น (ฟองหยุดลอยตอนชี้) */
+.cardx,.pick{transition:transform .15s ease-out}
+.cardx:not(.drag):hover,.pick:not(:disabled):hover{transform:scale(1.07);z-index:4}
+#web .cardx{transition:left .6s cubic-bezier(.34,1.56,.64,1),top .6s cubic-bezier(.34,1.56,.64,1),transform .15s ease-out}
+#web .cardx:hover,#web .cardx.free:hover,#web .cardx.sel:hover{animation:none;transform:translate(-50%,-50%) scale(1.15)}
+/* Sarabun ตัวเล็กกว่า Kanit ที่ขนาดเดียวกัน: ขยายตัวหนังสือบนการ์ด/ฟองขึ้นนิด */
+.cardx .tx{font-size:19px}.full .cardx .tx{font-size:20px}#web .cardx .tx{font-size:18px}#web.tight .cardx .tx{font-size:16px}
