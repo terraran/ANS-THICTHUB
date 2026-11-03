@@ -131,4 +131,19 @@ const fresh = { Submissions: [['time']] }, F = load(fresh, { TEACHER_KEY: 'k' })
 F.post({ action: 'setUnlock', key: 'k', rooms: ['Y4.1'], acts: { y4w1: true } });
 F.post({ action: 'roster', key: 'k', room: 'Y4.1', op: 'add', names: ['เอ', 'บี'] });
 assert.deepStrictEqual(JSON.parse(JSON.stringify([fresh.Unlocks, fresh.Roster.slice(1)])),[[['room', 'activityId', 'open'], ['Y4.1', 'y4w1', true]], [['Y4.1', 'เอ', true, 1], ['Y4.1', 'บี', true, 2]]]);
+
+// เงื่อนไขสุ่มที่นั่ง: ไม่มีแถว = ค่าเริ่มต้น · รหัสผิด = ไม่เขียน · บันทึกทับแถวเดิม · ทำความสะอาดค่า · แก้ชื่อแล้วคู่ตามไป
+const seatTabs = { Submissions: [['time']], Roster: [['room', 'nickname', 'active', 'order'], ['Y4.1', 'เอ', true, 1]] }, Q = load(seatTabs, { TEACHER_KEY: 'k' });
+assert.deepStrictEqual(Q.get({ action: 'dashboard', key: 'k', room: 'Y4.1' }).seats, { apart: [], together: [], level: 'vfar', zone: true });
+assert.strictEqual(Q.post({ action: 'seats', key: 'wrong', room: 'Y4.1', seats: { apart: [['เอ', 'บี']] } }), 'key');
+assert.strictEqual(seatTabs.Seats, undefined);
+Q.post({ action: 'seats', key: 'k', room: 'Y4.1', seats: { apart: [['เอ', 'บี'], [' ซี  ดี ', 'อี'], ['เอ', 'เอ'], ['x'], 'bad'], together: [['บี', 'ซี ดี']], level: 'far', zone: false, extra: 1 } });
+Q.post({ action: 'seats', key: 'k', room: 'Y4.2', seats: {} });
+assert.deepStrictEqual(seatTabs.Seats[0], ['room', 'json', 'updatedAt']);
+assert.deepStrictEqual(Q.get({ action: 'dashboard', key: 'k', room: 'Y4.1' }).seats, { apart: [['เอ', 'บี'], ['ซี ดี', 'อี']], together: [['บี', 'ซี ดี']], level: 'far', zone: false });
+Q.post({ action: 'seats', key: 'k', room: 'Y4.1', seats: { apart: [['เอ', 'บี']], together: [], level: 'nope' } });
+assert.strictEqual(seatTabs.Seats.length, 3, 'one row per room');
+assert.deepStrictEqual(Q.get({ action: 'dashboard', key: 'k', room: 'Y4.1' }).seats, { apart: [['เอ', 'บี']], together: [], level: 'vfar', zone: true });
+Q.post({ action: 'roster', key: 'k', room: 'Y4.1', op: 'rename', from: 'เอ', to: 'เอเอ' });
+assert.deepStrictEqual(Q.get({ action: 'dashboard', key: 'k', room: 'Y4.1' }).seats.apart, [['เอเอ', 'บี']]);
 console.log('apps-script tests: ok');

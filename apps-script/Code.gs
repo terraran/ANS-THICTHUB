@@ -8,6 +8,7 @@
 //   Roster      : room | nickname | active | order
 //   Unlocks     : room | activityId | open      (room ใส่ Y3.2 = ห้องเดียว, Y3 = ทั้งชั้น, * = ทุกห้อง · ห้องเดียวชนะชั้น ชั้นชนะ *)
 //   Drafts      : room | nickname | activityId | json | updatedAt   (งานที่ทำค้าง 1 แถวต่อคนต่อกิจกรรม · ส่งงานแล้วลบ)
+//   Seats       : room | json | updatedAt   (เงื่อนไขสุ่มที่นั่ง 1 แถวต่อห้อง: {apart:[[a,b]], together:[[a,b]], level:'far'|'vfar', zone})
 // กิจกรรมที่ไม่มีแถวใน Unlocks = ปิด
 //
 // นักเรียน (ไม่ต้องใช้ key)
@@ -19,21 +20,23 @@
 //   POST {action:'submit', row:[15 ช่อง], members:[...]}          ← ส่งงาน แล้วลบงานค้างของทุกคนใน members
 // ครู (ทุก action ต้องมี key ตรงกับ TEACHER_KEY · key ผิด = { ok:false, error:'key' } / POST ไม่ทำอะไร)
 //   GET  ?action=whoami&key=..                     → { ok }   ← ตรวจรหัสตอนเข้ามุมครู
-//   GET  ?action=dashboard&key=..&room=Y3.2        → { ok, roster: [{name, active}], open: {actId: true}, subs: [{act, members, score, round, time}], drafts: [{name, act, updatedAt}] }
+//   GET  ?action=dashboard&key=..&room=Y3.2        → { ok, roster: [{name, active}], open: {actId: true}, subs: [{act, members, score, round, time}], drafts: [{name, act, updatedAt}], seats: {...} }
 //   GET  ?action=submissions&key=..&room=..&act=.. → { ok, rows: [{time, members, score, lang, data}] }   ← แชร์ผลงาน/เปิดดูงาน
 //   POST {action:'setUnlock', key, rooms:[...], acts:{actId: true/false}}   ← เขียนแถวรายห้องในแท็บ Unlocks (มีแถวเดิมก็แก้ทับ)
 //   POST {action:'roster', key, room, op:'add', names:[...]}               ← เพิ่มชื่อ (มีอยู่แล้วแต่ซ่อน = แสดงกลับ)
 //   POST {action:'roster', key, room, op:'active', name, active:true/false} ← แสดง/ซ่อนชื่อ
-//   POST {action:'roster', key, room, op:'rename', from, to}               ← แก้ชื่อ แล้วงานที่ส่ง/งานค้างในห้องนั้นตามไปชื่อใหม่
+//   POST {action:'roster', key, room, op:'rename', from, to}               ← แก้ชื่อ แล้วงานที่ส่ง/งานค้าง/คู่ในเงื่อนไขที่นั่งของห้องนั้นตามไปชื่อใหม่
+//   POST {action:'seats', key, room, seats:{apart, together, level, zone}} ← บันทึกเงื่อนไขสุ่มที่นั่งของห้อง (ทับของเดิม)
 // ของเดิม (ยังใช้ได้)
 //   POST {row:[15 ช่อง]}                        ← ใบงานไฟล์เก่า
 //   GET  ?key=..&level=Y3&week=1                → { rows: [...] }  ← หน้าแชร์ผลงานเดิม
 
-const TAB = { sub: 'Submissions', roster: 'Roster', unlocks: 'Unlocks', drafts: 'Drafts' };
+const TAB = { sub: 'Submissions', roster: 'Roster', unlocks: 'Unlocks', drafts: 'Drafts', seats: 'Seats' };
 const HEAD = {
   Roster: ['room', 'nickname', 'active', 'order'],
   Unlocks: ['room', 'activityId', 'open'],
-  Drafts: ['room', 'nickname', 'activityId', 'json', 'updatedAt']
+  Drafts: ['room', 'nickname', 'activityId', 'json', 'updatedAt'],
+  Seats: ['room', 'json', 'updatedAt']
 };
 const COL = { room: 4, names: 5, lang: 6, score: 7, json: 13, round: 15, members: 16 };   // index ในแถว Submissions (เริ่ม 0)
 
@@ -42,6 +45,8 @@ const TEACHER_GET = {
   dashboard: p => dashboard_(p.room),
   submissions: p => ({ rows: submissions_(p.room, p.act) })
 };
+
+const TEACHER_POST = { setUnlock: b => setUnlock_(b), roster: b => rosterOp_(b), seats: b => setSeats_(b) };
 
 function doGet(e) {
   const p = (e && e.parameter) || {};
@@ -67,9 +72,9 @@ function doPost(e) {
   lock.waitLock(10000);
   try {
     if (body.action === 'draft') { saveDraft_(body); return ContentService.createTextOutput('ok'); }
-    if (body.action === 'setUnlock' || body.action === 'roster') {
+    if (TEACHER_POST[body.action]) {
       if (!checkKey_(body.key)) return ContentService.createTextOutput('key');
-      if (body.action === 'setUnlock') setUnlock_(body); else rosterOp_(body);
+      TEACHER_POST[body.action](body);
       return ContentService.createTextOutput('ok');
     }
     if (!Array.isArray(body.row)) return ContentService.createTextOutput('bad');
@@ -192,7 +197,31 @@ function dashboard_(room) {
   });
   const drafts = rows_(TAB.drafts).filter(r => String(r[0]) === room && r[2])
     .map(r => ({ name: String(r[1]), act: String(r[2]), updatedAt: iso_(r[4]) }));
-  return { roster: rosterAll_(room), open: openFor_(room), subs, drafts };
+  return { roster: rosterAll_(room), open: openFor_(room), subs, drafts, seats: seats_(room) };
+}
+
+// ---------- เงื่อนไขสุ่มที่นั่ง (เฉพาะครู · ไม่จำผลสุ่ม) ----------
+function seats_(room) {
+  const r = rows_(TAB.seats).find(r => String(r[0]).trim() === room);
+  return cleanSeats_(r ? parseJson_(r[1]) : null);
+}
+
+function cleanSeats_(o) {
+  o = o && typeof o === 'object' ? o : {};
+  const pairs = list => (Array.isArray(list) ? list : []).slice(0, 300)
+    .filter(p => Array.isArray(p) && p.length === 2)
+    .map(p => p.map(cleanName_))
+    .filter(p => p[0] && p[1] && nameKey_(p[0]) !== nameKey_(p[1]));
+  return { apart: pairs(o.apart), together: pairs(o.together), level: o.level === 'far' ? 'far' : 'vfar', zone: o.zone !== false };
+}
+
+function setSeats_(b) {
+  const room = String(b.room || '').trim();
+  if (!room) return;
+  const sh = tab_(TAB.seats), v = sh.getDataRange().getValues(), json = JSON.stringify(cleanSeats_(b.seats)), now = new Date();
+  const i = v.findIndex((r, n) => n > 0 && String(r[0]).trim() === room);
+  if (i > 0) sh.getRange(i + 1, 2, 1, 2).setValues([[json, now]]);
+  else sh.appendRow([room, json, now]);
 }
 
 function submissions_(room, act) {
@@ -256,6 +285,14 @@ function renameWork_(room, from, to) {
     if (names.some(x => nameKey_(x) === k)) sub.getRange(n + 1, COL.names + 1, 1, 1).setValues([[names.map(swap).join(' + ')]]);
     const who = r[COL.members] ? parseJson_(r[COL.members]) : null;
     if (Array.isArray(who)) sub.getRange(n + 1, COL.members + 1, 1, 1).setValues([[JSON.stringify(who.map(swap))]]);
+  });
+  const se = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(TAB.seats);
+  if (se) se.getDataRange().getValues().forEach((r, n) => {
+    if (n === 0 || String(r[0]).trim() !== room) return;
+    const d = parseJson_(r[1]);
+    if (!d) return;
+    ['apart', 'together'].forEach(k => { if (Array.isArray(d[k])) d[k] = d[k].map(p => Array.isArray(p) ? p.map(swap) : p); });
+    se.getRange(n + 1, 2, 1, 1).setValues([[JSON.stringify(d)]]);
   });
   const dr = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(TAB.drafts);
   if (!dr) return;
@@ -328,7 +365,7 @@ function json_(o) {
   return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON);
 }
 
-// กด Run ครั้งเดียวจากหน้า Apps Script: สร้างแท็บ Roster / Unlocks / Drafts พร้อมหัวตาราง (ถ้ายังไม่มี)
+// กด Run ครั้งเดียวจากหน้า Apps Script: สร้างแท็บ Roster / Unlocks / Drafts / Seats พร้อมหัวตาราง (ถ้ายังไม่มี)
 function setup() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   Object.keys(HEAD).forEach(name => { if (!ss.getSheetByName(name)) makeTab_(ss, name); });

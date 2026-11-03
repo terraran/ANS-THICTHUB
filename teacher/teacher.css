@@ -129,3 +129,53 @@ h2.sub2{font-size:18px;margin:6px 0 0;color:#334155;font-weight:600}
 .vhead button[aria-pressed="true"]{background:var(--navy);border-color:var(--navy);color:#fff}
 .vpanel iframe{flex:1;width:100%;border:none;border-radius:12px;background:#fff;min-height:0}
 @media (max-width:700px){.tnav{max-width:none}.tmain{padding:16px}.vframes{flex-direction:column}}
+
+/* สุ่มที่นั่ง (ผังจาก seats-core.js · ขนาดตัวอักษรตามความกว้างผังด้วย cqw) */
+.seatbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.seatwrap{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:20px;align-items:start}
+@media (max-width:900px){.seatwrap{grid-template-columns:minmax(0,1fr)}}
+.sroom{background:#fff;border:1px solid #cbd5e1;border-radius:16px;padding:12px;
+  background-image:linear-gradient(#e2e8f0 1px,transparent 1px),linear-gradient(90deg,#e2e8f0 1px,transparent 1px);background-size:24px 24px}
+.smap{position:relative;width:100%;max-width:calc((100vh - 190px) * 536 / 640);min-width:260px;margin:0 auto;aspect-ratio:536/640;container-type:inline-size}
+.seat,.sdesk,.sblocked{position:absolute;border:2px solid var(--navy);border-radius:6px;display:flex;align-items:center;justify-content:center;text-align:center}
+.seat{background:#fff;padding:2px;overflow:hidden}
+.seat .sn{white-space:pre;display:inline-block;font-weight:600;line-height:1.1;font-size:clamp(11px,3.3cqw,28px);color:var(--ink)}
+.seat.tall .sn{font-size:clamp(9px,2.3cqw,18px)}
+.seat .no{position:absolute;top:1px;left:4px;font-size:clamp(8px,1.6cqw,13px);color:var(--muted)}
+.seat.vac .sn{color:var(--muted);font-weight:400}
+.z-A{background:#e0f2fe!important}.z-B{background:#e0e7ff!important}.z-C{background:#fef3c7!important}.z-D{background:#dcfce7!important}
+.seat.flick .sn{opacity:.55}
+.seat.reserved,.sblocked{background:repeating-linear-gradient(45deg,transparent 0 6px,#e2e8f0 6px 8px)!important;border-style:dashed;color:var(--muted)}
+.seat.reserved .sn{color:var(--muted);font-weight:400;font-size:clamp(9px,2cqw,14px)}
+.seat.pop .sn{animation:spop .35s ease-out both}
+@keyframes spop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
+@media (prefers-reduced-motion:reduce){.seat.pop .sn{animation:none}}
+.sdesk{background:var(--navy);color:#fff;font-size:clamp(11px,3cqw,22px)}
+.sblocked{font-size:clamp(9px,2cqw,14px)}
+.sfront{position:absolute;left:30%;right:2%;top:2.5%;text-align:center;color:var(--muted);font-size:clamp(11px,2.6cqw,20px);letter-spacing:.08em}
+.stag{position:absolute;font-size:clamp(9px,2cqw,15px);color:var(--muted)}
+.seatside{display:flex;flex-direction:column;gap:12px;position:sticky;top:16px}
+.seatside h2{margin:0;font-size:28px;color:var(--navy)}
+.seatside h2 small{display:block;font-size:18px;color:var(--muted);font-weight:400}
+.tbtn.roll{font-size:26px;min-height:72px;background:var(--select);color:var(--navy);border-color:var(--navy)}
+.tbtn.roll:disabled{opacity:.6;cursor:wait}
+.smeta{font-size:16px;color:var(--muted)}
+.slegend{display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:16px}
+.slegend span{display:flex;align-items:center;gap:6px}
+.slegend i{width:16px;height:16px;border:1.5px solid var(--navy);border-radius:4px}
+.seatcfg{padding:14px 16px;display:flex;flex-direction:column;gap:12px}
+.seatcfg h3{margin:0 0 4px;font-size:19px}
+.scols{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media (max-width:760px){.scols{grid-template-columns:1fr}}
+.srow{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px;font-size:17px}
+.srow select{font-family:inherit;font-size:17px;min-height:44px;padding:4px 8px;border-radius:10px;border:2px solid #cbd5e1;max-width:100%}
+.srow input[type=checkbox]{width:22px;height:22px}
+.pairs{list-style:none;padding:0;margin:8px 0 0;display:flex;flex-direction:column;gap:6px}
+.pairs li{display:flex;justify-content:space-between;align-items:center;gap:8px;border:1px solid #e2e8f0;border-radius:10px;padding:4px 6px 4px 12px;background:#f8fafc;font-size:17px}
+.pairs li.hint{border:none;background:none;padding:0}
+.pairs em{color:#b91c1c;font-style:normal;font-size:15px}
+.scheck{border-radius:12px;padding:8px 14px;font-size:16px;background:#f8fafc;border-left:5px solid var(--muted)}
+.scheck.ok{border-color:var(--send)}.scheck.warn{border-color:#d97706}.scheck.bad{border-color:#dc2626}
+body.seatfull .tnav,body.seatfull .rooms,body.seatfull #note,body.seatfull .seatbar,body.seatfull .seatcfg{display:none}
+body.seatfull .tmain{padding:12px 16px}
+body.seatfull .smap{max-width:calc((100vh - 50px) * 536 / 640)}

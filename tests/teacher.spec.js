@@ -68,8 +68,8 @@ test('มุมครู: รหัสผิดเข้าไม่ได้ ·
   expect(log.gets.some(p => p.action === 'whoami' && p.key === KEY)).toBe(true);
   expect(await page.evaluate(() => JSON.stringify(localStorage))).not.toContain(KEY);
   expect(await page.evaluate(() => sessionStorage.getItem('ansHub.tkey'))).toBe(KEY);
-  // เมนู 4 หัวข้อ + ห้องจาก levels.json
-  await expect(page.locator('#tabs button')).toHaveText(['ตารางส่งงาน', 'เปิด/ปิดกิจกรรม', 'แชร์ผลงาน', 'รายชื่อนักเรียน']);
+  // เมนู 5 หัวข้อ + ห้องจาก levels.json
+  await expect(page.locator('#tabs button')).toHaveText(['ตารางส่งงาน', 'เปิด/ปิดกิจกรรม', 'แชร์ผลงาน', 'รายชื่อนักเรียน', 'สุ่มที่นั่ง']);
   await expect(page.locator('#rooms button')).toHaveCount(8);
   await page.reload();
   await expect(page.locator('#app')).toBeVisible();     // รีเฟรชไม่ต้องใส่ใหม่
@@ -269,9 +269,99 @@ test('มุมครูบนจอเล็ก: ไม่ล้นแนวน
   mockGas(page, withWork(seed()));
   await page.setViewportSize({ width: 390, height: 800 });
   await enter(page);
-  for (const t of ['ตารางส่งงาน', 'เปิด/ปิดกิจกรรม', 'แชร์ผลงาน', 'รายชื่อนักเรียน']) {
+  for (const t of ['ตารางส่งงาน', 'เปิด/ปิดกิจกรรม', 'แชร์ผลงาน', 'รายชื่อนักเรียน', 'สุ่มที่นั่ง']) {
     await page.click(`#tabs button:has-text("${t}")`);
     await page.waitForTimeout(100);
     expect(await page.evaluate(() => document.documentElement.scrollWidth), t).toBeLessThanOrEqual(390);
   }
+});
+
+test('สุ่มที่นั่ง: ชื่อจาก Roster · ตั้งคู่แยก/นั่งติดกันเก็บในแท็บ Seats · สุ่มผ่านเงื่อนไข · เต็มจอซ่อนเงื่อนไข', async ({ page, context }) => {
+  const errs = []; page.on('pageerror', e => errs.push(e.message));
+  await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  const { S, log, tabs } = mockGas(page, seed());
+  await enter(page);
+  await page.click('#rooms button:has-text("Y3.2")');
+  await page.click('#tabs button:has-text("สุ่มที่นั่ง")');
+  await expect(page.locator('.seatbar .lbl')).toHaveText('ห้อง Y3.2 · 4 คน / 24 ที่นั่ง');            // ชื่อที่ซ่อนไม่นับ
+  await expect(page.locator('#seatMap .seat')).toHaveCount(25);
+  await expect(page.locator('.smeta')).toHaveText('ยังไม่ได้สุ่ม');
+  await expect(page.locator('.seatcfg')).toHaveCount(0);                                         // แผงเงื่อนไขปิดไว้ตั้งต้น
+  // ตั้งเงื่อนไข
+  await page.click('#seatSet');
+  await expect(page.locator('.pairs li.hint')).toHaveText(['ยังไม่มีคู่ที่ต้องแยก', 'ยังไม่มีคู่ที่ต้องนั่งติดกัน']);
+  await page.selectOption('#apA', 'กาย'); await page.selectOption('#apB', 'ขิม');
+  await page.click('[data-add="apart"]');
+  await expect(page.locator('#note')).toHaveText('เพิ่มคู่แล้ว ✓');
+  await page.selectOption('#apA', 'ขิม'); await page.selectOption('#apB', 'กาย');
+  await page.click('[data-add="apart"]');
+  await expect(page.locator('#note')).toHaveText('มีคู่ ขิม กับ กาย อยู่แล้ว');
+  await page.selectOption('#toA', 'จีน'); await page.selectOption('#toB', 'ชิน');
+  await page.click('[data-add="together"]');
+  await expect(page.locator('#note')).toHaveText('เพิ่มคู่แล้ว ✓');
+  await page.selectOption('#seatLevel', 'far');
+  await expect(page.locator('#note')).toContainText('ห่าง (ประมาณ 2 ช่วงโต๊ะ)');
+  await page.uncheck('#seatZone');
+  await expect(page.locator('#note')).toHaveText('ปิด "แยกคนละโซน" แล้ว ✓');
+  expect(S.get({ action: 'dashboard', key: KEY, room: 'Y3.2' }).seats).toEqual({ apart: [['กาย', 'ขิม']], together: [['จีน', 'ชิน']], level: 'far', zone: false });
+  expect(tabs.Seats.length).toBe(2);
+  expect(log.posts.every(b => b.key === KEY)).toBe(true);
+  // สุ่ม: ครบ 4 คน ผ่านเงื่อนไข · คัดลอกตามเลขที่นั่ง
+  await page.click('#seatGo');
+  await expect(page.locator('.smeta')).toContainText('สุ่มครั้งที่ 1');
+  await expect(page.locator('#seatMap .seat:not(.vac) .sn')).toHaveCount(4);
+  expect((await page.locator('#seatMap .seat:not(.vac) .sn').allTextContents()).sort()).toEqual(['กาย', 'ขิม', 'จีน', 'ชิน'].sort());
+  await expect(page.locator('#seatMap .seat').nth(19)).toHaveClass(/reserved/);
+  await expect(page.locator('.scheck')).toContainText('ผ่านทุกเงื่อนไข');
+  await expect(page.locator('.scheck')).toContainText('จีน + ชิน: นั่งติดกัน ✓');
+  await page.click('#seatCopy');
+  await expect(page.locator('.seatside [role=status]')).toHaveText('คัดลอกแล้ว วางใน Excel หรือ Google Sheets ได้เลย');
+  const clip = await page.evaluate(() => navigator.clipboard.readText());
+  expect(clip.split('\n')).toHaveLength(26);
+  expect(clip).toContain('20\t-');
+  // ลบคู่
+  await page.click('[data-del="together"]');
+  await expect(page.locator('#note')).toHaveText('ลบคู่แล้ว ✓');
+  expect(S.get({ action: 'dashboard', key: KEY, room: 'Y3.2' }).seats.together).toEqual([]);
+  // เต็มจอ: ไม่มีเมนู/ปุ่มห้อง/แผงเงื่อนไข · Esc ออก
+  await page.click('#seatFull');
+  await expect(page.locator('.tnav')).toBeHidden();
+  await expect(page.locator('.seatcfg')).toBeHidden();
+  await expect(page.locator('#rooms')).toBeHidden();
+  await expect(page.locator('#seatGo')).toBeVisible();
+  await page.click('#seatGo');
+  await expect(page.locator('.smeta')).toContainText('สุ่มครั้งที่ 2');
+  await page.keyboard.press('Escape');
+  await expect(page.locator('.tnav')).toBeVisible();
+  await expect(page.locator('#seatFull')).toHaveText('เต็มจอ ⛶');
+  // ห้องอื่นมีเงื่อนไขของตัวเอง · ผลสุ่มไม่ติดไปห้องอื่น
+  await page.click('#rooms button:has-text("Y3.1")');
+  await expect(page.locator('.smeta')).toHaveText('ยังไม่ได้สุ่ม');
+  await expect(page.locator('.pairs li.hint')).toHaveText(['ยังไม่มีคู่ที่ต้องแยก', 'ยังไม่มีคู่ที่ต้องนั่งติดกัน']);
+  // Script เก่า (ไม่รู้จัก seats) → บอกครูว่าบันทึกไม่สำเร็จ
+  page.route('**/script.google.com/**', r => r.request().method() === 'POST' ? r.fulfill({ body: 'ok' }) : r.fallback());
+  await page.click('#seatZone');
+  await expect(page.locator('#note')).toContainText('บันทึกไม่สำเร็จ');
+  expect(errs).toEqual([]);
+});
+
+test('สุ่มที่นั่ง: แอนิเมชันสุ่มจบแล้วได้ชื่อครบ · รายชื่อเกิน 24 คนสุ่มไม่ได้', async ({ page }) => {
+  const errs = []; page.on('pageerror', e => errs.push(e.message));
+  const tabs = seed();
+  for (let i = 1; i <= 21; i++) tabs.Roster.push(['Y3.3', 'N' + i, true, i]);
+  for (let i = 1; i <= 25; i++) tabs.Roster.push(['Y3.4', 'M' + i, true, i]);
+  mockGas(page, tabs);
+  await enter(page);
+  await page.click('#tabs button:has-text("สุ่มที่นั่ง")');
+  await page.click('#rooms button:has-text("Y3.3")');
+  await page.click('#seatGo');
+  await expect(page.locator('#seatGo')).toBeDisabled();
+  await expect(page.locator('#seatGo')).toBeEnabled();
+  await expect(page.locator('#seatMap .seat:not(.vac):not(.reserved)')).toHaveCount(21);
+  await expect(page.locator('#seatMap .seat.pop')).toHaveCount(21);
+  await page.click('#rooms button:has-text("Y3.4")');
+  await expect(page.locator('#seatGo')).toBeDisabled();
+  await expect(page.locator('.seatside .note.err')).toContainText('เกิน 24 ที่นั่ง');
+  expect(errs).toEqual([]);
 });

@@ -1,4 +1,4 @@
-// มุมครู: ใส่รหัสครู → ตารางส่งงาน / เปิด-ปิดกิจกรรม / แชร์ผลงาน / รายชื่อนักเรียน
+// มุมครู: ใส่รหัสครู → ตารางส่งงาน / เปิด-ปิดกิจกรรม / แชร์ผลงาน / รายชื่อนักเรียน / สุ่มที่นั่ง
 // อ่านใช้ GET (ใส่ key ทุกครั้ง) · เขียนใช้ POST แบบ no-cors อ่านผลไม่ได้ จึงโหลดข้อมูลใหม่มาตรวจทุกครั้งหลังบันทึก
 (() => {
 const $ = s => document.querySelector(s);
@@ -6,7 +6,7 @@ const { esc, store } = HubUtil;
 const th = o => HubUtil.t(o, 'th');
 const plain = h => String(h).replace(/<[^>]+>/g, '');
 const H2C = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
-const TABS = { matrix: 'ตารางส่งงาน', open: 'เปิด/ปิดกิจกรรม', share: 'แชร์ผลงาน', roster: 'รายชื่อนักเรียน' };
+const TABS = { matrix: 'ตารางส่งงาน', open: 'เปิด/ปิดกิจกรรม', share: 'แชร์ผลงาน', roster: 'รายชื่อนักเรียน', seats: 'สุ่มที่นั่ง' };
 const ST = { done: 'ส่งแล้ว', doing: 'ทำค้าง', todo: 'ยังไม่เริ่ม' };
 // รหัสอยู่ใน sessionStorage เท่านั้น (ปิดแท็บแล้วต้องใส่ใหม่) · บางเครื่องปิดไว้ จึงห่อ try/catch
 const SES = 'ansHub.tkey';
@@ -62,7 +62,7 @@ async function login(k, quiet){
   $('#login').classList.add('hide'); $('#app').classList.remove('hide');
   drawNav(); show();
 }
-function logout(msg){ key = ''; ses.del(); dash = {}; subsCache = {}; closeViewer(); note(''); showLogin(msg); }
+function logout(msg){ key = ''; ses.del(); dash = {}; subsCache = {}; seatRes = {}; closeViewer(); setFull(false); note(''); showLogin(msg); }
 $('#login').addEventListener('submit', e => { e.preventDefault(); const k = $('#key').value.trim(); if (k) login(k); });
 $('#logout').addEventListener('click', () => ses.del());
 
@@ -72,7 +72,7 @@ function drawNav(){
   $('#rooms').innerHTML = '<span class="lbl">ห้อง</span>' + levels.flatMap(l => l.rooms)
     .map(r => `<button data-room="${r}" aria-pressed="${r === room}">${r}</button>`).join('');
 }
-$('#tabs').addEventListener('click', e => { const b = e.target.closest('[data-tab]'); if (!b) return; tab = b.dataset.tab; store.set('tTab', tab); editing = ''; note(''); drawNav(); show(); });
+$('#tabs').addEventListener('click', e => { const b = e.target.closest('[data-tab]'); if (!b) return; tab = b.dataset.tab; if (tab !== 'seats') setFull(false); store.set('tTab', tab); editing = ''; note(''); drawNav(); show(); });
 $('#rooms').addEventListener('click', e => { const b = e.target.closest('[data-room]'); if (!b) return; room = b.dataset.room; store.set('tRoom', room); editing = ''; cmpSel = []; note(''); drawNav(); show(); });
 
 async function loadDash(r){ dash[r] = await api({ action: 'dashboard', room: r }); return dash[r]; }
@@ -106,6 +106,7 @@ function render(){
   if (tab === 'matrix') drawMatrix();
   else if (tab === 'open') drawOpen();
   else if (tab === 'share') drawShare();
+  else if (tab === 'seats') drawSeats();
   else drawRoster();
 }
 
@@ -386,6 +387,151 @@ $('#view').addEventListener('keydown', e => {
   if (e.target.id !== 'renameIn') return;
   if (e.key === 'Enter') { e.preventDefault(); rename(editing, e.target.value); }
   if (e.key === 'Escape') { e.stopPropagation(); editing = ''; render(); }
+});
+
+// ---------- 5. สุ่มที่นั่ง (ผัง/ตัวจัดอยู่ใน seats-core.js) ----------
+// เงื่อนไขคู่เก็บในแท็บ Seats รายห้อง (มาพร้อม dashboard) · ผลสุ่มไม่บันทึก อยู่ในหน้านี้จนรีเฟรช
+// รายละเอียดเงื่อนไขอยู่ในแผง "ตั้งเงื่อนไข" ที่ปิดไว้ตั้งต้น และซ่อนตอนเต็มจอ เพื่อไม่ให้ขึ้นจอโปรเจกเตอร์
+const SC = window.SeatCore;
+const LV = { vfar: 'ห่างมาก (เกิน 2 ช่วงโต๊ะ)', far: 'ห่าง (ประมาณ 2 ช่วงโต๊ะ)' };
+const ZONE_C = ['A', 'B', 'C', 'D'];
+let seatRes = {}, seatSet = false, rolling = false, popNext = false, full = false, copyMsg = '';
+const seatCfg = () => dash[room].seats || { apart: [], together: [], level: 'vfar', zone: true };
+const kidsOf = r => dash[r].roster.filter(x => x.active).map(x => x.name);
+const pct = (v, t) => (v / t * 100) + '%';
+const at = (x, y, w, h, g = 0) => `left:${pct(x + g, SC.W)};top:${pct(y + g, SC.H)};width:${pct(w - 2 * g, SC.W)};height:${pct(h - 2 * g, SC.H)}`;
+const samePair = (p, a, b) => (nk(p[0]) === nk(a) && nk(p[1]) === nk(b)) || (nk(p[0]) === nk(b) && nk(p[1]) === nk(a));
+// ชื่ออังกฤษยาวในโต๊ะแนวตั้ง: ตัดครึ่งเป็น 2 บรรทัด
+const seatText = (s, n) => s.h > s.w && n.length >= 7 && /^[A-Za-z]+$/.test(n) ? n.slice(0, Math.ceil(n.length / 2)) + '\n' + n.slice(Math.ceil(n.length / 2)) : n;
+const STATE = { ok: 'ห่างพอ · คนละโซน ✓', zone: 'ห่างพอ (โซนเดียวกัน)', near: 'ใกล้เกินไป ✗', tog: 'นั่งติดกัน ✓', split: 'ไม่ได้นั่งติดกัน ✗', missing: 'ไม่ได้อยู่ในผังนี้' };
+
+function drawSeats(){
+  const kids = kidsOf(room), cfg = seatCfg(), R = seatRes[room], over = kids.length > SC.CAP;
+  const pop = popNext; popNext = false;
+  const seats = SC.SEATS.map((s, i) => {
+    const n = R ? R.seating[i] : '', res = SC.RESERVED.includes(s.no);
+    return `<div class="seat z-${s.zone}${s.h > s.w ? ' tall' : ''}${res ? ' reserved' : ''}${n ? '' : ' vac'}${pop && n ? ' pop' : ''}" style="${at(s.x, s.y, s.w, s.h, 2)}">
+      <span class="no">${s.no}</span><span class="sn"${pop ? ` style="animation-delay:${i * 25}ms"` : ''}>${esc(n ? seatText(s, n) : res ? 'เว้นว่าง' : R ? 'ว่าง' : '')}</span></div>`;
+  }).join('');
+  const map = `<div class="smap" id="seatMap"><div class="sdesk" style="${at(20, 30, 138, 56)}">โต๊ะครู</div><div class="sfront">หน้าห้อง</div>
+    <div class="sblocked" style="${at(20, 570, 104, 50, 2)}">ไม่ใช้</div>
+    ${[['A', 60, 128], ['B', 338, 128], ['C', 20, 498], ['D', 288, 498]].map(([z, x, y]) => `<div class="stag" style="left:${pct(x, SC.W)};top:${pct(y, SC.H)}">โซน ${z}</div>`).join('')}
+    ${seats}</div>`;
+  const msg = !kids.length ? 'ห้องนี้ยังไม่มีรายชื่อ เพิ่มได้ที่เมนู "รายชื่อนักเรียน"'
+    : over ? `รายชื่อ ${kids.length} คน เกิน ${SC.CAP} ที่นั่ง ซ่อนบางชื่อที่เมนู "รายชื่อนักเรียน" ก่อนสุ่ม` : '';
+  $('#view').innerHTML = `<div class="seatbar"><span class="lbl">ห้อง ${esc(room)} · ${kids.length} คน / ${SC.CAP} ที่นั่ง</span><span class="sp"></span>
+      <button class="tbtn line" id="seatSet" aria-expanded="${seatSet}">ตั้งเงื่อนไข (เฉพาะครู)</button></div>
+    ${seatSet ? seatPanel(kids, cfg, R) : ''}
+    <div class="seatwrap"><div class="sroom">${map}</div>
+     <div class="seatside"><h2>สุ่มที่นั่ง <small>ห้อง ${esc(room)}</small></h2>
+      <button class="tbtn roll" id="seatGo" ${msg || rolling ? 'disabled' : ''}>🎲 สุ่มที่นั่ง</button>
+      ${msg ? `<div class="note err">${esc(msg)}</div>` : ''}
+      <div class="smeta">${R ? `สุ่มครั้งที่ ${R.round} · ${esc(R.time)}` : 'ยังไม่ได้สุ่ม'}</div>
+      <div class="slegend" aria-hidden="true">${ZONE_C.map(z => `<span><i class="z-${z}"></i>โซน ${z}</span>`).join('')}</div>
+      <button class="tbtn line" id="seatCopy" ${R ? '' : 'disabled'}>คัดลอกรายชื่อตามเลขที่นั่ง</button>
+      <div class="hint" role="status">${esc(copyMsg)}</div>
+      <button class="tbtn dark" id="seatFull">${full ? 'ออกจากเต็มจอ' : 'เต็มจอ ⛶'}</button></div></div>`;
+  fitSeats();
+}
+
+function seatPanel(kids, cfg, R){
+  const sel = (id, i) => `<select id="${id}" aria-label="นักเรียนคนที่ ${i}">${kids.map((n, j) => `<option ${j === i - 1 ? 'selected' : ''}>${esc(n)}</option>`).join('')}</select>`;
+  const list = (k, mark, none) => (cfg[k].length ? cfg[k].map((p, i) => `<li><span>${esc(p[0])} ${mark} ${esc(p[1])}${p.every(n => has(kids, n)) ? '' : ' <em>(ไม่อยู่ในรายชื่อ)</em>'}</span>
+      <button class="ic wide" data-del="${k}" data-i="${i}" aria-label="ลบคู่ ${esc(p[0])} ${esc(p[1])}">ลบ</button></li>`).join('') : `<li class="hint">${none}</li>`);
+  let check = '';
+  if (R) {
+    const ev = SC.evaluate(R.seating, cfg);
+    check = `<div class="scheck ${ev.hard ? 'bad' : ev.soft ? 'warn' : 'ok'}"><b>ผลสุ่มล่าสุด:</b> ${ev.hard ? 'มีเงื่อนไขที่ไม่ผ่าน ควรสุ่มใหม่' : ev.soft ? 'ผ่านทุกเงื่อนไข (บางคู่อยู่โซนเดียวกัน แต่ห่างกันพอ)' : 'ผ่านทุกเงื่อนไข'}
+      ${ev.detail.length ? `<br>${ev.detail.map(d => `${esc(d.a)} ${d.t ? '+' : '↔'} ${esc(d.b)}: ${STATE[d.s]}`).join('<br>')}` : ''}</div>`;
+  }
+  return `<div class="panel seatcfg">${check}<div class="scols">
+    <div><h3>คู่ที่ต้องแยกกัน</h3><p class="hint">นั่งห่างกันตามระดับที่เลือก วัดทุกทิศรวมข้ามทางเดิน</p>
+      <label class="srow">ระดับความห่าง <select id="seatLevel">${Object.keys(LV).map(k => `<option value="${k}" ${cfg.level === k ? 'selected' : ''}>${LV[k]}</option>`).join('')}</select></label>
+      <div class="srow">${sel('apA', 1)}${sel('apB', 2)}<button class="tbtn" data-add="apart">เพิ่มคู่</button></div>
+      <ul class="pairs">${list('apart', '↔', 'ยังไม่มีคู่ที่ต้องแยก')}</ul>
+      <label class="srow"><input type="checkbox" id="seatZone" ${cfg.zone ? 'checked' : ''}> พยายามให้คู่ที่แยกอยู่คนละโซน</label></div>
+    <div><h3>คู่ที่ต้องนั่งติดกัน</h3><p class="hint">ได้โต๊ะที่ด้านข้างชนกันเสมอ</p>
+      <div class="srow">${sel('toA', 1)}${sel('toB', 2)}<button class="tbtn" data-add="together">เพิ่มคู่</button></div>
+      <ul class="pairs">${list('together', '+', 'ยังไม่มีคู่ที่ต้องนั่งติดกัน')}</ul></div>
+  </div><p class="hint">เงื่อนไขเก็บใน Google Sheet (แท็บ Seats) แยกรายห้อง · ผลสุ่มไม่บันทึก</p></div>`;
+}
+
+// ลดขนาดตัวอักษรจนชื่อพอดีโต๊ะ
+function fitSeats(){
+  document.querySelectorAll('#seatMap .seat').forEach(el => {
+    const nm = el.querySelector('.sn'); nm.style.fontSize = '';
+    let fs = parseFloat(getComputedStyle(nm).fontSize); const max = el.clientWidth - 8;
+    while (nm.offsetWidth > max && fs > 8) { fs -= 1; nm.style.fontSize = fs + 'px'; }
+  });
+}
+let fitT; addEventListener('resize', () => { clearTimeout(fitT); fitT = setTimeout(() => { if (tab === 'seats') fitSeats(); }, 120); });
+
+function saveSeats(next, wait, done){
+  const r = room, same = () => JSON.stringify(dash[r].seats) === JSON.stringify(next);
+  return save(wait, () => send({ action: 'seats', room: r, seats: next }), [r], same, done);
+}
+function addPair(k){
+  const [a, b] = k === 'apart' ? [$('#apA').value, $('#apB').value] : [$('#toA').value, $('#toB').value];
+  const cfg = seatCfg(), other = k === 'apart' ? 'together' : 'apart';
+  if (!a || !b || nk(a) === nk(b)) return note('เลือกนักเรียน 2 คนที่ต่างกัน', 'err');
+  if (cfg[k].some(p => samePair(p, a, b))) return note(`มีคู่ ${a} กับ ${b} อยู่แล้ว`, 'err');
+  if (cfg[other].some(p => samePair(p, a, b))) return note(`คู่นี้อยู่ในรายการ${other === 'apart' ? 'ต้องแยกกัน' : 'ต้องนั่งติดกัน'}อยู่แล้ว`, 'err');
+  const next = Object.assign({}, cfg, { [k]: cfg[k].concat([[a, b]]) });
+  saveSeats(next, `กำลังเพิ่มคู่ ${a} ${k === 'apart' ? '↔' : '+'} ${b}...`, `เพิ่มคู่แล้ว ✓`);
+}
+
+const reduceMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+function roll(){
+  const kids = kidsOf(room), r = room;
+  if (rolling || !kids.length || kids.length > SC.CAP) return;
+  const { seating, ev } = SC.solve(kids, seatCfg());
+  seatRes[r] = { seating, ev, round: ((seatRes[r] || {}).round || 0) + 1, time: new Date().toLocaleString('th-TH', { dateStyle: 'medium', timeStyle: 'short' }) };
+  copyMsg = '';
+  if (reduceMotion()) return render();
+  rolling = true; $('#seatGo').disabled = true;
+  let k = 0;
+  const iv = setInterval(() => {
+    if (tab !== 'seats' || room !== r) { clearInterval(iv); rolling = false; return; }
+    document.querySelectorAll('#seatMap .seat:not(.reserved)').forEach(el => { el.classList.add('flick'); el.querySelector('.sn').textContent = kids[Math.random() * kids.length | 0]; });
+    if (++k >= 18) { clearInterval(iv); rolling = false; popNext = true; render(); }
+  }, 70);
+}
+
+// เต็มจอ: ซ่อนเมนู/ปุ่มห้อง/แผงตั้งค่า เหลือผังกับปุ่มสุ่ม · ขอเต็มจอจริงของเบราว์เซอร์ด้วยถ้าได้
+function setFull(on){
+  if (full === on) return;
+  full = on; document.body.classList.toggle('seatfull', on);
+  try {
+    if (on && document.documentElement.requestFullscreen && !document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {});
+    if (!on && document.fullscreenElement) document.exitFullscreen().catch(() => {});
+  } catch (e) {}
+}
+document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement && full) { setFull(false); render(); } });
+addEventListener('keydown', e => { if (e.key === 'Escape' && full && !vw) { setFull(false); render(); } });
+
+$('#view').addEventListener('click', async e => {
+  if (tab !== 'seats') return;
+  const b = e.target.closest('button'); if (!b) return;
+  if (b.id === 'seatGo') return roll();
+  if (b.id === 'seatSet') { seatSet = !seatSet; return render(); }
+  if (b.id === 'seatFull') { setFull(!full); return render(); }
+  if (b.id === 'seatCopy') {
+    const R = seatRes[room]; if (!R) return;
+    const txt = 'เลขที่นั่ง\tชื่อ\n' + SC.SEATS.map((s, i) => s.no + '\t' + (R.seating[i] || '-')).join('\n');
+    try { await navigator.clipboard.writeText(txt); copyMsg = 'คัดลอกแล้ว วางใน Excel หรือ Google Sheets ได้เลย'; }
+    catch (err) { copyMsg = 'คัดลอกไม่ได้ในเบราว์เซอร์นี้'; }
+    return render();
+  }
+  if (b.dataset.add) return addPair(b.dataset.add);
+  if (b.dataset.del) {
+    const k = b.dataset.del, cfg = seatCfg(), p = cfg[k][+b.dataset.i];
+    return saveSeats(Object.assign({}, cfg, { [k]: cfg[k].filter((x, i) => i !== +b.dataset.i) }), `กำลังลบคู่ ${p[0]} กับ ${p[1]}...`, 'ลบคู่แล้ว ✓');
+  }
+});
+$('#view').addEventListener('change', e => {
+  if (tab !== 'seats') return;
+  if (e.target.id === 'seatLevel') saveSeats(Object.assign({}, seatCfg(), { level: e.target.value }), 'กำลังบันทึกระดับความห่าง...', `ตั้งเป็น "${LV[e.target.value]}" แล้ว ✓`);
+  if (e.target.id === 'seatZone') saveSeats(Object.assign({}, seatCfg(), { zone: e.target.checked }), 'กำลังบันทึกตัวเลือกโซน...', e.target.checked ? 'เปิด "แยกคนละโซน" แล้ว ✓' : 'ปิด "แยกคนละโซน" แล้ว ✓');
 });
 
 // ---------- เริ่ม ----------
