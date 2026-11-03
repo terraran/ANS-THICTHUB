@@ -245,7 +245,7 @@ main{min-width:0}
 .mini{border-radius:12px;padding:5px 10px;display:flex;gap:8px;align-items:center;border:2px solid #0b254522}
 .mini .ma{font-size:24px;white-space:nowrap;flex:none}
 .mini .ms{font-size:14px;line-height:1.25}
-#again{font-size:16px;min-height:44px;padding:4px 14px}
+#again{flex:none;font-size:16px;min-height:44px;padding:4px 14px}
 /* ไม่มีการ์ด (cards: []): กล่อง Flow Map มีแต่ช่องเขียน ให้ช่องเต็มกล่อง */
 .nocards .map .bin .list{display:none}
 .nocards .frow .bin .wfield{flex:1;display:flex;flex-direction:column;margin-top:2px}
@@ -263,3 +263,38 @@ main{min-width:0}
 #web .cardx:hover,#web .cardx.free:hover,#web .cardx.sel:hover{animation:none;transform:translate(-50%,-50%) scale(1.15)}
 /* Sarabun ตัวเล็กกว่า Kanit ที่ขนาดเดียวกัน: ขยายตัวหนังสือบนการ์ด/ฟองขึ้นนิด */
 .cardx .tx{font-size:19px}.full .cardx .tx{font-size:20px}#web .cardx .tx{font-size:18px}#web.tight .cardx .tx{font-size:16px}
+/* Flow Map ไม่จำกัดขั้น (write.flex): กล่องสัญญาณ + กล่องที่เด็กเพิ่มเอง · ชี้ลูกศร/ท้ายแถว = ถามว่าเพิ่มกล่องไหม */
+.flex .frow{gap:0}
+.flex .frow .bin{flex:none}
+.bin.sig{width:400px}
+.frow.many .bin.sig{width:330px}
+.sgs{flex:1;min-height:0;overflow:auto;display:grid;grid-template-columns:1fr 1fr;gap:6px;align-content:start}
+.sg,.sg:disabled{background:#f8fafc;color:var(--ink);border:2px solid var(--line);box-shadow:none;font-size:16px;font-weight:600;min-height:46px;padding:4px 10px;border-radius:12px;white-space:normal;text-align:left;line-height:1.2;display:flex;align-items:center;gap:6px;cursor:pointer}
+.sg:disabled{cursor:default}
+.sg.on,.sg.on:disabled{background:#fde68a;border-color:#f59e0b}
+.sg>span:first-child{font-size:20px;flex:none}
+.sg.own{border-style:dashed;position:relative;padding-right:34px}
+.x{position:absolute;right:4px;top:50%;transform:translateY(-50%);width:28px;height:28px;min-height:0;padding:0;border-radius:50%;background:#fee2e2;color:#b91c1c;font-size:14px;box-shadow:none;display:flex;align-items:center;justify-content:center}
+.sgadd{display:flex;gap:6px;margin-top:8px}
+.sgadd input{flex:1;min-width:0;font:inherit;font-size:17px;padding:6px 14px;border:2px solid var(--line);border-radius:999px;user-select:text;-webkit-user-select:text}
+.sgadd input:focus{outline:none;border-color:var(--accent)}
+.sgadd button{font-size:16px;min-height:40px;padding:2px 16px}
+.flex .frow .bin.stp{flex:1 1 0;min-width:0;max-width:380px;animation:boxin .3s cubic-bezier(.34,1.56,.64,1)}
+.bin.stp h2{position:relative;display:flex;justify-content:center}
+.stp .no{display:inline-flex;width:30px;height:30px;border-radius:50%;background:#fff;color:var(--accent);align-items:center;justify-content:center;font-weight:800}
+.bin.stp textarea{flex:1;height:auto;font-size:19px;line-height:1.45}
+.bin.stp textarea:read-only{background:#f8fafc}
+.slot{flex:none;width:44px;position:relative;display:flex;align-items:center;justify-content:center}
+.slot .plus{position:absolute;top:50%;left:50%;z-index:5;transform:translate(-50%,-50%) scale(.6);opacity:0;pointer-events:none;transition:opacity .15s,transform .15s;border-radius:999px;padding:6px 14px;min-height:0;font-size:17px;box-shadow:0 6px 16px #0284c755}
+.slot.can:hover .plus,.slot .plus:focus-visible{opacity:1;pointer-events:auto;transform:translate(-50%,-50%) scale(1)}
+.ghost{flex:none;width:210px;display:flex;align-items:stretch}
+.ghost .arrow{align-self:center;width:44px;text-align:center;opacity:.3}
+.gbox{flex:1;background:transparent;color:#64748b;border:4px dashed #94a3b8;border-radius:16px;box-shadow:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;opacity:.45;white-space:normal;transition:opacity .15s,background .15s}
+.gbox b{font-size:46px;line-height:1}
+.gbox span{font-size:19px;opacity:0;transition:opacity .15s}
+.gbox:hover,.gbox:focus-visible{opacity:1;background:#e0f2fe;border-color:var(--accent);color:var(--accent)}
+.gbox:hover span,.gbox:focus-visible span{opacity:1}
+@keyframes boxin{from{opacity:0;transform:scale(.85)}}
+/* แท็บเล็ต (ไม่มีเมาส์ชี้): ปุ่ม ➕ โชว์จาง ๆ ตลอด */
+@media (hover:none){.slot.can .plus{opacity:.75;pointer-events:auto;transform:translate(-50%,-50%) scale(.85)}.slot.can .plus span{display:none}.gbox{opacity:.75}.gbox span{opacity:1}}
+@media (prefers-reduced-motion:reduce){.flex .frow .bin.stp{animation:none}}

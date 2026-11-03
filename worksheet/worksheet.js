@@ -7,6 +7,7 @@
 // ขั้น 2: มี signs = กดป้ายสัญญาณบนการ์ดกลุ่ม b · มี write = เขียนตัวอย่าง/วิธีรับมือ (เลือกสถานการณ์ได้ถ้ามี write.choose)
 // add = ขั้น 1 เด็กพิมพ์การ์ดของตัวเองเพิ่มลงกล่องไหนก็ได้ (อย่างน้อย add.min ใบ ไม่ตรวจถูกผิด)
 // write.fields[].hd = หัวข้อเหนือช่อง (แค่แสดง) · noReason = ไม่มีขั้นให้เหตุผล: ขั้น 2 เสร็จแล้วเด้งคำถาม Frame of Reference เลย (หัวขั้นเหลือ 3 ขั้น)
+// write.flex = Flow Map ไม่จำกัดขั้น: กล่องแรกเลือกสัญญาณ (signs + พิมพ์เพิ่มเอง) · เด็กกด ➕ เพิ่มกล่องเอง (min-max กล่อง)
 // write.choose[].scenes = การ์ตูนสั้น: ขั้น 1 เลือกเรื่องแล้วดูให้จบ · cards: [] = ไม่มีการ์ด ไม่ตรวจถูกผิด ครูอ่านที่เด็กเขียน
 (() => {
 const $ = s => document.querySelector(s);
@@ -24,7 +25,7 @@ const UI = {
         loading: 'กำลังโหลดงานที่ทำค้างไว้...', pairAdd: '+ ทำกับเพื่อน', pairChange: 'เปลี่ยนเพื่อน', pairHd: r => `ทำงานคู่กับใคร? (${r})`,
         solo: 'ทำคนเดียว', pairFt: 'กดส่งครั้งเดียว ใบงานนับให้ทั้งสองคน', rosterErr: 'โหลดรายชื่อไม่สำเร็จ ลองใหม่อีกครั้ง',
         addPh: 'พิมพ์เพิ่ม 1 ข้อ...', addTo: 'ใส่ใน', addN: (n, m) => n >= m ? `เพิ่มแล้ว ${n} ใบ ✓ เพิ่มอีกได้` : `เพิ่มแล้ว ${n} ใบ · อีก ${m - n} ใบ`, del: 'ลบ', myOwn: 'การ์ดที่เราเพิ่ม:', addBubble: '➕ เพิ่มฟอง',
-        replay: '↺ ดูอีกครั้ง', watchAgain: '▶ ดูการ์ตูนอีกครั้ง', pickStory: '👆 เลือกเรื่องด้านบนก่อนนะ', doneWrite: 'ส่ง Flow Map ให้ครูแล้ว ครูจะอ่านที่เราเขียน' },
+        replay: '↺ ดูอีกครั้ง', addHere: 'เพิ่มกล่องตรงนี้ไหม?', addBox: 'เพิ่มกล่องไหม?', add: 'เพิ่ม', watchAgain: '▶ ดูการ์ตูนอีกครั้ง', pickStory: '👆 เลือกเรื่องด้านบนก่อนนะ', doneWrite: 'ส่ง Flow Map ให้ครูแล้ว ครูจะอ่านที่เราเขียน' },
   en: { steps: ['1 Sort', '2 Find signs', '3 Explain', '4 Look back'], stepTag: (n, m) => `Step ${n} / ${m}`, lib: 'Activities', week: n => `Week ${n}`,
         next: 'Next step ➜', back: '◀ Back', check: 'Check and send to teacher ✔', skip: 'Skip and send', edit: '✏️ Fix and send again', lib2: 'Back to activities',
         pickHint: '👆 Tap the card you were least sure about', picked: 'The card we were least sure about:', reason: 'What makes you think that?', reasonPh: 'Type your reason...',
@@ -37,7 +38,7 @@ const UI = {
         loading: 'Loading your saved work...', pairAdd: '+ Work with a friend', pairChange: 'Change friend', pairHd: r => `Who are you working with? (${r})`,
         solo: 'Work alone', pairFt: 'Send once and it counts for both of you', rosterErr: 'Could not load names. Try again.',
         addPh: 'Type 1 more...', addTo: 'Put in', addN: (n, m) => n >= m ? `${n} added ✓ you can add more` : `${n} added · ${m - n} to go`, del: 'Delete', myOwn: 'Cards we added:', addBubble: '➕ Add bubble',
-        replay: '↺ Watch again', watchAgain: '▶ Watch the cartoon again', pickStory: '👆 Pick a story above first', doneWrite: 'Your Flow Map was sent. Your teacher will read it.' }
+        replay: '↺ Watch again', addHere: 'Add a box here?', addBox: 'Add a box?', add: 'Add', watchAgain: '▶ Watch the cartoon again', pickStory: '👆 Pick a story above first', doneWrite: 'Your Flow Map was sent. Your teacher will read it.' }
 };
 
 const H = new URLSearchParams(location.hash.slice(1));
@@ -67,7 +68,9 @@ const binLabel = id => (bins().find(b => b.id === id) || {}).label;
 const isWrite = () => !!C.write;
 const fieldEl = id => document.querySelector(`[data-f="${id}"]`);
 const signsDone = () => C.cards.filter(c => placed[c.id] === 'b').every(c => signs[c.id] && signs[c.id].size);
-const writeDone = () => (!C.write.choose || !!wr.pick) && C.write.fields.every(f => (wr.f[f.id] || '').trim().length >= 2);
+const FLEX = () => !!(C.write && C.write.flex);
+const flexDone = () => wr.sg.length + wr.so.length >= 1 && wr.st.length >= (C.write.flex.min || 1) && wr.st.every(x => x.trim().length >= 2);
+const writeDone = () => (!C.write.choose || !!wr.pick) && (FLEX() ? flexDone() : C.write.fields.every(f => (wr.f[f.id] || '').trim().length >= 2));
 const step2Done = () => isWrite() ? writeDone() : signsDone();
 const isAdd = () => !!C.add;
 const WEB = () => C.map === 'bubble';
@@ -98,6 +101,7 @@ function buildMap(){
     const steps = bins().filter(b => !b.off), off = bins().filter(b => b.off);
     m.className = 'map flow';
     m.innerHTML = '<div class="frow">' + steps.map(box).join('<div class="arrow">➜</div>') + '</div>' + off.map(box).join('');
+    if (FLEX()) { m.className = 'map flow flex'; m.innerHTML = '<div class="frow" id="frow"></div>'; Object.assign(wr, { sg: [], so: [], st: [] }); bindFlex(); }
   }
   if (C.add) {
     $('#addBins').innerHTML = WEB() ? '<button type="button" class="ab add" data-b=""></button>'
@@ -129,6 +133,45 @@ function buildMap(){
     $('#again').onclick = () => setStep(1);
   }
 }
+// ---- Flow Map ไม่จำกัดขั้น (write.flex): wr.sg = ป้ายสัญญาณที่เลือก · wr.so = สัญญาณที่พิมพ์เอง · wr.st = ข้อความแต่ละกล่อง ----
+function renderFlex(){
+  const F = C.write.flex, U = UI[L], ed = step === 2 && !checked, can = ed && wr.st.length < (F.max || 6);
+  const ph = i => t(F.ph[Math.min(i, F.ph.length - 1)]);
+  const plus = i => can ? `<button type="button" class="plus" data-add="${i}">➕ <span>${U.addHere}</span></button>` : '';
+  const sign = `<div class="bin sig"><h2>${esc(t(binLabel('sig')) || '')}</h2><div class="sgs">` +
+    F.signs.map(g => `<button type="button" class="sg${wr.sg.includes(g.id) ? ' on' : ''}" data-sg="${g.id}"${ed ? '' : ' disabled'}><span>${g.icon || ''}</span>${esc(t(g.text))}</button>`).join('') +
+    wr.so.map((x, i) => `<span class="sg on own"><span>✏️</span>${esc(x)}${ed ? `<button type="button" class="x" data-sodel="${i}" aria-label="${U.del}">✕</button>` : ''}</span>`).join('') + '</div>' +
+    (ed ? `<div class="sgadd"><input id="sgTx" maxlength="40" autocomplete="off" placeholder="${esc(t(F.signPh))}"><button type="button" id="sgAdd">${U.add}</button></div>` : '') + '</div>';
+  const box = (x, i) => `<div class="slot${can ? ' can' : ''}"><span class="arrow">➜</span>${plus(i)}</div>` +
+    `<div class="bin stp"><h2><span class="no">${i + 2}</span>${ed ? `<button type="button" class="x" data-del="${i}" aria-label="${U.del}">✕</button>` : ''}</h2>` +
+    `<textarea data-st="${i}" placeholder="${esc(ph(i))}"${ed ? '' : ' readonly'}>${esc(x)}</textarea></div>`;
+  $('#frow').innerHTML = sign + wr.st.map(box).join('') +
+    (can ? `<div class="ghost"><span class="arrow">➜</span><button type="button" class="gbox" data-add="${wr.st.length}"><b>➕</b><span>${U.addBox}</span></button></div>` : '');
+  $('#frow').classList.toggle('many', wr.st.length >= 4);
+}
+function addSign(){
+  const x = $('#sgTx').value.trim().slice(0, 40);
+  if (!x || wr.so.length >= 4) return;
+  wr.so.push(x); dirty = true; renderFlex(); update(); $('#sgTx').focus();
+}
+function bindFlex(){
+  const fr = $('#frow');
+  fr.addEventListener('click', e => {
+    if (step !== 2 || checked) return;
+    const g = e.target.closest('[data-sg]'), a = e.target.closest('button[data-add]'), d = e.target.closest('[data-del]'), so = e.target.closest('[data-sodel]');
+    if (e.target.closest('#sgAdd')) return addSign();
+    if (g) wr.sg = wr.sg.includes(g.dataset.sg) ? wr.sg.filter(x => x !== g.dataset.sg) : wr.sg.concat(g.dataset.sg);
+    else if (so) wr.so.splice(+so.dataset.sodel, 1);
+    else if (d) wr.st.splice(+d.dataset.del, 1);
+    else if (a) wr.st.splice(+a.dataset.add, 0, '');
+    else return;
+    dirty = true; renderFlex(); update();
+    if (a) fr.querySelector(`[data-st="${a.dataset.add}"]`).focus();
+  });
+  fr.addEventListener('input', e => { const i = e.target.dataset.st; if (i == null) return; wr.st[+i] = e.target.value; dirty = true; update(); });
+  fr.addEventListener('keydown', e => { if (e.target.id === 'sgTx' && e.key === 'Enter') { e.preventDefault(); addSign(); } });
+}
+
 // ---- การ์ดที่เด็กเพิ่มเอง (ขั้น 1) ----
 function ownEl(o){
   const d = document.createElement('div'); d.className = 'cardx own'; d.dataset.own = o.id;
@@ -245,6 +288,8 @@ function paintWrite(){
 }
 const writeSummary = () => {
   const th = o => (o && typeof o === 'object') ? o.th : o, w = C.write, p = (w.choose || []).find(c => c.id === wr.pick);
+  if (w.flex) return (p ? plain(th(p.text)) + ' | ' : '') + 'สัญญาณ: ' + w.flex.signs.filter(g => wr.sg.includes(g.id)).map(g => th(g.text)).concat(wr.so).join(', ') +
+    wr.st.map((x, i) => ` | ขั้น ${i + 2}: ${x.trim()}`).join('');
   return (p ? plain(th(p.text)) + ' | ' : '') + w.fields.map(f => plain(th(f.label || binLabel(f.in)) || f.id) + ': ' + (wr.f[f.id] || '').trim()).join(' | ');
 };
 
@@ -321,6 +366,7 @@ function applyLang(){
   document.querySelectorAll('.bin').forEach(el => el.querySelector('h2').textContent = t(binLabel(el.dataset.bin)));
   paintWrite();
   if (STORY()) { paintStrip(); if (step === 1 && !checked) paintScene(); }
+  if (FLEX()) renderFlex();
   if (C.add) {
     $('#addTx').placeholder = t(C.add.ph) || U.addPh;
     document.querySelectorAll('.ab').forEach(b => b.textContent = b.dataset.b ? `${U.addTo} ${t(binLabel(b.dataset.b))}` : U.addBubble);
@@ -528,6 +574,7 @@ function restore(d){
   Object.keys(d.signs || {}).forEach(id => { if (placed[id] === 'b') { signs[id] = new Set(d.signs[id]); cardOf(id).querySelectorAll('.chip').forEach(ch => ch.classList.toggle('on', signs[id].has(+ch.dataset.s))); } });
   if (C.write && d.write) {
     wr = { pick: d.write.pick || '', f: Object.assign({}, d.write.f) }; seen = !!wr.pick;
+    if (FLEX()) { const arr = x => Array.isArray(x) ? x.map(String) : []; Object.assign(wr, { sg: arr(d.write.sg), so: arr(d.write.so), st: arr(d.write.st) }); }
     Object.keys(wr.f).forEach(id => { const el = fieldEl(id); if (el) el.value = wr.f[id]; }); paintPick();
   }
   if (d.hes && cardOf(d.hes)) { hes = d.hes; cardOf(hes).classList.add('hes'); }

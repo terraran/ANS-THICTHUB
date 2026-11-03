@@ -5,10 +5,7 @@
  "map": "flow",
  "title": { "th": "เพื่อนโดนหลอก เราช่วยด้วยหลัก 3 ส.", "en": "A friend got tricked: help with the 3 S steps" },
  "bins": [
-  { "id": "s1", "label": { "th": "👀 1 สังเกต", "en": "👀 1 Spot" } },
-  { "id": "s2", "label": { "th": "🤔 2 สงสัย", "en": "🤔 2 Stop and doubt" } },
-  { "id": "s3", "label": { "th": "🙋 3 สอบถาม", "en": "🙋 3 Speak to an adult" } },
-  { "id": "s4", "label": { "th": "🚩 4 รายงาน", "en": "🚩 4 Report" } }
+  { "id": "sig", "label": { "th": "👀 สัญญาณ", "en": "👀 Signs" } }
  ],
  "noReason": true,
  "steps": {
@@ -20,8 +17,8 @@
   "en": "<b>Step 1</b> Pick 1 story and watch the cartoon to the end."
  },
  "task2": {
-  "th": "<b>ขั้นที่ 2</b> เขียน Flow Map เอง: แต่ละกล่องเราจะ <b>ทำหรือพูดอะไร</b> เพื่อช่วยเพื่อน",
-  "en": "<b>Step 2</b> Write your own Flow Map: in each box, what will we <b>do or say</b> to help our friend?"
+  "th": "<b>ขั้นที่ 2</b> กดเลือก <b>สัญญาณ</b> ที่เห็น แล้วกด <b>➕</b> เพิ่มกล่อง เขียนว่าเราจะทำอะไรต่อทีละขั้น",
+  "en": "<b>Step 2</b> Tap the <b>signs</b> you see, then tap <b>➕</b> to add boxes. Write what we will do next, one step per box."
  },
  "think": {
   "th": "🤔 ถ้าเจอเหตุการณ์นี้ที่บ้าน เราจะสอบถามใครเป็นคนแรก เพราะอะไร?",
@@ -58,12 +55,26 @@
       { "bg": "calm", "art": ["👦", "🤐", "🧒"], "say": { "th": "ภูมิบอกเราว่า \"เขาบอกว่าห้ามบอกใคร\"", "en": "Phum tells us: \"They said not to tell anyone.\"" } }
      ] }
   ],
-  "fields": [
-   { "id": "w1", "in": "s1", "ph": { "th": "สัญญาณอันตรายที่เราเห็นคือ...", "en": "The danger sign we see is..." } },
-   { "id": "w2", "in": "s2", "ph": { "th": "เราจะบอกเพื่อนว่า อย่าเพิ่ง...", "en": "We will tell our friend: do not..." } },
-   { "id": "w3", "in": "s3", "ph": { "th": "เราจะไปบอก... ว่า...", "en": "We will tell... that..." } },
-   { "id": "w4", "in": "s4", "ph": { "th": "เราจะ... กับผู้ใหญ่", "en": "With an adult, we will..." } }
-  ]
+  "flex": {
+   "min": 1, "max": 6,
+   "signs": [
+    { "id": "g1", "icon": "🔑", "text": { "th": "ขอรหัสผ่าน", "en": "Asks for a password" } },
+    { "id": "g2", "icon": "🎁", "text": { "th": "แจกของฟรี", "en": "Free stuff" } },
+    { "id": "g3", "icon": "⏰", "text": { "th": "เร่งให้รีบทำ", "en": "Rushes us" } },
+    { "id": "g4", "icon": "🤫", "text": { "th": "บอกให้เก็บเป็นความลับ", "en": "Says keep it secret" } },
+    { "id": "g5", "icon": "📸", "text": { "th": "ขอรูปของเรา", "en": "Asks for our photo" } },
+    { "id": "g6", "icon": "🔗", "text": { "th": "ส่งลิงก์แปลก ๆ", "en": "Sends a strange link" } },
+    { "id": "g7", "icon": "👤", "text": { "th": "เป็นคนที่ไม่รู้จัก", "en": "Someone we don't know" } },
+    { "id": "g8", "icon": "😍", "text": { "th": "ชมเราเยอะ ๆ", "en": "Lots of nice words" } }
+   ],
+   "signPh": { "th": "พิมพ์สัญญาณอื่นที่เห็น...", "en": "Type another sign..." },
+   "ph": [
+    { "th": "อย่างแรก เราจะ...", "en": "First, we will..." },
+    { "th": "ต่อไป เราจะ...", "en": "Next, we will..." },
+    { "th": "แล้วเราจะ...", "en": "Then we will..." }
+   ]
+  },
+  "fields": []
  },
  "cards": [],
  "retired": [
