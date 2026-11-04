@@ -27,7 +27,7 @@
  "write": {
   "chooseHd": { "th": "เลือกเรื่อง:", "en": "Pick a story:" },
   "choose": [
-   { "id": "p1", "icon": "🎮", "text": { "th": "ต้นกล้าแลกสกินฟรี", "en": "Tonkla and the free skin" },
+   { "id": "p1", "thumb": ["👦", "🎮", "🎁"], "icon": "🎮", "text": { "th": "ต้นกล้าแลกสกินฟรี", "en": "Tonkla and the free skin" },
      "ask": { "th": "เราจะช่วยต้นกล้ายังไงดี?", "en": "How can we help Tonkla?" },
      "scenes": [
       { "bg": "day", "art": ["👦", "🎮"], "say": { "th": "ต้นกล้ากำลังเล่นเกมสนุก ๆ อยู่ที่บ้าน", "en": "Tonkla is having fun playing a game at home." } },
@@ -36,7 +36,7 @@
       { "bg": "alert", "fx": "shake", "art": ["👦", "🔒", "❌"], "say": { "th": "ต้นกล้าส่งรหัสไป... ตอนนี้เข้าเกมไม่ได้แล้ว!", "en": "Tonkla sent the password... now he cannot log in!" } },
       { "bg": "calm", "art": ["👦", "🤫", "🧒"], "say": { "th": "ต้นกล้ากระซิบบอกเราว่า \"อย่าบอกครูนะ\"", "en": "Tonkla whispers to us: \"Don't tell the teacher.\"" } }
      ] },
-   { "id": "p2", "icon": "📷", "text": { "th": "ใบเฟิร์นกับเพชรฟรี", "en": "Fern and the free gems" },
+   { "id": "p2", "thumb": ["👧", "📸", "💎"], "icon": "📷", "text": { "th": "ใบเฟิร์นกับเพชรฟรี", "en": "Fern and the free gems" },
      "ask": { "th": "เราจะช่วยใบเฟิร์นยังไงดี?", "en": "How can we help Fern?" },
      "scenes": [
       { "bg": "day", "art": ["👧", "🎮", "⭐"], "say": { "th": "ใบเฟิร์นเล่นเกมชนะติดกันหลายตา", "en": "Fern wins the game again and again." } },
@@ -45,7 +45,7 @@
       { "bg": "alert", "fx": "shake", "art": ["👧", "📸", "💎"], "say": { "th": "ใบเฟิร์นกำลังจะถ่ายรูปส่งไป!", "en": "Fern is about to take a photo and send it!" } },
       { "bg": "calm", "art": ["👧", "😊", "🧒"], "say": { "th": "ใบเฟิร์นบอกเราว่า \"ได้เพชรฟรีด้วยนะ ดีจัง\"", "en": "Fern tells us: \"Free gems! So cool!\"" } }
      ] },
-   { "id": "p3", "icon": "🔗", "text": { "th": "ภูมิกับลิงก์รับรางวัล", "en": "Phum and the prize link" },
+   { "id": "p3", "thumb": ["👦", "🔗", "🏆"], "icon": "🔗", "text": { "th": "ภูมิกับลิงก์รับรางวัล", "en": "Phum and the prize link" },
      "ask": { "th": "เราจะช่วยภูมิยังไงดี?", "en": "How can we help Phum?" },
      "scenes": [
       { "bg": "day", "art": ["👦", "📱"], "say": { "th": "ภูมิกำลังดูคลิปในมือถือ", "en": "Phum is watching videos on his phone." } },

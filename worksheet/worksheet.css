@@ -264,10 +264,9 @@ main{min-width:0}
 /* Sarabun ตัวเล็กกว่า Kanit ที่ขนาดเดียวกัน: ขยายตัวหนังสือบนการ์ด/ฟองขึ้นนิด */
 .cardx .tx{font-size:19px}.full .cardx .tx{font-size:20px}#web .cardx .tx{font-size:18px}#web.tight .cardx .tx{font-size:16px}
 /* Flow Map ไม่จำกัดขั้น (write.flex): กล่องสัญญาณ + กล่องที่เด็กเพิ่มเอง · ชี้ลูกศร/ท้ายแถว = ถามว่าเพิ่มกล่องไหม */
-.flex .frow{gap:0}
-.flex .frow .bin{flex:none}
-.bin.sig{width:400px}
-.frow.many .bin.sig{width:330px}
+.flex .frow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-rows:minmax(0,1fr);gap:46px 44px;position:relative}
+.flex .frow .bin{position:relative;min-width:0;width:auto}
+.frow.two .bin.sig{grid-row:span 2}
 .sgs{flex:1;min-height:0;overflow:auto;display:grid;grid-template-columns:1fr 1fr;gap:6px;align-content:start}
 .sg,.sg:disabled{background:#f8fafc;color:var(--ink);border:2px solid var(--line);box-shadow:none;font-size:16px;font-weight:600;min-height:46px;padding:4px 10px;border-radius:12px;white-space:normal;text-align:left;line-height:1.2;display:flex;align-items:center;gap:6px;cursor:pointer}
 .sg:disabled{cursor:default}
@@ -279,16 +278,23 @@ main{min-width:0}
 .sgadd input{flex:1;min-width:0;font:inherit;font-size:17px;padding:6px 14px;border:2px solid var(--line);border-radius:999px;user-select:text;-webkit-user-select:text}
 .sgadd input:focus{outline:none;border-color:var(--accent)}
 .sgadd button{font-size:16px;min-height:40px;padding:2px 16px}
-.flex .frow .bin.stp{flex:1 1 0;min-width:0;max-width:380px;animation:boxin .3s cubic-bezier(.34,1.56,.64,1)}
+.flex .frow .bin.stp{animation:boxin .3s cubic-bezier(.34,1.56,.64,1)}
 .bin.stp h2{position:relative;display:flex;justify-content:center}
 .stp .no{display:inline-flex;width:30px;height:30px;border-radius:50%;background:#fff;color:var(--accent);align-items:center;justify-content:center;font-weight:800}
 .bin.stp textarea{flex:1;height:auto;font-size:19px;line-height:1.45}
 .bin.stp textarea:read-only{background:#f8fafc}
-.slot{flex:none;width:44px;position:relative;display:flex;align-items:center;justify-content:center}
+.slot{position:absolute;left:-48px;top:0;bottom:0;width:44px;display:flex;align-items:center;justify-content:center}
+.slot.up{left:0;right:0;top:-50px;bottom:auto;width:auto;height:46px}
+.wrapline{position:absolute;top:calc(50% - 23px);height:46px;left:calc((100% - 132px) * 3 / 8 + 44px);right:calc((100% - 132px) / 8);pointer-events:none}
+.wrapline i{position:absolute;border:0 solid var(--ink)}
+.wrapline i:first-child{left:14px;right:0;top:-4px;height:calc(50% + 4px);border-right-width:4px;border-bottom-width:4px;border-bottom-right-radius:14px}
+.wrapline i:last-child{left:-2px;width:20px;top:calc(50% - 4px);bottom:6px;border-left-width:4px;border-top-width:4px;border-top-left-radius:14px}
+.wrapline i:last-child:after{content:'';position:absolute;left:-12px;bottom:-12px;border:10px solid transparent;border-top:12px solid var(--ink);border-bottom:0}
 .slot .plus{position:absolute;top:50%;left:50%;z-index:5;transform:translate(-50%,-50%) scale(.6);opacity:0;pointer-events:none;transition:opacity .15s,transform .15s;border-radius:999px;padding:6px 14px;min-height:0;font-size:17px;box-shadow:0 6px 16px #0284c755}
 .slot.can:hover .plus,.slot .plus:focus-visible{opacity:1;pointer-events:auto;transform:translate(-50%,-50%) scale(1)}
-.ghost{flex:none;width:210px;display:flex;align-items:stretch}
-.ghost .arrow{align-self:center;width:44px;text-align:center;opacity:.3}
+.ghost{position:relative;display:flex;align-items:stretch}
+.ghost .slot .arrow{opacity:.3}
+.flex .frow .ghost .slot.up{display:none}
 .gbox{flex:1;background:transparent;color:#64748b;border:4px dashed #94a3b8;border-radius:16px;box-shadow:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;opacity:.45;white-space:normal;transition:opacity .15s,background .15s}
 .gbox b{font-size:46px;line-height:1}
 .gbox span{font-size:19px;opacity:0;transition:opacity .15s}
@@ -298,3 +304,19 @@ main{min-width:0}
 /* แท็บเล็ต (ไม่มีเมาส์ชี้): ปุ่ม ➕ โชว์จาง ๆ ตลอด */
 @media (hover:none){.slot.can .plus{opacity:.75;pointer-events:auto;transform:translate(-50%,-50%) scale(.85)}.slot.can .plus span{display:none}.gbox{opacity:.75}.gbox span{opacity:1}}
 @media (prefers-reduced-motion:reduce){.flex .frow .bin.stp{animation:none}}
+/* หน้าเลือกเรื่อง (ก่อนเล่นการ์ตูน) */
+.chooser{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:30px;padding:30px 40px;background:radial-gradient(circle at 50% 30%,#fff,#e0f2fe)}
+.chooser h2{margin:0;font-size:44px;font-weight:800;color:var(--navy)}
+.scards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:30px;width:100%;max-width:1320px}
+.scard{background:#fff;color:var(--ink);border:5px solid var(--line);border-radius:28px;box-shadow:0 8px 0 #cbd5e1;padding:0 0 22px;display:flex;flex-direction:column;align-items:stretch;gap:14px;overflow:hidden;white-space:normal;text-align:center;
+  transition:transform .15s,border-color .15s,box-shadow .15s;animation:artin .5s cubic-bezier(.34,1.56,.64,1) backwards;animation-delay:calc(var(--k) * .12s)}
+.scard:hover{transform:translateY(-8px);border-color:var(--accent);box-shadow:0 14px 0 #7dd3fc}
+.scard.on{border-color:#f59e0b}
+.sart{height:190px;display:flex;align-items:center;justify-content:center;gap:22px;font-size:92px;line-height:1}
+.sart span{display:inline-block;animation:bob 2.4s ease-in-out infinite}
+.sart span:nth-child(2){animation-delay:.4s}.sart span:nth-child(3){animation-delay:.8s}
+.scard b{flex:1;display:flex;align-items:center;justify-content:center;font-size:32px;padding:0 16px;line-height:1.25}
+.scard .go{align-self:center;background:var(--accent);color:#fff;border-radius:999px;padding:8px 28px;font-size:24px;font-weight:700;box-shadow:0 4px 0 #0369a1}
+.scard:hover .go{background:#0369a1}
+#change{position:absolute;left:0;font-size:18px}
+@media (prefers-reduced-motion:reduce){.scard,.sart span{animation:none}}

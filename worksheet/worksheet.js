@@ -8,7 +8,7 @@
 // add = ขั้น 1 เด็กพิมพ์การ์ดของตัวเองเพิ่มลงกล่องไหนก็ได้ (อย่างน้อย add.min ใบ ไม่ตรวจถูกผิด)
 // write.fields[].hd = หัวข้อเหนือช่อง (แค่แสดง) · noReason = ไม่มีขั้นให้เหตุผล: ขั้น 2 เสร็จแล้วเด้งคำถาม Frame of Reference เลย (หัวขั้นเหลือ 3 ขั้น)
 // write.flex = Flow Map ไม่จำกัดขั้น: กล่องแรกเลือกสัญญาณ (signs + พิมพ์เพิ่มเอง) · เด็กกด ➕ เพิ่มกล่องเอง (min-max กล่อง)
-// write.choose[].scenes = การ์ตูนสั้น: ขั้น 1 เลือกเรื่องแล้วดูให้จบ · cards: [] = ไม่มีการ์ด ไม่ตรวจถูกผิด ครูอ่านที่เด็กเขียน
+// write.choose[].thumb = รูปบนการ์ดเลือกเรื่อง (ไม่ใส่ = ใช้ art ฉากแรก) · write.choose[].scenes = การ์ตูนสั้น: ขั้น 1 เลือกเรื่องแล้วดูให้จบ · cards: [] = ไม่มีการ์ด ไม่ตรวจถูกผิด ครูอ่านที่เด็กเขียน
 (() => {
 const $ = s => document.querySelector(s);
 const { store, initial, esc, AV } = HubUtil;
@@ -25,7 +25,7 @@ const UI = {
         loading: 'กำลังโหลดงานที่ทำค้างไว้...', pairAdd: '+ ทำกับเพื่อน', pairChange: 'เปลี่ยนเพื่อน', pairHd: r => `ทำงานคู่กับใคร? (${r})`,
         solo: 'ทำคนเดียว', pairFt: 'กดส่งครั้งเดียว ใบงานนับให้ทั้งสองคน', rosterErr: 'โหลดรายชื่อไม่สำเร็จ ลองใหม่อีกครั้ง',
         addPh: 'พิมพ์เพิ่ม 1 ข้อ...', addTo: 'ใส่ใน', addN: (n, m) => n >= m ? `เพิ่มแล้ว ${n} ใบ ✓ เพิ่มอีกได้` : `เพิ่มแล้ว ${n} ใบ · อีก ${m - n} ใบ`, del: 'ลบ', myOwn: 'การ์ดที่เราเพิ่ม:', addBubble: '➕ เพิ่มฟอง',
-        replay: '↺ ดูอีกครั้ง', addHere: 'เพิ่มกล่องตรงนี้ไหม?', addBox: 'เพิ่มกล่องไหม?', add: 'เพิ่ม', watchAgain: '▶ ดูการ์ตูนอีกครั้ง', pickStory: '👆 เลือกเรื่องด้านบนก่อนนะ', doneWrite: 'ส่ง Flow Map ให้ครูแล้ว ครูจะอ่านที่เราเขียน' },
+        replay: '↺ ดูอีกครั้ง', addHere: 'เพิ่มกล่องตรงนี้ไหม?', addBox: 'เพิ่มกล่องไหม?', add: 'เพิ่ม', watchAgain: '▶ ดูการ์ตูนอีกครั้ง', chooseTtl: '🎬 เลือกเรื่องที่อยากดู', watchThis: '▶ ดูเรื่องนี้', change: '⇄ เปลี่ยนเรื่อง', doneWrite: 'ส่ง Flow Map ให้ครูแล้ว ครูจะอ่านที่เราเขียน' },
   en: { steps: ['1 Sort', '2 Find signs', '3 Explain', '4 Look back'], stepTag: (n, m) => `Step ${n} / ${m}`, lib: 'Activities', week: n => `Week ${n}`,
         next: 'Next step ➜', back: '◀ Back', check: 'Check and send to teacher ✔', skip: 'Skip and send', edit: '✏️ Fix and send again', lib2: 'Back to activities',
         pickHint: '👆 Tap the card you were least sure about', picked: 'The card we were least sure about:', reason: 'What makes you think that?', reasonPh: 'Type your reason...',
@@ -38,7 +38,7 @@ const UI = {
         loading: 'Loading your saved work...', pairAdd: '+ Work with a friend', pairChange: 'Change friend', pairHd: r => `Who are you working with? (${r})`,
         solo: 'Work alone', pairFt: 'Send once and it counts for both of you', rosterErr: 'Could not load names. Try again.',
         addPh: 'Type 1 more...', addTo: 'Put in', addN: (n, m) => n >= m ? `${n} added ✓ you can add more` : `${n} added · ${m - n} to go`, del: 'Delete', myOwn: 'Cards we added:', addBubble: '➕ Add bubble',
-        replay: '↺ Watch again', addHere: 'Add a box here?', addBox: 'Add a box?', add: 'Add', watchAgain: '▶ Watch the cartoon again', pickStory: '👆 Pick a story above first', doneWrite: 'Your Flow Map was sent. Your teacher will read it.' }
+        replay: '↺ Watch again', addHere: 'Add a box here?', addBox: 'Add a box?', add: 'Add', watchAgain: '▶ Watch the cartoon again', chooseTtl: '🎬 Pick a story to watch', watchThis: '▶ Watch this', change: '⇄ Change story', doneWrite: 'Your Flow Map was sent. Your teacher will read it.' }
 };
 
 const H = new URLSearchParams(location.hash.slice(1));
@@ -51,7 +51,7 @@ let C = null, A = null, game = null;   // เนื้อหาใบงาน �
 let step = 1, placed = {}, signs = {}, hes = '', sel = null, round = Math.max(1, parseInt(H.get('round'), 10) || 1);
 let wr = { pick: '', f: {} };   // ขั้นเขียน: สถานการณ์ที่เลือก + ข้อความแต่ละช่อง
 let own = [];                    // การ์ดที่เด็กเพิ่มเอง [{id, text, bin}]
-let scene = 0, seen = false, sceneTimer = 0;   // การ์ตูนขั้น 1: ฉากที่เล่นอยู่ · ดูจบแล้วหรือยัง
+let scene = 0, seen = false, sceneTimer = 0, choosing = false;   // การ์ตูนขั้น 1: ฉากที่เล่นอยู่ · ดูจบแล้วหรือยัง · อยู่หน้าเลือกเรื่อง
 let checked = false, sendState = '', scale = 1, sending = false, dirty = false, partner = '', sentAt = null, oldSet = false;
 const app = $('#app'), pool = $('#pool'), stage = $('#stage');
 const t = o => HubUtil.t(o, L);
@@ -130,6 +130,12 @@ function buildMap(){
   if (STORY()) {
     $('#sdots').addEventListener('click', e => { const d = e.target.closest('[data-i]'); if (d && story()) playScene(+d.dataset.i); });
     $('#replay').onclick = () => { if (story()) playScene(0); };
+    $('#change').onclick = () => { choosing = true; playScene(0); };
+    $('#scene').addEventListener('click', e => {
+      const b = e.target.closest('[data-p]'); if (!b || step !== 1 || checked) return;
+      if (wr.pick !== b.dataset.p) seen = false;
+      wr.pick = b.dataset.p; choosing = false; dirty = true; playScene(0); update();
+    });
     $('#again').onclick = () => setStep(1);
   }
 }
@@ -142,13 +148,17 @@ function renderFlex(){
     F.signs.map(g => `<button type="button" class="sg${wr.sg.includes(g.id) ? ' on' : ''}" data-sg="${g.id}"${ed ? '' : ' disabled'}><span>${g.icon || ''}</span>${esc(t(g.text))}</button>`).join('') +
     wr.so.map((x, i) => `<span class="sg on own"><span>✏️</span>${esc(x)}${ed ? `<button type="button" class="x" data-sodel="${i}" aria-label="${U.del}">✕</button>` : ''}</span>`).join('') + '</div>' +
     (ed ? `<div class="sgadd"><input id="sgTx" maxlength="40" autocomplete="off" placeholder="${esc(t(F.signPh))}"><button type="button" id="sgAdd">${U.add}</button></div>` : '') + '</div>';
-  const box = (x, i) => `<div class="slot${can ? ' can' : ''}"><span class="arrow">➜</span>${plus(i)}</div>` +
-    `<div class="bin stp"><h2><span class="no">${i + 2}</span>${ed ? `<button type="button" class="x" data-del="${i}" aria-label="${U.del}">✕</button>` : ''}</h2>` +
+  // แถวละ ROW ช่อง · 2 แถวเมื่อกล่องเกิน: กล่องสัญญาณสูงเต็มซ้าย ขั้นที่เหลือขึ้นแถวใหม่ รับลูกศรหักมุมจากท้ายแถวบน (.wrapline)
+  const slot = (k, add) => `<div class="slot${k % ROW ? '' : ' up'}${can && add != null ? ' can' : ''}">${k % ROW ? '<span class="arrow">➜</span>' : ''}${add != null ? plus(add) : ''}</div>`;
+  const box = (x, i) => `<div class="bin stp">${slot(i + 1, i)}<h2><span class="no">${i + 2}</span>${ed ? `<button type="button" class="x" data-del="${i}" aria-label="${U.del}">✕</button>` : ''}</h2>` +
     `<textarea data-st="${i}" placeholder="${esc(ph(i))}"${ed ? '' : ' readonly'}>${esc(x)}</textarea></div>`;
+  const n = 1 + wr.st.length + (can ? 1 : 0);
   $('#frow').innerHTML = sign + wr.st.map(box).join('') +
-    (can ? `<div class="ghost"><span class="arrow">➜</span><button type="button" class="gbox" data-add="${wr.st.length}"><b>➕</b><span>${U.addBox}</span></button></div>` : '');
-  $('#frow').classList.toggle('many', wr.st.length >= 4);
+    (can ? `<div class="ghost">${slot(wr.st.length + 1)}<button type="button" class="gbox" data-add="${wr.st.length}"><b>➕</b><span>${U.addBox}</span></button></div>` : '') +
+    (n > ROW ? '<div class="wrapline"><i></i><i></i></div>' : '');
+  $('#frow').classList.toggle('two', n > ROW);
 }
+const ROW = 4;
 function addSign(){
   const x = $('#sgTx').value.trim().slice(0, 40);
   if (!x || wr.so.length >= 4) return;
@@ -299,21 +309,26 @@ const sceneHtml = (sc, i) => `<div class="scn bg-${sc.bg || 'day'}${sc.fx ? ' fx
   (sc.phone ? `<div class="phone"><div class="pfrom">${esc(sc.phone.from || '')}</div><div class="pmsg">${esc(t(sc.phone.text))}</div></div>` : '') +
   `<div class="say">${esc(t(sc.say))}</div></div>`;
 function paintScene(){
-  const s = story();
-  if (!s) { $('#scene').innerHTML = `<div class="scn bg-calm"><div class="art"><span>🎬</span></div><div class="say">${UI[L].pickStory}</div></div>`; $('#sdots').innerHTML = ''; $('#replay').classList.add('hide'); return; }
+  const s = story(), U = UI[L];
+  $('#change').textContent = U.change;
+  $('.sbar').classList.toggle('hide', !s || choosing);
+  // หน้าเลือกเรื่อง: การ์ดใหญ่เรื่องละใบ (ภาพจากฉากแรก)
+  if (!s || choosing) { $('#scene').innerHTML = `<div class="chooser"><h2>${U.chooseTtl}</h2><div class="scards">` + C.write.choose.map((c, k) =>
+    `<button type="button" class="scard${c.id === wr.pick ? ' on' : ''}" data-p="${c.id}" style="--k:${k}"><span class="sart bg-${c.scenes[0].bg || 'day'}">${(c.thumb || c.scenes[0].art).map(a => `<span>${a}</span>`).join('')}</span>` +
+    `<b>${esc(t(c.text))}</b><span class="go">${U.watchThis}</span></button>`).join('') + '</div></div>'; return; }
   const n = s.scenes.length;
   $('#scene').innerHTML = scene < n ? sceneHtml(s.scenes[scene], scene)
     : `<div class="scn bg-ask" data-n="ask"><div class="art"><span>🧒</span><span style="--k:1">💭</span></div><div class="say big">${esc(t(s.ask))}</div></div>`;
   $('#sdots').innerHTML = s.scenes.map((x, i) => `<button type="button" class="dot${i === scene ? ' on' : i < scene ? ' past' : ''}" data-i="${i}">${i + 1}</button>`).join('') +
     `<button type="button" class="dot${scene >= n ? ' on' : ''}" data-i="${n}">❓</button>`;
-  $('#replay').textContent = UI[L].replay; $('#replay').classList.remove('hide');
+  $('#replay').textContent = U.replay;
 }
 function playScene(i){
   clearTimeout(sceneTimer);
   const s = story(); scene = i;
   if (s && i >= s.scenes.length) { scene = s.scenes.length; if (!seen) { seen = true; update(); } }
   paintScene();
-  if (s && scene < s.scenes.length && step === 1 && !checked) sceneTimer = setTimeout(() => playScene(scene + 1), s.scenes[scene].ms || 4000);
+  if (s && !choosing && scene < s.scenes.length && step === 1 && !checked) sceneTimer = setTimeout(() => playScene(scene + 1), s.scenes[scene].ms || 4000);
 }
 // ขั้นเขียน: แถบเรื่องย่อ 4 ฉาก ให้ดูระหว่างเขียน
 function paintStrip(){
@@ -453,14 +468,14 @@ function setStep(n){
   $('#adder').classList.toggle('hide', !adder);
   if (C.write) {
     const box = !!C.write.choose || C.write.fields.some(f => !f.in);   // มีอะไรให้แสดงนอกแผนภาพไหม
-    $('#writer').classList.toggle('hide', !(adder || (box && (n === 2 || checked || (STORY() && n === 1)))));
+    $('#writer').classList.toggle('hide', !(adder || (box && (n === 2 || checked))));
     $('#wgrid').classList.toggle('hide', adder || !C.write.fields.some(f => !f.in));
     document.querySelectorAll('[data-f]').forEach(el => { el.readOnly = n !== 2 || checked; });
   }
   if (STORY()) {   // ขั้น 1 = เลือกเรื่อง + ดูการ์ตูน (ซ่อนแผนภาพ) · ขั้นอื่น = แถบเรื่องย่อเหนือ Flow Map
     const watch = n === 1 && !checked;
     $('#story').classList.toggle('hide', !watch); $('#map').classList.toggle('hide', watch);
-    $('#wch').classList.toggle('hide', !watch); $('#stripRow').classList.toggle('hide', watch || !story());
+    $('#wch').classList.add('hide'); $('#stripRow').classList.toggle('hide', watch || !story());
     $('#again').classList.toggle('hide', checked);
     if (watch) playScene(seen && story() ? story().scenes.length : 0); else clearTimeout(sceneTimer);
   }
@@ -573,7 +588,7 @@ function restore(d){
   layout();
   Object.keys(d.signs || {}).forEach(id => { if (placed[id] === 'b') { signs[id] = new Set(d.signs[id]); cardOf(id).querySelectorAll('.chip').forEach(ch => ch.classList.toggle('on', signs[id].has(+ch.dataset.s))); } });
   if (C.write && d.write) {
-    wr = { pick: d.write.pick || '', f: Object.assign({}, d.write.f) }; seen = !!wr.pick;
+    wr = { pick: d.write.pick || '', f: Object.assign({}, d.write.f) }; seen = !!wr.pick; choosing = false;
     if (FLEX()) { const arr = x => Array.isArray(x) ? x.map(String) : []; Object.assign(wr, { sg: arr(d.write.sg), so: arr(d.write.so), st: arr(d.write.st) }); }
     Object.keys(wr.f).forEach(id => { const el = fieldEl(id); if (el) el.value = wr.f[id]; }); paintPick();
   }

@@ -403,6 +403,7 @@ test('เนื้อหาสัปดาห์ 2: การ์ดทุกใ�
   for (const c of y4.write.choose) {
     expect(c.scenes).toHaveLength(4);
     expect(c.text.th && c.text.en && c.ask.th && c.ask.en).toBeTruthy();
+    expect(c.thumb.length).toBeGreaterThan(0);
     for (const sc of c.scenes) { expect(sc.say.th && sc.say.en).toBeTruthy(); expect(sc.art.length).toBeGreaterThan(0); if (sc.phone) expect(sc.phone.text.th && sc.phone.text.en).toBeTruthy(); }
   }
   const acts = JSON.parse(fs.readFileSync(path.join(__dirname, '../data/activities.json'), 'utf8')).activities;
@@ -560,9 +561,17 @@ test('Y4 สัปดาห์ 2 Flow Map: เลือกเรื่อง →
   await expect(page.locator('.cardx')).toHaveCount(0);
   await expect(page.locator('#map')).toBeHidden();
   await expect(page.locator('#story')).toBeVisible();
-  await expect(page.locator('.pick')).toHaveCount(3);
+  await expect(page.locator('#wch')).toBeHidden();                // เลือกเรื่องในหน้าเลือกเรื่องตรงกลางแทน
+  await expect(page.locator('.chooser h2')).toHaveText('🎬 Pick a story to watch');
+  await expect(page.locator('.scard')).toHaveCount(3);
+  await expect(page.locator('.sbar')).toBeHidden();
   await expect(page.locator('#next')).toBeDisabled();
-  await page.click('.pick[data-p="p2"]');
+  await shot(page, 'y4w2-0-choose');
+  await page.click('.scard[data-p="p1"]');
+  await expect(page.locator('.scn .say')).toHaveText(C.write.choose[0].scenes[0].say.en);
+  await page.click('#change');                                     // เปลี่ยนเรื่องได้
+  await expect(page.locator('.scard[data-p="p1"]')).toHaveClass(/on/);
+  await page.click('.scard[data-p="p2"]');
   await expect(page.locator('.scn .say')).toHaveText(p2s.scenes[0].say.en);
   await shot(page, 'y4w2-1-scene1');
   await expect(page.locator('.dot[data-i="1"]')).toHaveClass(/on/, { timeout: 6000 });   // เล่นต่อฉากถัดไปเอง
@@ -611,6 +620,11 @@ test('Y4 สัปดาห์ 2 Flow Map: เลือกเรื่อง →
   for (let i = 3; i < C.write.flex.max; i++) await page.click('.gbox');
   await expect(page.locator('.bin.stp')).toHaveCount(C.write.flex.max);
   await expect(page.locator('.gbox')).toHaveCount(0);             // ครบสูงสุดแล้ว
+  await expect(page.locator('.wrapline')).toBeVisible();         // เกินแถวแรก = ขึ้นแถวใหม่ มีลูกศรหักมุม
+  const [r2, r5] = [await page.locator('.bin.stp >> nth=0').boundingBox(), await page.locator('.bin.stp >> nth=3').boundingBox()];
+  expect(r5.y).toBeGreaterThan(r2.y + r2.height);                 // ขั้น 5 อยู่แถวล่าง
+  expect(Math.abs(r5.width - r2.width)).toBeLessThan(2);          // กล่องไม่หดตามจำนวน
+  await shot(page, 'y4w2-5b-max');
   for (let i = C.write.flex.max - 1; i >= 3; i--) await page.click(`[data-del="${i}"]`);
   await shot(page, 'y4w2-5-write');
   await page.click('#toLib');                                     // ออกกลางทาง = บันทึกงานค้าง
@@ -627,7 +641,7 @@ test('Y4 สัปดาห์ 2 Flow Map: เลือกเรื่อง →
   await expect(p2.locator('.sg.on')).toHaveCount(2);
   await p2.click('#again');
   await expect(p2.locator('#s1')).toHaveClass(/on/);
-  await expect(p2.locator('.pick[data-p="p2"]')).toHaveClass(/on/);
+  await expect(p2.locator('.scn .say.big')).toHaveText(p2s.ask.en);   // ดูจบแล้ว ไม่ต้องดูใหม่
   await expect(p2.locator('#next')).toBeEnabled();
   await p2.click('#next');
   await p2.click('#next');                                        // ขั้น 2 เสร็จ = เด้งคำถาม FoR
