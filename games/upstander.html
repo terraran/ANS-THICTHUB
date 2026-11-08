@@ -78,6 +78,18 @@ button:disabled{background:#94a3b8;color:#1e293b;box-shadow:none;cursor:not-allo
 .beat{animation:beat .5s}
 @keyframes fade{from{opacity:0}to{opacity:1}}
 @keyframes blink{0%,60%,100%{opacity:.35}30%{opacity:1}}
+/* ฉาก "1 สัปดาห์ต่อมา" + ตอนจบ */
+.epi{display:flex;flex-direction:column;gap:12px;cursor:pointer}
+.epi h2{margin:0;font-size:32px;text-align:center}
+.ecards{display:flex;flex-direction:column;gap:10px}
+.ecard{display:grid;grid-template-columns:64px 1fr;gap:14px;align-items:center;background:#f8fafc;border-radius:16px;padding:10px 16px;font-size:20px;line-height:1.4;border-left:8px solid var(--line)}
+.ecard.g{border-color:var(--ok);background:#f0fdf4}.ecard.b{border-color:var(--bad);background:#fef2f2}
+.ecard .em{font-size:44px;text-align:center;line-height:1}
+.ending{border-radius:20px;padding:18px 20px;display:flex;flex-direction:column;gap:10px}
+.ending h3{margin:0;font-size:28px;text-align:center}
+.ending.good{background:linear-gradient(135deg,#fef9c3,#dcfce7)}.ending.mid{background:linear-gradient(135deg,#e0f2fe,#f1f5f9)}.ending.sad{background:linear-gradient(135deg,#cbd5e1,#94a3b8);color:#0f172a}
+.ending .ecard{background:#ffffffb0;border-color:transparent}
+#toSum{align-self:center}
 @media (prefers-reduced-motion:reduce){.pop{animation-name:fade}.typing i{animation-name:blink}.beat{animation:none}.hbar i{transition:none}}
 @media (max-width:820px){.play{grid-template-columns:1fr}.chat{height:480px}.title h1{font-size:38px}}
 </style></head><body>
@@ -110,6 +122,13 @@ button:disabled{background:#94a3b8;color:#1e293b;box-shadow:none;cursor:not-allo
    </div>
   </div>
  </section>
+ <section id="sEpi" class="card epi hide">
+  <h2 id="epTitle"></h2>
+  <div class="ecards" id="epCards"></div>
+  <div class="ending hide" id="ending"><h3 id="enTitle"></h3><div class="ecards" id="enCards"></div></div>
+  <div class="skip" id="epSkip"></div>
+  <button id="toSum" class="hide"></button>
+ </section>
  <section id="sEnd" class="card final hide">
   <div class="badge" id="eBadge"></div>
   <h2 id="eRank"></h2>
@@ -119,7 +138,8 @@ button:disabled{background:#94a3b8;color:#1e293b;box-shadow:none;cursor:not-allo
  </section>
 </div>
 <script>
-// เกมเล่นเฉย ๆ ไม่เก็บคะแนน · เราเป็นคนที่เห็นเพื่อน (ภูมิ) โดนแกล้งในกลุ่มแชทห้อง · เล่นรอบละ 5 เหตุการณ์ (สุ่มจาก 7) · ทุกเหตุการณ์เกมหยุดให้เลือกทำ 1 อย่าง จาก 6 ตัวเลือก
+// เกมเล่นเฉย ๆ ไม่เก็บคะแนน · เราเป็นคนที่เห็นเพื่อน (ภูมิ) โดนแกล้งในกลุ่มแชทห้อง · เล่นรอบละ 5 เหตุการณ์ (สุ่มจาก 7) · ทุกเหตุการณ์เกมหยุดให้เลือกทำ 1 อย่าง จาก 6 ตัวเลือก (เฉพาะเหตุการณ์ 2 + ทั่วไป 4)
+// จบแล้วมีฉาก "1 สัปดาห์ต่อมา" จากตัวเลือกที่เลือกจริง + ตอนจบ 3 แบบตามหัวใจของภูมิ
 // ปุ่มตัวเลือกหน้าตาเหมือนกัน สลับลำดับทุกครั้ง · หลอดหัวใจของภูมิขึ้น/ลงตามสิ่งที่เราเลือก · แชทเปลี่ยนตาม
 const $ = s => document.querySelector(s);
 const P = { ta: { th: 'ต้า', en: 'Ta', c: '#c2410c' }, beam: { th: 'บีม', en: 'Beam', c: '#4f46e5' }, por: { th: 'ปอ', en: 'Por', c: '#0f766e' },
@@ -163,6 +183,94 @@ const ROUNDS = [
     { p: 'phum', k: 'text', x: { th: 'ลบเถอะ ขอร้อง', en: 'Please delete it' } }] }
 ];
 const PLAY = 5;   // เล่นรอบละ 5 เหตุการณ์ สุ่มจากทั้งหมด
+// ตัวเลือกเฉพาะเหตุการณ์ [ช่วยได้, ไม่ช่วย] ตามลำดับ ROUNDS · af = การ์ดในฉาก "1 สัปดาห์ต่อมา"
+const SP = [
+  [{ id: 'cheer', h: 1, d: 15, t: { th: '💪 ส่งสติกเกอร์ให้กำลังใจภูมิในกลุ่ม', en: '💪 Send a cheer-up sticker to Phum in the group' },
+     out: [{ me: 1, k: 'stk', x: '💪🙂' }, { p: 'june', x: { th: '💪 ด้วยคน', en: '💪 Me too' } }],
+     why: { th: 'ทุกคนในกลุ่มเห็นว่ามีคนอยู่ข้างภูมิ คนอื่นก็กล้าทำตาม', en: 'Everyone sees someone is on Phum’s side, so others feel brave enough to join.' },
+     af: { e: '💪', x: { th: 'ในกลุ่มแชท มีเพื่อนส่งสติกเกอร์ให้กำลังใจภูมิตามเราอีกหลายคน', en: 'Lots of friends followed us and sent Phum cheer-up stickers' } } },
+   { id: 'turtle', h: 0, d: -15, t: { th: '🐢 ส่งสติกเกอร์เต่าอีกตัวให้ฮากว่าเดิม', en: '🐢 Send another turtle sticker to make it funnier' },
+     out: [{ me: 1, k: 'stk', x: '🐢🐢' }, { p: 'ta', x: { th: '555 เข้าใจเล่น', en: 'lol nice one' } }],
+     why: { th: 'ดูเหมือนแค่ขำ ๆ แต่เป็นการแกล้งเพิ่ม ภูมิเห็นว่าคนแกล้งเขามีมากขึ้น', en: 'It looks like a joke, but it is more bullying. Phum sees even more people teasing him.' },
+     af: { e: '🐢', x: { th: 'สติกเกอร์เต่ากลายเป็นมุกประจำห้อง ทุกคนเรียกภูมิว่าเต่า', en: 'The turtle sticker became a class joke. Everyone calls Phum “turtle” now' } } }],
+  [{ id: 'askdel', h: 1, d: 15, t: { th: '🙏 บอกบีมว่า "ลบรูปเถอะ ภูมิไม่ได้อนุญาต"', en: '🙏 Tell Beam: "Please delete it, Phum didn’t say yes"' },
+     out: [{ me: 1, x: { th: 'บีม ลบรูปเถอะ ภูมิไม่ได้อนุญาต', en: 'Beam, please delete it. Phum didn’t say yes' } }, { p: 'beam', x: { th: 'โอเค ลบแล้ว ขอโทษนะภูมิ', en: 'OK, deleted. Sorry Phum' } }],
+     why: { th: 'บอกตรง ๆ อย่างสุภาพ ให้คนโพสต์รู้ว่าต้องขออนุญาตก่อนโพสต์รูปคนอื่น', en: 'Saying it clearly and politely reminds them to ask before posting someone’s photo.' },
+     af: { e: '🗑️', x: { th: 'บีมลบรูปแล้ว และขอโทษภูมิต่อหน้าเพื่อน ๆ', en: 'Beam deleted the photo and said sorry to Phum in front of everyone' } } },
+   { id: 'save', h: 0, d: -15, t: { th: '💾 กดเซฟรูปเก็บไว้ในเครื่อง', en: '💾 Save the photo to our phone' },
+     out: [{ sys: 1, x: { th: '💾 บันทึกรูปลงเครื่องแล้ว', en: '💾 Photo saved to phone' } }],
+     why: { th: 'เก็บรูปที่ทำให้เพื่อนอายไว้ วันหนึ่งรูปนี้อาจถูกส่งต่ออีก', en: 'Keeping a photo that embarrasses a friend means it could be shared again one day.' },
+     af: { e: '💾', x: { th: 'เพื่อนยืมมือถือเราไปเห็นรูปภูมิ แล้วส่งต่อไปอีกหลายกลุ่ม', en: 'A friend borrowed our phone, found Phum’s photo and forwarded it to more groups' } } }],
+  [{ id: 'stay', h: 1, d: 15, t: { th: '🏠 ไม่เข้ากลุ่มใหม่ อยู่กลุ่มเดิมกับภูมิ', en: '🏠 Don’t join the new group, stay with Phum' },
+     out: [{ sys: 1, x: { th: 'เราไม่เข้าร่วม "ป.4/1 ตัวจริง"', en: 'We didn’t join "Y4/1 Real"' } }, { me: 1, x: { th: 'เราอยู่กลุ่มนี้กับภูมินะ', en: 'I’m staying here with Phum' } }, { p: 'phum', x: { th: '🥹', en: '🥹' } }],
+     why: { th: 'ไม่ร่วมกันกีดกันเพื่อน ภูมิรู้ว่ายังมีเพื่อนอยู่', en: 'We don’t help leave a friend out. Phum knows he still has friends.' },
+     af: { e: '🏠', x: { th: 'กลุ่มใหม่ของต้าเงียบไป เพื่อน ๆ กลับมาคุยในกลุ่มเดิมที่มีภูมิ', en: 'Ta’s new group went quiet. Everyone came back to the group with Phum' } } },
+   { id: 'join', h: 0, d: -15, t: { th: '🚪 เข้ากลุ่มใหม่ไปก่อน กลัวไม่มีเพื่อน', en: '🚪 Join the new group, scared of having no friends' },
+     out: [{ sys: 1, x: { th: 'เราเข้าร่วม "ป.4/1 ตัวจริง" แล้ว · สมาชิก 31 คน', en: 'We joined "Y4/1 Real" · 31 members' } }],
+     why: { th: 'เข้าใจได้ว่ากลัว แต่การเข้ากลุ่มที่กีดกันเพื่อน คือการช่วยกันกีดกันภูมิ', en: 'Being scared is normal, but joining a group that leaves someone out helps leave Phum out.' },
+     af: { e: '🚪', x: { th: 'ภูมิเห็นว่าเราก็ไปอยู่กลุ่มใหม่ เขาคิดว่าไม่มีใครเป็นเพื่อนเขาแล้ว', en: 'Phum saw we joined the new group too. He thinks nobody is his friend now' } } }],
+  [{ id: 'noname', h: 1, d: 15, t: { th: '➕ เพิ่มตัวเลือกในโพลว่า "ไม่ตั้งชื่อล้อใคร"', en: '➕ Add a poll option: "No mean nicknames"' },
+     out: [{ sys: 1, x: { th: '📊 เพิ่มตัวเลือก "🙅 ไม่ตั้งชื่อล้อใคร"', en: '📊 New option: "🙅 No mean nicknames"' } }, { p: 'june', x: { th: 'โหวตอันนี้ 🙅', en: 'Voting for this 🙅' } }, { p: 'mint', x: { th: 'เราด้วย', en: 'Me too' } }],
+     why: { th: 'เปลี่ยนโพลล้อเพื่อนให้เป็นทางเลือกที่ดี เพื่อนที่ไม่เห็นด้วยก็มีที่ให้โหวต', en: 'It turns a mean poll into a kind choice, and friends who disagree can vote for it.' },
+     af: { e: '🙅', x: { th: '"ไม่ตั้งชื่อล้อใคร" ชนะโพล ไม่มีใครเรียกภูมิว่าเต่าน้อยอีก', en: '"No mean nicknames" won the poll. Nobody calls Phum “Little Turtle” anymore' } } },
+   { id: 'vote', h: 0, d: -15, t: { th: '🐢 โหวตเต่าน้อย เพราะเพื่อนโหวตกันเยอะ', en: '🐢 Vote “Little Turtle” because most friends did' },
+     out: [{ sys: 1, x: { th: '📊 เต่าน้อย 8 · มันฝรั่ง 5', en: '📊 Little Turtle 8 · Potato 5' } }],
+     why: { th: 'ทำตามเพื่อนส่วนใหญ่ แต่ทุกโหวตคือการช่วยกันล้อภูมิ', en: 'Following the crowd, but every vote helps tease Phum.' },
+     af: { e: '🐢', x: { th: 'ชื่อ "เต่าน้อย" ติดตัวภูมิ เพื่อนห้องอื่นก็เรียกตาม', en: 'The name “Little Turtle” stuck. Kids in other classes use it too' } } }],
+  [{ id: 'notphum', h: 1, d: 20, t: { th: '📢 บอกในกลุ่มว่า "นี่ไม่ใช่ภูมิตัวจริง" แล้วช่วยกันรายงาน', en: '📢 Tell the group "This isn’t the real Phum" and report it together' },
+     out: [{ me: 1, x: { th: 'นี่ไม่ใช่ภูมิตัวจริงนะ ช่วยกันรายงานบัญชีนี้', en: 'This isn’t the real Phum. Let’s report this account' } }, { sys: 1, x: { th: '🚩 3 คนรายงานบัญชี "ภูมิตัวจริง"', en: '🚩 3 people reported "RealPhum"' } }],
+     why: { th: 'ช่วยให้ทุกคนรู้ความจริง และให้แอปจัดการบัญชีปลอม', en: 'Everyone learns the truth, and the app can deal with the fake account.' },
+     af: { e: '🚩', x: { th: 'แอปลบบัญชีปลอมแล้ว ทุกคนรู้ว่าข้อความนั้นไม่ใช่ของภูมิ', en: 'The app removed the fake account. Everyone knows those posts weren’t Phum’s' } } },
+   { id: 'whoru', h: 0, d: -10, t: { th: '❓ ทักไปถามบัญชีปลอมว่าเป็นใคร', en: '❓ Message the fake account to ask who they are' },
+     out: [{ dm: 1, me: 1, x: { th: '(ส่วนตัว) นายเป็นใคร', en: '(private) Who are you?' } }, { dm: 1, p: 'fake', x: { th: '(ส่วนตัว) อยากรู้เหรอ 555 เดี๋ยวโพสต์เพิ่มให้ดู', en: '(private) Wanna know? lol I’ll post more' } }],
+     why: { th: 'คุยกับบัญชีปลอมทำให้เขาสนุก และเราไม่รู้ว่าเขาเป็นใคร ควรรายงานและบอกผู้ใหญ่', en: 'Talking to it gives them attention, and we don’t know who it is. Report it and tell an adult.' },
+     af: { e: '❓', x: { th: 'บัญชีปลอมโพสต์เรื่องแต่งของภูมิเพิ่มอีก เพราะรู้ว่ามีคนสนใจ', en: 'The fake account posted more made-up stories about Phum, because people paid attention' } } }],
+  [{ id: 'myteam', h: 1, d: 15, t: { th: '🎮 ชวนภูมิมาเล่นทีมเราแทน', en: '🎮 Invite Phum to play on our team' },
+     out: [{ sys: 1, x: { th: '🎮 ภูมิเข้าทีมเหลือง', en: '🎮 Phum joined Yellow team' } }, { p: 'phum', x: { th: 'ขอบใจนะ!', en: 'Thanks!' } }],
+     why: { th: 'ไม่ปล่อยให้เพื่อนถูกไล่ออก ให้ภูมิมีที่ยืนในเกม', en: 'We don’t let a friend get kicked out. Phum has a place in the game.' },
+     af: { e: '🏆', x: { th: 'ภูมิเล่นเกมทีมเดียวกับเราทุกวัน ทีมเราชนะด้วย!', en: 'Phum plays on our team every day. We even won!' } } },
+   { id: 'repphum', h: 0, d: -20, t: { th: '👎 กดรีพอร์ตภูมิตามที่ต้าบอก', en: '👎 Report Phum like Ta said' },
+     out: [{ sys: 1, x: { th: '🚩 รายงานภูมิแล้ว · ภูมิถูกระงับเล่น 3 วัน', en: '🚩 Phum reported · Phum is banned for 3 days' } }],
+     why: { th: 'รายงานคนที่ไม่ได้ทำผิด คือการใช้ปุ่มรายงานแกล้งเพื่อน', en: 'Reporting someone who did nothing wrong is using the report button to bully.' },
+     af: { e: '⛔', x: { th: 'ภูมิโดนแบนจากเกมทั้งที่ไม่ได้ทำผิดอะไร', en: 'Phum got banned from the game even though he did nothing wrong' } } }],
+  [{ id: 'nostk', h: 1, d: 15, t: { th: '🙏 บอกมิ้นท์ว่า "อย่าทำเป็นสติกเกอร์ ภูมิขอให้ลบแล้ว"', en: '🙏 Tell Mint: "Don’t make it a sticker, Phum asked to delete it"' },
+     out: [{ me: 1, x: { th: 'มิ้นท์ อย่าทำเป็นสติกเกอร์เลย ภูมิขอให้ลบแล้ว', en: 'Mint, don’t make it a sticker. Phum asked us to delete it' } }, { p: 'mint', x: { th: 'จริงด้วย ลบแล้ว ขอโทษนะภูมิ', en: 'You’re right. Deleted. Sorry Phum' } }],
+     why: { th: 'ช่วยให้เสียงของภูมิถูกได้ยิน คนตัดต่อรู้ว่าเพื่อนไม่สนุกด้วย', en: 'It helps Phum’s voice be heard. The editor learns it isn’t fun for him.' },
+     af: { e: '🙏', x: { th: 'มิ้นท์ลบรูปตัดต่อ และไม่เอาหน้าเพื่อนไปตัดต่ออีก', en: 'Mint deleted the edit and stopped editing friends’ faces' } } },
+   { id: 'editmore', h: 0, d: -20, t: { th: '🖌️ ขอไฟล์รูปไปแต่งต่อ', en: '🖌️ Ask for the file to edit it more' },
+     out: [{ me: 1, x: { th: 'ส่งไฟล์มาหน่อย จะแต่งเพิ่ม', en: 'Send me the file, I’ll edit it more' } }, { p: 'mint', x: { th: 'ส่งให้แล้ว 555', en: 'Sent lol' } }],
+     why: { th: 'แต่งรูปเพิ่มก็คือแกล้งเพิ่ม รูปตัดต่อถูกส่งต่อและลบคืนยาก', en: 'Editing it more is more bullying. Edited photos spread and are hard to take back.' },
+     af: { e: '🖌️', x: { th: 'รูปตัดต่อของภูมิกลายเป็นสติกเกอร์ที่ทั้งโรงเรียนใช้กัน', en: 'The edit of Phum became a sticker the whole school uses' } } }]
+];
+ROUNDS.forEach((R, i) => { R.sp = SP[i]; });
+// ผลที่ตามมาของตัวเลือกทั่วไป (จัดเป็นกลุ่ม · การ์ดซ้ำกันแสดงครั้งเดียว)
+const AFTER = {
+  friend: { e: '💌', x: { th: 'ภูมินั่งกินข้าวกับเราทุกวัน เริ่มยิ้มได้แล้ว', en: 'Phum eats lunch with us every day and is smiling again' } },
+  adult: { e: '👩‍🏫', x: { th: 'ครูคุยกับทั้งห้องเรื่องการแกล้งออนไลน์ คนที่แกล้งขอโทษภูมิ', en: 'The teacher talked to the class about online bullying. The bullies said sorry to Phum' } },
+  report: { e: '🚩', x: { th: 'แอปลบข้อความที่แกล้งภูมิออกแล้ว', en: 'The app removed the messages that bullied Phum' } },
+  stop: { e: '🗣️', x: { th: 'เพื่อน ๆ ในกลุ่มกล้าพูดว่า "พอเถอะ" ตามเรา', en: 'Friends in the group started saying "stop it" too' } },
+  talk: { e: '🤝', x: { th: '{who}รู้ว่าภูมิเสียใจ และหยุดแกล้ง', en: '{who} realised Phum was hurt and stopped' } },
+  spread: { e: '😢', x: { th: 'เรื่องของภูมิไปถึงห้องอื่น ภูมิไม่อยากมาโรงเรียน 2 วัน', en: 'Phum’s story reached other classes. He didn’t want to come to school for 2 days' } },
+  fight: { e: '😠', x: { th: 'เรากับ{who}ทะเลาะกันหนัก โดนเรียกพบครูทั้งคู่', en: 'We had a big fight with {who}. We both had to see the teacher' } },
+  alone: { e: '🪑', x: { th: 'ภูมินั่งคนเดียวตอนพัก ไม่มีใครรู้ว่าเขาเสียใจ', en: 'Phum sits alone at break. Nobody knows how sad he is' } }
+};
+const AFG = { dm: 'friend', lunch: 'friend', proof: 'adult', parents: 'adult', buddy: 'adult', report: 'report', stop: 'stop', talkta: 'talk',
+              laugh: 'spread', share: 'spread', gossip: 'spread', fight: 'fight', revenge: 'fight', quiet: 'alone', shrug: 'alone', delete: 'alone' };
+// ตอนจบ 3 แบบ ตามหัวใจของภูมิ (≥80 ดีที่สุด · 40–79 กลาง ๆ · <40 เศร้า)
+const ENDS = {
+  good: { t: { th: '🌈 ตอนจบที่ดีที่สุด', en: '🌈 The best ending' }, c: [
+    { e: '🌈', x: { th: 'ห้องเราไม่มีใครแกล้งกันในแชทอีกแล้ว', en: 'Nobody bullies anyone in our class chat anymore' } },
+    { e: '😊', x: { th: 'ภูมิบอกว่า "ขอบคุณที่ไม่ปล่อยให้เราอยู่คนเดียว"', en: 'Phum says: "Thank you for not leaving me alone"' } }] },
+  mid: { t: { th: '🌤️ ตอนจบกลาง ๆ', en: '🌤️ A so-so ending' }, c: [
+    { e: '🌤️', x: { th: 'ภูมิดีขึ้นบ้าง แต่ยังมีคนแกล้งอยู่', en: 'Phum feels a bit better, but some people still bully him' } },
+    { e: '💭', x: { th: 'ถ้ามีคนช่วยมากกว่านี้ ภูมิคงยิ้มได้มากกว่านี้', en: 'If more people had helped, Phum could smile more' } }] },
+  sad: { t: { th: '🌧️ ตอนจบที่น่าเศร้า', en: '🌧️ A sad ending' }, c: [
+    { e: '😞', x: { th: 'ภูมิไม่อยากเปิดมือถือ ไม่อยากมาโรงเรียน', en: 'Phum didn’t want to open his phone or come to school' } },
+    { e: '🌙', x: { th: 'ตอนกลางคืนภูมิร้องไห้ ไม่กล้าเล่าให้ใครฟัง', en: 'At night he cried and didn’t dare tell anyone' } },
+    { e: '🏫', x: { th: 'สุดท้าย พ่อแม่ตัดสินใจให้ภูมิย้ายไปเรียนโรงเรียนอื่น', en: 'In the end, his parents moved him to another school' } },
+    { e: '💭', x: { th: 'ในกลุ่มแชทห้อง ไม่มีชื่อภูมิอีกแล้ว…ถ้าวันนั้นมีคนช่วย เรื่องอาจไม่จบแบบนี้', en: 'Phum’s name is gone from the class chat… If someone had helped that day, it might have ended differently' } }] }
+};
+const endKey = () => heart >= 80 ? 'good' : heart >= 40 ? 'mid' : 'sad';
 // ตัวเลือก: h = ช่วยได้ (+) · u = ไม่ช่วย (−) · out = สิ่งที่เกิดในแชทหลังเลือก
 const ACTS = [
   { id: 'dm', h: 1, d: 15, t: { th: '💌 ทักส่วนตัวไปหาภูมิ ให้กำลังใจ', en: '💌 Message Phum privately to cheer him up' },
@@ -219,11 +327,11 @@ const UI = {
   th: { title: 'ฮีโร่กลุ่มแชท', sub: 'เราอยู่ในกลุ่มแชทห้อง แล้วเห็นเพื่อนชื่อภูมิโดนแกล้ง ทุกครั้งที่มีเรื่อง เกมจะหยุดให้เราเลือกทำ 1 อย่าง ดูหลอดหัวใจของภูมิว่าเปลี่ยนไปอย่างไร',
         go: 'เริ่มเล่น ▶', gback: '↩ กลับ', room: 'ป.4/1 ห้องเรา 😎', mem: '31 คน · ออนไลน์ 12', round: (a, b) => `เหตุการณ์ ${a} / ${b}`,
         heart: 'ใจของภูมิ', skip: 'แตะแชทเพื่อข้าม', next: 'เหตุการณ์ต่อไป ➜', finish: 'ดูผล ➜', helped: 'ช่วยภูมิได้ 💚', hurt: 'ทำให้แย่ลง 💔',
-        sum: (a, b) => `เราช่วยภูมิ ${a} จาก ${b} ครั้ง`, ranks: ['คนที่เห็นฝึกหัด', 'เพื่อนที่ช่วยได้', 'ฮีโร่กลุ่มแชท'], again: 'เล่นอีกครั้ง ↻', toTitle: 'กลับหน้าแรก', you: 'เรา' },
+        epi: '📅 1 สัปดาห์ต่อมา…', toSum: 'ดูสรุป ➜', sum: (a, b) => `เราช่วยภูมิ ${a} จาก ${b} ครั้ง`, ranks: ['คนที่เห็นฝึกหัด', 'เพื่อนที่ช่วยได้', 'ฮีโร่กลุ่มแชท'], again: 'เล่นอีกครั้ง ↻', toTitle: 'กลับหน้าแรก', you: 'เรา' },
   en: { title: 'Group Chat Hero', sub: 'We are in the class group chat and see our friend Phum being bullied. Each time something happens, the game stops so we can choose 1 thing to do. Watch Phum’s heart bar change.',
         go: 'Start ▶', gback: '↩ Back', room: 'Y4/1 Our Class 😎', mem: '31 members · 12 online', round: (a, b) => `Event ${a} / ${b}`,
         heart: 'Phum’s heart', skip: 'Tap the chat to skip', next: 'Next event ➜', finish: 'See results ➜', helped: 'Helped Phum 💚', hurt: 'Made it worse 💔',
-        sum: (a, b) => `We helped Phum ${a} of ${b} times`, ranks: ['Learning bystander', 'Helpful friend', 'Group Chat Hero'], again: 'Play again ↻', toTitle: 'Back to start', you: 'Me' }
+        epi: '📅 One week later…', toSum: 'See summary ➜', sum: (a, b) => `We helped Phum ${a} of ${b} times`, ranks: ['Learning bystander', 'Helpful friend', 'Group Chat Hero'], again: 'Play again ↻', toTitle: 'Back to start', you: 'Me' }
 };
 let order = [], L = 'th', round = 0, heart = 60, hist = [], opts = [], picked = null, seq = 0, playing = false, skipTo = null, shown = [];
 const t = o => typeof o === 'string' ? o : o[L], U = () => UI[L];
@@ -231,8 +339,8 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;',
 function shuffle(a){ a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 // ตัวเลือกของเหตุการณ์นี้: แทน {who} และ p: 'by' ด้วยคนแกล้ง
 const sub = (o, by) => o && typeof o === 'object' ? { th: o.th.replace(/\{who\}/g, P[by].th), en: o.en.replace(/\{who\}/g, P[by].en) } : o;
-const forEvent = (a, R) => Object.assign({}, a, { t: sub(a.t, R.by), why: sub(a.why, R.by), out: a.out.map(l => Object.assign({}, l, { p: l.p === 'by' ? R.by : l.p, x: sub(l.x, R.by) })) });
-const show = id => ['sTitle', 'sPlay', 'sEnd'].forEach(s => $('#' + s).classList.toggle('hide', s !== id));
+const forEvent = (a, R) => Object.assign({}, a, { t: sub(a.t, R.by), why: sub(a.why, R.by), af: (x => x && { e: x.e, x: sub(x.x, R.by) })(a.af || AFTER[AFG[a.id]]), out: a.out.map(l => Object.assign({}, l, { p: l.p === 'by' ? R.by : l.p, x: sub(l.x, R.by) })) });
+const show = id => ['sTitle', 'sPlay', 'sEpi', 'sEnd'].forEach(s => $('#' + s).classList.toggle('hide', s !== id));
 // รอแบบข้ามได้: แตะแชท = ข้ามไปข้อความสุดท้ายทันที
 const wait = ms => new Promise(r => { const id = setTimeout(r, ms); skipTo = () => { clearTimeout(id); r(); }; });
 
@@ -273,9 +381,10 @@ function start(){
 }
 async function deal(){
   const R = ROUNDS[order[round]], my = seq; picked = null;
-  // ตัวเลือก 6 ข้อ: ช่วยได้ 3 + ไม่ช่วย 3 สุ่มจากคลัง สลับตำแหน่ง
+  // ตัวเลือก 6 ข้อ: เฉพาะเหตุการณ์นี้ 2 (ช่วยได้ 1 + ไม่ช่วย 1) + ทั่วไป 4 (ช่วยได้ 2 + ไม่ช่วย 2) สลับตำแหน่ง
   const pool = ACTS.filter(a => !(R.skip || []).includes(a.id)).map(a => forEvent(a, R));
-  opts = shuffle(shuffle(pool.filter(a => a.h)).slice(0, 3).concat(shuffle(pool.filter(a => !a.h)).slice(0, 3)));
+  const sp = (R.sp || []).map(a => forEvent(a, R));
+  opts = shuffle(sp.concat(shuffle(pool.filter(a => a.h)).slice(0, 2), shuffle(pool.filter(a => !a.h)).slice(0, 2)));
   $('#opts').innerHTML = ''; $('#res').classList.add('hide'); $('#next').classList.add('hide'); $('#ask').textContent = '';
   paint();
   await play(R.lines); if (my !== seq) return;
@@ -287,13 +396,13 @@ function paintOpts(){
 $('#opts').addEventListener('click', async e => {
   const b = e.target.closest('[data-a]'); if (!b || picked || playing) return;
   const a = opts.find(x => x.id === b.dataset.a), my = seq;
-  picked = a.id; hist.push({ ev: order[round], id: a.id, h: a.h, t: a.t }); paintOpts();
+  picked = a.id; hist.push({ ev: order[round], id: a.id, h: a.h, t: a.t, af: a.af }); paintOpts();
   heart = Math.max(0, Math.min(100, heart + a.d)); paintHeart(a.d);
   await play(a.out); if (my !== seq) return;
   const r = $('#res'); r.className = 'res ' + (a.h ? 'good' : 'no'); r.innerHTML = `<b>${a.h ? U().helped : U().hurt}</b><br>${esc(t(a.why))}`;
   $('#next').classList.remove('hide'); paint();
 });
-$('#next').onclick = () => { if (round >= order.length - 1) { seq++; show('sEnd'); renderEnd(); } else { round++; shown.push({ k: 'sys', x: { th: '· · · ต่อมา · · ·', en: '· · · later · · ·' } }); render(); deal(); } };
+$('#next').onclick = () => { if (round >= order.length - 1) { seq++; playEpi(); } else { round++; shown.push({ k: 'sys', x: { th: '· · · ต่อมา · · ·', en: '· · · later · · ·' } }); render(); deal(); } };
 function face(){ return heart < 30 ? '😢' : heart < 55 ? '😟' : heart < 80 ? '🙂' : '😊'; }
 function paintHeart(d){
   $('#face').textContent = face(); $('#hFill').style.width = heart + '%'; $('#hLbl').textContent = `❤️ ${U().heart} ${heart}%`;
@@ -306,6 +415,28 @@ function paint(){
   $('#next').textContent = round >= order.length - 1 ? U().finish : U().next;
   $('#face').textContent = face(); $('#hLbl').textContent = `❤️ ${U().heart} ${heart}%`;
 }
+// การ์ดผลที่ตามมาเด้งทีละใบ (แตะเพื่อข้าม) แล้วตามด้วยตอนจบตามหัวใจของภูมิ
+const ecard = (c, cls) => `<div class="ecard pop ${cls || ''}"><span class="em">${c.e}</span><span>${esc(t(c.x))}</span></div>`;
+function epiCards(){ const seen = new Set(); return hist.filter(h => { const k = h.af && h.af.x.th; if (!k || seen.has(k)) return false; seen.add(k); return true; }); }
+let epiN = 0;
+function paintEpi(){
+  const xs = epiCards(), E = ENDS[endKey()];
+  $('#epTitle').textContent = U().epi; $('#toSum').textContent = U().toSum; $('#epSkip').textContent = epiN < xs.length + 1 ? U().skip : '';
+  $('#epCards').innerHTML = xs.slice(0, epiN).map(h => ecard(h.af, h.h ? 'g' : 'b')).join('');
+  const shownEnd = epiN > xs.length;
+  $('#ending').className = 'ending ' + endKey() + (shownEnd ? '' : ' hide');
+  $('#enTitle').textContent = t(E.t);
+  $('#enCards').innerHTML = shownEnd ? E.c.slice(0, epiN - xs.length).map(c => ecard(c)).join('') : '';
+  $('#toSum').classList.toggle('hide', epiN < xs.length + E.c.length);
+}
+async function playEpi(){
+  const my = seq, total = epiCards().length + ENDS[endKey()].c.length;
+  epiN = 0; show('sEpi'); paintEpi();
+  while (epiN < total) { await wait(1300); if (my !== seq) return; epiN++; paintEpi(); }
+  skipTo = null;
+}
+$('#sEpi').addEventListener('click', e => { if (e.target.id !== 'toSum' && skipTo) skipTo(); });
+$('#toSum').onclick = () => { seq++; skipTo = null; show('sEnd'); renderEnd(); };
 function renderEnd(){
   const good = hist.filter(h => h.h).length, n = order.length, r = good === n ? 2 : good >= n / 2 ? 1 : 0;
   $('#eBadge').textContent = ['👀', '🤝', '🦸'][r]; $('#eRank').textContent = U().ranks[r];
@@ -328,6 +459,7 @@ function applyLang(){
     if (picked) { const a = opts.find(x => x.id === picked); $('#res').innerHTML = `<b>${a.h ? U().helped : U().hurt}</b><br>${esc(t(a.why))}`; }
   }
   if (!$('#sEnd').classList.contains('hide')) renderEnd();
+  if (!$('#sEpi').classList.contains('hide')) paintEpi();
 }
 $('#lth').onclick = () => { L = 'th'; applyLang(); }; $('#len').onclick = () => { L = 'en'; applyLang(); };
 // เปิดใน iframe (Hub/ใบงาน): ปุ่มกลับส่ง 'closeGame' · รับภาษาจาก postMessage({lang})

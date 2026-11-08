@@ -272,7 +272,22 @@ test('เกมฮีโร่กลุ่มแชท (Y4): แชทเด้�
     expect(after > before || after === 100).toBe(true);                   // หัวใจเต็ม 100 แล้วไม่เกิน
     await expect(page.locator('#res')).toHaveClass(/good/, { timeout: 8000 });
   }
+  // ตัวเลือกเฉพาะเหตุการณ์ 2 ข้อ (ช่วยได้ 1 + ไม่ช่วย 1) อยู่ในตัวเลือกทุกรอบ
+  expect(await page.evaluate(() => { const R = ROUNDS[order[round]]; return R.sp.every(a => opts.some(o => o.id === a.id)) && R.sp.map(a => a.h).join(); })).toBe('1,0');
+  // จบ → ฉาก 1 สัปดาห์ต่อมา: การ์ดมาจากตัวเลือกที่เลือกจริง · ตอนจบตามหัวใจของภูมิ
   await page.click('#next');
+  await expect(page.locator('#sEpi')).toBeVisible();
+  await expect(page.locator('#epTitle')).toHaveText('📅 1 สัปดาห์ต่อมา…');
+  await expect(page.locator('#toSum')).toBeHidden();
+  await expect(page.locator('#epCards .ecard')).toHaveCount(1, { timeout: 4000 });   // เด้งทีละใบ
+  const want = await page.evaluate(() => ({ cards: epiCards().map(h => h.af.x.th), end: endKey(), n: ENDS[endKey()].c.length }));
+  for (let k = 0; k < 12; k++) await page.click('#epTitle');              // แตะเพื่อข้าม
+  await expect(page.locator('#toSum')).toBeVisible({ timeout: 8000 });
+  await expect(page.locator('#epCards .ecard span:last-child')).toHaveText(want.cards);
+  await expect(page.locator('#ending')).toHaveClass(new RegExp(want.end));
+  await expect(page.locator('#enCards .ecard')).toHaveCount(want.n);
+  await expect(page.locator('#epCards .ecard.b')).toHaveCount(1);            // รอบแรกเลือกไม่ช่วย = การ์ดผลเสีย 1 ใบ
+  await page.click('#toSum');
   await expect(page.locator('#eSum')).toContainText('เราช่วยภูมิ 4 จาก 5 ครั้ง');
   await expect(page.locator('#eList > div')).toHaveCount(5);
   await expect(page.locator('#eRank')).toHaveText('เพื่อนที่ช่วยได้');
@@ -298,5 +313,11 @@ test('เกมสัปดาห์ 3: คลังโพสต์ 22 แบบ
     reply: forEvent(ACTS.find(a => a.id === 'talkta'), ROUNDS[1]).out[1].p, fake: ROUNDS.find(R => R.by === 'fake').skip }));
   expect(names.fight).toContain('บีม'); expect(names.fight).not.toContain('ต้า');
   expect(names.reply).toBe('beam');
+  // ตัวเลือกเฉพาะเหตุการณ์ครบทุกเหตุการณ์ · ทุกตัวเลือกมีผลที่ตามมา · ตอนจบ 3 แบบ (เศร้า = ย้ายโรงเรียน)
+  const sp = await page.evaluate(() => ({ every: ROUNDS.every(R => R.sp.length === 2 && R.sp[0].h === 1 && R.sp[1].h === 0),
+    af: ROUNDS.every(R => ACTS.concat(R.sp).every(a => forEvent(a, R).af.x.th && forEvent(a, R).af.x.en)), ends: Object.keys(ENDS).join(),
+    who: forEvent(ACTS.find(a => a.id === 'fight'), ROUNDS[6]).af.x.th, sad: ENDS.sad.c.map(c => c.x.th).join(' ') }));
+  expect(sp).toMatchObject({ every: true, af: true, ends: 'good,mid,sad' });
+  expect(sp.who).toContain('มิ้นท์'); expect(sp.sad).toContain('ย้ายไปเรียนโรงเรียนอื่น');
   expect(names.fake).toEqual(expect.arrayContaining(['talkta', 'fight', 'revenge']));
 });
