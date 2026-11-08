@@ -197,12 +197,12 @@ test('เกมโพสต์ดีไหมนะ (Y3): โพสต์หน�
   await expect(page.locator('#tTitle')).toHaveText('โพสต์ดีไหมนะ?');
   await expect(page.locator('#gback')).toBeHidden();                       // เปิดตรง ๆ ไม่มีปุ่มกลับ
   await page.click('#goE');
-  await expect(page.locator('#trail i')).toHaveCount(6);
+  await expect(page.locator('#trail i')).toHaveCount(8);
   const deck = await page.evaluate(() => deck.map(p => p.ok));
-  expect(deck.filter(Boolean).length).toBe(3);                              // โพสต์ได้ 3 · ไม่ควร 3
+  expect(deck.filter(Boolean).length).toBe(4);                              // โพสต์ได้ 4 · ไม่ควร 4
   let delDone = false;
-  for (let i = 0; i < 6; i++) {
-    await expect(page.locator('#pCount')).toHaveText(`โพสต์ที่ ${i + 1} / 6`);
+  for (let i = 0; i < 8; i++) {
+    await expect(page.locator('#pCount')).toHaveText(`โพสต์ที่ ${i + 1} / 8`);
     await expect(page.locator('#post.draft')).toBeVisible();
     await expect(page.locator('#post .tag, #post .ptx, #post .pic')).not.toHaveCount(0);
     const cls = await page.locator('#bPost, #bKeep').evaluateAll(bs => bs.map(b => b.className + getComputedStyle(b).backgroundColor));
@@ -223,59 +223,80 @@ test('เกมโพสต์ดีไหมนะ (Y3): โพสต์หน�
     }
     await page.click('#pNext');
   }
-  await expect(page.locator('#eSum')).toHaveText('ตัดสินใจดี 5 จาก 6 โพสต์');
-  await expect(page.locator('#ePath > div')).toHaveCount(6);
+  await expect(page.locator('#eSum')).toHaveText('ตัดสินใจดี 7 จาก 8 โพสต์');
+  await expect(page.locator('#ePath > div')).toHaveCount(8);
   await page.click('#len');
-  await expect(page.locator('#eSum')).toHaveText('Good choices: 5 of 6 posts');
+  await expect(page.locator('#eSum')).toHaveText('Good choices: 7 of 8 posts');
   await page.click('#eTitle');
   await page.click('#goH');
-  await expect(page.locator('#trail i')).toHaveCount(8);
+  await expect(page.locator('#trail i')).toHaveCount(12);
   await page.click('#bKeep');                                               // ไม่โพสต์อันที่โพสต์ได้ = ไม่เสียอะไร แต่บอกว่าโพสต์ได้
   const ok0 = await page.evaluate(() => deck[0].ok);
   await expect(page.locator('#pRes')).toHaveClass(ok0 ? /mid/ : /good/);
   expect(errs).toEqual([]);
 });
 
-test('เกมฮีโร่กลุ่มแชท (Y4): แชทเด้งทีละข้อความ · ตัวเลือก 5 ข้อหน้าตาเหมือนกัน · หัวใจของภูมิขึ้นลงตามที่เลือก · เล่นจบ', async ({ page }) => {
+test('เกมฮีโร่กลุ่มแชท (Y4): แชทเด้งทีละข้อความ · สุ่ม 5 จาก 7 เหตุการณ์ · ตัวเลือก 6 ข้อหน้าตาเหมือนกัน · หัวใจของภูมิขึ้นลงตามที่เลือก · เล่นจบ', async ({ page }) => {
   const errs = []; page.on('pageerror', e => errs.push(e.message));
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.route('**/fonts.googleapis.com/**', r => r.abort());
   await page.goto('/games/upstander.html');
   await page.click('#goN');
-  await expect(page.locator('#hRound')).toHaveText('เหตุการณ์ 1 / 4');
+  await expect(page.locator('#hRound')).toHaveText('เหตุการณ์ 1 / 5');
   await expect(page.locator('#hLbl')).toHaveText('❤️ ใจของภูมิ 60%');
   await expect(page.locator('#lines .ln.typing')).toHaveCount(1);         // กำลังพิมพ์...
   await expect(page.locator('.op')).toHaveCount(0);                        // ยังไม่มีตัวเลือกจนแชทมาครบ
-  await expect(page.locator('#lines .bub.stk')).toBeVisible({ timeout: 6000 });
-  await expect(page.locator('.op')).toHaveCount(5, { timeout: 8000 });
+  await expect(page.locator('#lines .bub').first()).toBeVisible({ timeout: 6000 });
+  await expect(page.locator('.op')).toHaveCount(6, { timeout: 8000 });
   const looks = await page.locator('.op').evaluateAll(bs => [...new Set(bs.map(b => b.className + getComputedStyle(b).backgroundColor + getComputedStyle(b).borderColor))]);
   expect(looks.length).toBe(1);
   const helpful = await page.evaluate(() => opts.filter(a => a.h).length);
-  expect(helpful).toBe(2);
+  expect(helpful).toBe(3);
   // รอบ 1: ด่ากลับ (ดูเหมือนช่วยแต่ไม่ใช่) → หัวใจลด
   const fight = await page.evaluate(() => opts.some(a => a.id === 'fight'));
   const bad = fight ? 'fight' : await page.evaluate(() => opts.find(a => !a.h).id);
   await page.click(`.op[data-a="${bad}"]`);
-  await expect(page.locator('.op:disabled')).toHaveCount(5);
+  await expect(page.locator('.op:disabled')).toHaveCount(6);
   await expect(page.locator('#delta')).toHaveClass(/dn/);
   await expect(page.locator('#res')).toHaveClass(/no/, { timeout: 8000 });
-  for (let r = 1; r < 4; r++) {
+  for (let r = 1; r < 5; r++) {
     await page.click('#next');
-    await expect(page.locator('#hRound')).toHaveText(`เหตุการณ์ ${r + 1} / 4`);
+    await expect(page.locator('#hRound')).toHaveText(`เหตุการณ์ ${r + 1} / 5`);
     for (let k = 0; k < 6; k++) await page.click('#chat');                 // แตะแชทเพื่อข้าม
-    await expect(page.locator('.op')).toHaveCount(5, { timeout: 8000 });
+    await expect(page.locator('.op')).toHaveCount(6, { timeout: 8000 });
     const before = await page.evaluate(() => heart);
     const good = await page.evaluate(() => opts.find(a => a.h).id);
     await page.click(`.op[data-a="${good}"]`);
     await expect(page.locator('#delta')).toHaveClass(/up/);
-    expect(await page.evaluate(() => heart)).toBeGreaterThan(before);
+    const after = await page.evaluate(() => heart);
+    expect(after > before || after === 100).toBe(true);                   // หัวใจเต็ม 100 แล้วไม่เกิน
     await expect(page.locator('#res')).toHaveClass(/good/, { timeout: 8000 });
   }
   await page.click('#next');
-  await expect(page.locator('#eSum')).toContainText('เราช่วยภูมิ 3 จาก 4 ครั้ง');
-  await expect(page.locator('#eList > div')).toHaveCount(4);
+  await expect(page.locator('#eSum')).toContainText('เราช่วยภูมิ 4 จาก 5 ครั้ง');
+  await expect(page.locator('#eList > div')).toHaveCount(5);
   await expect(page.locator('#eRank')).toHaveText('เพื่อนที่ช่วยได้');
   await page.click('#len');
   await expect(page.locator('#eRank')).toHaveText('Helpful friend');
   expect(errs).toEqual([]);
+});
+
+test('เกมสัปดาห์ 3: คลังโพสต์ 22 แบบ · 7 เหตุการณ์ 16 ตัวเลือก · ตัวเลือกเรียกชื่อคนแกล้งของเหตุการณ์นั้น', async ({ page }) => {
+  await page.route('**/fonts.googleapis.com/**', r => r.abort());
+  await page.goto('/games/footprint.html');
+  const fp = await page.evaluate(() => ({ n: POSTS.length, ok: POSTS.filter(p => p.ok).length, ids: new Set(POSTS.map(p => p.id)).size,
+    full: POSTS.every(p => p.tx.th && p.tx.en && p.why.th && p.why.en && p.cm.length === 2) }));
+  expect(fp).toEqual({ n: 22, ok: 10, ids: 22, full: true });
+  await page.click('#goH');
+  await expect(page.locator('#trail i')).toHaveCount(12);
+  await page.goto('/games/upstander.html');
+  const up = await page.evaluate(() => ({ ev: ROUNDS.length, acts: ACTS.length, good: ACTS.filter(a => a.h).length, ids: new Set(ACTS.map(a => a.id)).size,
+    by: ROUNDS.every(R => P[R.by]) }));
+  expect(up).toEqual({ ev: 7, acts: 16, good: 8, ids: 16, by: true });
+  // เหตุการณ์ที่บีมแชร์รูป: ตัวเลือก ด่ากลับ ต้องเรียกบีม ไม่ใช่ต้า · บัญชีปลอมไม่มีตัวเลือกคุย/ด่า/แกล้งคืน
+  const names = await page.evaluate(() => ({ fight: forEvent(ACTS.find(a => a.id === 'fight'), ROUNDS[1]).t.th,
+    reply: forEvent(ACTS.find(a => a.id === 'talkta'), ROUNDS[1]).out[1].p, fake: ROUNDS.find(R => R.by === 'fake').skip }));
+  expect(names.fight).toContain('บีม'); expect(names.fight).not.toContain('ต้า');
+  expect(names.reply).toBe('beam');
+  expect(names.fake).toEqual(expect.arrayContaining(['talkta', 'fight', 'revenge']));
 });

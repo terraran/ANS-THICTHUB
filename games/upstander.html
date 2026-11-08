@@ -119,32 +119,50 @@ button:disabled{background:#94a3b8;color:#1e293b;box-shadow:none;cursor:not-allo
  </section>
 </div>
 <script>
-// เกมเล่นเฉย ๆ ไม่เก็บคะแนน · เราเป็นคนที่เห็นเพื่อน (ภูมิ) โดนแกล้งในกลุ่มแชทห้อง · ทุกเหตุการณ์เกมหยุดให้เลือกทำ 1 อย่าง
+// เกมเล่นเฉย ๆ ไม่เก็บคะแนน · เราเป็นคนที่เห็นเพื่อน (ภูมิ) โดนแกล้งในกลุ่มแชทห้อง · เล่นรอบละ 5 เหตุการณ์ (สุ่มจาก 7) · ทุกเหตุการณ์เกมหยุดให้เลือกทำ 1 อย่าง จาก 6 ตัวเลือก
 // ปุ่มตัวเลือกหน้าตาเหมือนกัน สลับลำดับทุกครั้ง · หลอดหัวใจของภูมิขึ้น/ลงตามสิ่งที่เราเลือก · แชทเปลี่ยนตาม
 const $ = s => document.querySelector(s);
 const P = { ta: { th: 'ต้า', en: 'Ta', c: '#c2410c' }, beam: { th: 'บีม', en: 'Beam', c: '#4f46e5' }, por: { th: 'ปอ', en: 'Por', c: '#0f766e' },
-            mint: { th: 'มิ้นท์', en: 'Mint', c: '#be185d' }, june: { th: 'จูน', en: 'June', c: '#15803d' }, phum: { th: 'ภูมิ', en: 'Phum', c: '#0284c7' }, kru: { th: 'ครูแอน', en: 'Ms. Ann', c: '#334155' } };
+            mint: { th: 'มิ้นท์', en: 'Mint', c: '#be185d' }, june: { th: 'จูน', en: 'June', c: '#15803d' }, phum: { th: 'ภูมิ', en: 'Phum', c: '#0284c7' }, kru: { th: 'ครูแอน', en: 'Ms. Ann', c: '#334155' },
+            fake: { th: 'ภูมิตัวจริง', en: 'RealPhum', c: '#64748b' }, mum: { th: 'แม่', en: 'Mum', c: '#9333ea' } };
 // เหตุการณ์ 4 รอบ: k = text | stk (สติกเกอร์) | photo | poll | sys · rx = ปุ่มรีแอคชันใต้ข้อความ
 const ROUNDS = [
-  { ask: { th: 'ภูมิโดนล้อด้วยสติกเกอร์ เราจะทำอะไร?', en: 'Phum is teased with a sticker. What will we do?' }, lines: [
+  { by: 'ta', ask: { th: 'ภูมิโดนล้อด้วยสติกเกอร์ เราจะทำอะไร?', en: 'Phum is teased with a sticker. What will we do?' }, lines: [
     { p: 'ta', k: 'text', x: { th: 'เมื่อกี้ดูภูมิวิ่งตอนพละยัง 555', en: 'Did you see Phum running in PE lol' } },
     { p: 'ta', k: 'stk', x: '🐢💨', rx: '😂 5' },
     { p: 'beam', k: 'text', x: { th: '555 ช้าจริง', en: 'lol so slow' } },
     { p: 'phum', k: 'typing' }] },
-  { ask: { th: 'มีคนแชร์รูปที่ทำให้ภูมิอาย เราจะทำอะไร?', en: 'Someone shares a photo that embarrasses Phum. What will we do?' }, lines: [
+  { by: 'beam', ask: { th: 'มีคนแชร์รูปที่ทำให้ภูมิอาย เราจะทำอะไร?', en: 'Someone shares a photo that embarrasses Phum. What will we do?' }, lines: [
     { p: 'beam', k: 'photo', pic: '🤸🍜', x: { th: 'ภาพหลุด ภูมิล้มในโรงอาหาร 555', en: 'Caught on camera: Phum fell in the canteen lol' }, rx: '😂 8' },
     { p: 'por', k: 'text', x: { th: 'ส่งไปกลุ่มห้อง 2 แล้ว', en: 'Sent it to Class 2’s group' } },
     { p: 'phum', k: 'text', x: { th: 'ลบได้ไหม 😞', en: 'Can you delete it 😞' } }] },
-  { ask: { th: 'ต้าตั้งกลุ่มใหม่ ไม่ให้ภูมิเข้า เราจะทำอะไร?', en: 'Ta made a new group without Phum. What will we do?' }, lines: [
+  { by: 'ta', ask: { th: 'ต้าตั้งกลุ่มใหม่ ไม่ให้ภูมิเข้า เราจะทำอะไร?', en: 'Ta made a new group without Phum. What will we do?' }, lines: [
     { p: 'ta', k: 'text', x: { th: 'ไปคุยกลุ่มใหม่กัน ไม่ต้องชวนภูมินะ', en: 'Let’s move to a new group. Don’t add Phum' } },
     { k: 'sys', x: { th: 'ต้า สร้างกลุ่ม "ป.4/1 ตัวจริง" · เพิ่มสมาชิก 30 คน', en: 'Ta created "Y4/1 Real" · added 30 members' } },
     { p: 'mint', k: 'text', x: { th: 'โอเค 👌', en: 'OK 👌' } },
     { p: 'phum', k: 'text', x: { th: 'ทำไมเราไม่อยู่ในกลุ่มใหม่อะ', en: 'Why am I not in the new group?' } }] },
-  { ask: { th: 'มีโพลตั้งชื่อเล่นล้อภูมิ เราจะทำอะไร?', en: 'There is a poll to give Phum a mean nickname. What will we do?' }, lines: [
+  { by: 'ta', ask: { th: 'มีโพลตั้งชื่อเล่นล้อภูมิ เราจะทำอะไร?', en: 'There is a poll to give Phum a mean nickname. What will we do?' }, lines: [
     { p: 'ta', k: 'poll', x: { th: '📊 โหวตชื่อเล่นใหม่ให้ภูมิ', en: '📊 Vote for Phum’s new nickname' }, o: [[{ th: '🐢 เต่าน้อย', en: '🐢 Little Turtle' }, 7], [{ th: '🥔 มันฝรั่ง', en: '🥔 Potato' }, 5]] },
     { p: 'june', k: 'text', x: { th: 'โหวตแล้ว 555', en: 'Voted lol' } },
-    { p: 'phum', k: 'typing' }] }
+    { p: 'phum', k: 'typing' }] },
+  { by: 'fake', skip: ['talkta', 'fight', 'revenge'], ask: { th: 'มีบัญชีปลอมแอบอ้างเป็นภูมิ เราจะทำอะไร?', en: 'A fake account is pretending to be Phum. What will we do?' }, lines: [
+    { k: 'sys', x: { th: 'บัญชี "ภูมิตัวจริง" เข้าร่วมกลุ่ม', en: '"RealPhum" joined the group' } },
+    { p: 'fake', k: 'text', x: { th: 'เราชอบกินขี้มูกตอนเรียน 555', en: 'I like eating my boogers in class lol' } },
+    { p: 'beam', k: 'text', x: { th: 'จริงดิ ภูมิ 😂', en: 'For real, Phum? 😂' }, rx: '😂 6' },
+    { p: 'phum', k: 'text', x: { th: 'นั่นไม่ใช่เรา!! 😭', en: 'That’s not me!! 😭' } }] },
+  { by: 'ta', ask: { th: 'ต้าชวนกันไล่ภูมิออกจากทีม และกดรีพอร์ตภูมิ เราจะทำอะไร?', en: 'Ta wants everyone to kick Phum off the team and report him. What will we do?' }, lines: [
+    { k: 'sys', x: { th: '🎮 ห้องเกม: ทีมฟ้า 4/4', en: '🎮 Game room: Blue team 4/4' } },
+    { p: 'ta', k: 'text', x: { th: 'ใครให้ภูมิเข้าทีม แพ้แน่', en: 'Whoever let Phum on the team, we’ll lose' } },
+    { p: 'por', k: 'text', x: { th: 'เตะออกเลย', en: 'Kick him out' } },
+    { p: 'ta', k: 'text', x: { th: 'ทุกคนกดรีพอร์ตภูมิกัน จะได้โดนแบน', en: 'Everyone report Phum so he gets banned' }, rx: '👍 4' },
+    { p: 'phum', k: 'typing' }] },
+  { by: 'mint', ask: { th: 'มีคนเอาหน้าภูมิไปตัดต่อเป็นตัวการ์ตูน เราจะทำอะไร?', en: 'Someone edited Phum’s face onto a cartoon. What will we do?' }, lines: [
+    { p: 'mint', k: 'photo', pic: '🦛🙂', x: { th: 'ภูมิเวอร์ชันฮิปโป 555', en: 'Hippo Phum lol' }, rx: '😂 9' },
+    { p: 'june', k: 'text', x: { th: 'แต่งเก่งอะ', en: 'Nice edit' } },
+    { p: 'ta', k: 'text', x: { th: 'เอาไปทำสติกเกอร์เลย', en: 'Make it a sticker!' } },
+    { p: 'phum', k: 'text', x: { th: 'ลบเถอะ ขอร้อง', en: 'Please delete it' } }] }
 ];
+const PLAY = 5;   // เล่นรอบละ 5 เหตุการณ์ สุ่มจากทั้งหมด
 // ตัวเลือก: h = ช่วยได้ (+) · u = ไม่ช่วย (−) · out = สิ่งที่เกิดในแชทหลังเลือก
 const ACTS = [
   { id: 'dm', h: 1, d: 15, t: { th: '💌 ทักส่วนตัวไปหาภูมิ ให้กำลังใจ', en: '💌 Message Phum privately to cheer him up' },
@@ -162,12 +180,40 @@ const ACTS = [
   { id: 'share', h: 0, d: -25, t: { th: '↪️ ส่งต่อให้เพื่อนห้องอื่นดูด้วย', en: '↪️ Forward it to friends in another class' },
     out: [{ sys: 1, x: { th: '↪️ ส่งต่อไปอีก 1 กลุ่ม · มีคนเห็นเพิ่มอีก 28 คน', en: '↪️ Forwarded to 1 more group · 28 more people saw it' } }],
     why: { th: 'ส่งต่อ = แกล้งเพิ่ม คนเห็นมากขึ้น และลบคืนไม่ได้', en: 'Forwarding is more bullying. More people see it, and it can’t be taken back.' } },
-  { id: 'fight', h: 0, d: -10, t: { th: '😠 ด่าต้ากลับแรง ๆ ให้รู้สึกบ้าง', en: '😠 Insult Ta back so he feels it too' },
-    out: [{ me: 1, x: { th: 'ต้า นายมันนิสัยแย่ที่สุด!', en: 'Ta, you’re the worst!' } }, { p: 'ta', x: { th: 'อ้าว มาหาเรื่องทำไม 555', en: 'Whoa, why pick a fight lol' } }, { p: 'por', x: { th: 'ทะเลาะกันแล้ว 🍿', en: 'Fight! 🍿' } }],
+  { id: 'fight', h: 0, d: -10, t: { th: '😠 ด่า{who}กลับแรง ๆ ให้รู้สึกบ้าง', en: '😠 Insult {who} back so they feel it too' },
+    out: [{ me: 1, x: { th: '{who} นิสัยแย่ที่สุด!', en: '{who}, you’re the worst!' } }, { p: 'by', x: { th: 'อ้าว มาหาเรื่องทำไม 555', en: 'Whoa, why pick a fight lol' } }, { p: 'por', x: { th: 'ทะเลาะกันแล้ว 🍿', en: 'Fight! 🍿' } }],
     why: { th: 'ดูเหมือนช่วย แต่การด่ากลับทำให้ทะเลาะกันหนักขึ้น และเรื่องของภูมิยิ่งถูกพูดถึง', en: 'It looks like helping, but insulting back makes the fight bigger, and Phum gets talked about even more.' } },
   { id: 'quiet', h: 0, d: -5, t: { th: '🙈 เงียบไว้ ทำเป็นไม่เห็น', en: '🙈 Stay quiet and pretend not to see' },
     out: [{ sys: 1, x: { th: 'อ่านแล้ว 31 คน · ไม่มีใครพูดอะไร', en: 'Read by 31 · nobody says anything' } }],
-    why: { th: 'ไม่ได้แกล้ง แต่ภูมิรู้สึกว่าไม่มีใครช่วย คนที่เห็นช่วยได้มากกว่านี้', en: 'We didn’t bully, but Phum feels nobody cares. People who see it can do more.' } }
+    why: { th: 'ไม่ได้แกล้ง แต่ภูมิรู้สึกว่าไม่มีใครช่วย คนที่เห็นช่วยได้มากกว่านี้', en: 'We didn’t bully, but Phum feels nobody cares. People who see it can do more.' } },
+  { id: 'lunch', h: 1, d: 15, t: { th: '🙋 พรุ่งนี้ชวนภูมิมานั่งกินข้าวด้วยกัน', en: '🙋 Invite Phum to eat lunch with us tomorrow' },
+    out: [{ dm: 1, me: 1, x: { th: '(ส่วนตัว) พรุ่งนี้มากินข้าวกับเรานะ', en: '(private) Come eat lunch with us tomorrow' } }, { dm: 1, p: 'phum', x: { th: '(ส่วนตัว) ได้เลย 😊 ดีใจจัง', en: '(private) Sure 😊 That makes me happy' } }],
+    why: { th: 'ไม่ปล่อยให้ภูมิอยู่คนเดียว มีเพื่อนในชีวิตจริงช่วยให้ใจดีขึ้น', en: 'Phum is not left alone. Having friends in real life helps a lot.' } },
+  { id: 'report', h: 1, d: 15, t: { th: '🚩 กดรายงาน (Report) ข้อความหรือบัญชีนั้นในแอป', en: '🚩 Report the message or account in the app' },
+    out: [{ sys: 1, x: { th: '🚩 ส่งรายงานแล้ว · ทีมดูแลแอปกำลังตรวจสอบ', en: '🚩 Report sent · the app team is checking it' } }],
+    why: { th: 'การรายงานช่วยให้แอปลบข้อความหรือบัญชีที่แกล้งคนอื่นได้ และคนแกล้งไม่รู้ว่าใครรายงาน', en: 'Reporting helps the app remove bullying messages or accounts, and the bully doesn’t know who reported.' } },
+  { id: 'parents', h: 1, d: 15, t: { th: '👨‍👩‍👧 กลับบ้านไปเล่าให้พ่อแม่ฟัง', en: '👨‍👩‍👧 Tell our parents at home' },
+    out: [{ sys: 1, x: { th: '🏠 ตอนเย็น เราเล่าให้แม่ฟัง', en: '🏠 In the evening, we tell Mum' } }, { dm: 1, p: 'mum', x: { th: '(ส่วนตัว) ดีแล้วที่เล่าให้แม่ฟัง พรุ่งนี้แม่จะคุยกับครูให้นะ', en: '(private) I’m glad you told me. I’ll talk to the teacher tomorrow' } }],
+    why: { th: 'ผู้ใหญ่ที่บ้านช่วยคุยกับครูได้ เราไม่ต้องแก้ปัญหาคนเดียว', en: 'Adults at home can talk to the teacher. We don’t have to fix it alone.' } },
+  { id: 'talkta', h: 1, d: 10, t: { th: '💬 ทักส่วนตัวไปบอก{who}ดี ๆ ว่าภูมิเสียใจ', en: '💬 Message {who} privately and kindly: Phum is hurt' },
+    out: [{ dm: 1, me: 1, x: { th: '(ส่วนตัว) {who} ภูมิเสียใจจริง ๆ นะ หยุดเถอะ', en: '(private) {who}, Phum is really hurt. Please stop' } }, { dm: 1, p: 'by', x: { th: '(ส่วนตัว) เหรอ… ไม่รู้เลย โอเค', en: '(private) Really… I didn’t know. OK' } }],
+    why: { th: 'พูดสุภาพ ไม่ด่า บางครั้งคนแกล้งไม่รู้ว่าเพื่อนเจ็บแค่ไหน ถ้ายังไม่หยุด ต้องบอกผู้ใหญ่', en: 'Polite, not rude. Sometimes bullies don’t know how much it hurts. If it doesn’t stop, tell an adult.' } },
+  { id: 'buddy', h: 1, d: 20, t: { th: '🤝 ชวนเพื่อนอีกคนไปบอกครูด้วยกัน', en: '🤝 Ask another friend to tell the teacher with us' },
+    out: [{ dm: 1, me: 1, x: { th: '(ส่วนตัว) จูน ไปบอกครูด้วยกันไหม', en: '(private) June, shall we tell the teacher together?' } }, { dm: 1, p: 'june', x: { th: '(ส่วนตัว) ไปสิ เราก็ไม่ชอบเหมือนกัน', en: '(private) Yes, I don’t like it either' } },
+          { dm: 1, p: 'kru', x: { th: '(ส่วนตัว) ขอบใจทั้งสองคนนะ ครูจะช่วยดูให้', en: '(private) Thank you both. I will help' } }],
+    why: { th: 'ไปกับเพื่อนทำให้กล้าขึ้น และครูช่วยหยุดเรื่องนี้ได้', en: 'Going with a friend makes us braver, and the teacher can help stop it.' } },
+  { id: 'shrug', h: 0, d: -5, t: { th: '🤐 บอกภูมิว่า "ช่างมันเถอะ เดี๋ยวเขาก็เลิก"', en: '🤐 Tell Phum: "Just ignore it, they’ll stop"' },
+    out: [{ dm: 1, me: 1, x: { th: '(ส่วนตัว) ช่างมันเถอะ เดี๋ยวเขาก็เลิก', en: '(private) Just ignore it, they’ll stop' } }, { dm: 1, p: 'phum', x: { th: '(ส่วนตัว) …แต่มันไม่เลิกเลยนะ', en: '(private) …but it never stops' } }],
+    why: { th: 'ฟังดูใจดี แต่ไม่ได้ช่วยหยุดการแกล้ง ภูมิรู้สึกว่าต้องทนอยู่คนเดียว', en: 'It sounds kind, but it doesn’t stop the bullying. Phum feels he has to put up with it alone.' } },
+  { id: 'delete', h: 0, d: -10, t: { th: '🗑️ ลบแชทในเครื่องเราทิ้ง จะได้ไม่ต้องเห็น', en: '🗑️ Delete the chat on our phone so we don’t see it' },
+    out: [{ sys: 1, x: { th: '🗑️ ลบแชทในเครื่องเราแล้ว · แต่ในเครื่องคนอื่นยังอยู่ครบ', en: '🗑️ Deleted on our phone · it’s still on everyone else’s' } }],
+    why: { th: 'ลบแล้วเราไม่เห็น แต่การแกล้งยังอยู่ และเราไม่มีหลักฐานไปบอกผู้ใหญ่', en: 'We stop seeing it, but the bullying goes on, and we have no proof to show an adult.' } },
+  { id: 'revenge', h: 0, d: -15, t: { th: '🕵️ ไปแกล้ง{who}คืนในกลุ่มอื่น', en: '🕵️ Tease {who} back in another group' },
+    out: [{ sys: 1, x: { th: 'เราโพสต์ล้อ{who}ในกลุ่มห้อง 2', en: 'We posted a joke about {who} in Class 2’s group' } }, { p: 'by', x: { th: 'ใครทำ! เดี๋ยวเอาคืนภูมิแน่', en: 'Who did that! I’ll get Phum back for this' } }],
+    why: { th: 'แกล้งคืนทำให้เรื่องใหญ่ขึ้น และคนแกล้งอาจไปลงที่ภูมิอีก', en: 'Getting revenge makes it bigger, and the bully may take it out on Phum again.' } },
+  { id: 'gossip', h: 0, d: -10, t: { th: '🙊 เอาเรื่องภูมิไปเล่าต่อให้เพื่อนห้องอื่นฟัง', en: '🙊 Tell kids in other classes what happened to Phum' },
+    out: [{ sys: 1, x: { th: '💬 เรื่องของภูมิไปถึงอีก 2 ห้องแล้ว', en: '💬 Phum’s story has reached 2 more classes' } }],
+    why: { th: 'เล่าต่อก็เหมือนส่งต่อ คนรู้เรื่องมากขึ้น ภูมิยิ่งอาย', en: 'Telling others is like forwarding. More people know, and Phum feels even more embarrassed.' } }
 ];
 const UI = {
   th: { title: 'ฮีโร่กลุ่มแชท', sub: 'เราอยู่ในกลุ่มแชทห้อง แล้วเห็นเพื่อนชื่อภูมิโดนแกล้ง ทุกครั้งที่มีเรื่อง เกมจะหยุดให้เราเลือกทำ 1 อย่าง ดูหลอดหัวใจของภูมิว่าเปลี่ยนไปอย่างไร',
@@ -179,10 +225,13 @@ const UI = {
         heart: 'Phum’s heart', skip: 'Tap the chat to skip', next: 'Next event ➜', finish: 'See results ➜', helped: 'Helped Phum 💚', hurt: 'Made it worse 💔',
         sum: (a, b) => `We helped Phum ${a} of ${b} times`, ranks: ['Learning bystander', 'Helpful friend', 'Group Chat Hero'], again: 'Play again ↻', toTitle: 'Back to start', you: 'Me' }
 };
-let L = 'th', round = 0, heart = 60, hist = [], opts = [], picked = null, seq = 0, playing = false, skipTo = null, shown = [];
+let order = [], L = 'th', round = 0, heart = 60, hist = [], opts = [], picked = null, seq = 0, playing = false, skipTo = null, shown = [];
 const t = o => typeof o === 'string' ? o : o[L], U = () => UI[L];
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 function shuffle(a){ a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+// ตัวเลือกของเหตุการณ์นี้: แทน {who} และ p: 'by' ด้วยคนแกล้ง
+const sub = (o, by) => o && typeof o === 'object' ? { th: o.th.replace(/\{who\}/g, P[by].th), en: o.en.replace(/\{who\}/g, P[by].en) } : o;
+const forEvent = (a, R) => Object.assign({}, a, { t: sub(a.t, R.by), why: sub(a.why, R.by), out: a.out.map(l => Object.assign({}, l, { p: l.p === 'by' ? R.by : l.p, x: sub(l.x, R.by) })) });
 const show = id => ['sTitle', 'sPlay', 'sEnd'].forEach(s => $('#' + s).classList.toggle('hide', s !== id));
 // รอแบบข้ามได้: แตะแชท = ข้ามไปข้อความสุดท้ายทันที
 const wait = ms => new Promise(r => { const id = setTimeout(r, ms); skipTo = () => { clearTimeout(id); r(); }; });
@@ -219,12 +268,14 @@ $('#chat').addEventListener('click', () => { if (skipTo) skipTo(); });
 
 function start(){
   seq++; round = 0; heart = 60; hist = []; shown = [];
+  order = shuffle(ROUNDS.map((x, i) => i)).slice(0, PLAY);
   show('sPlay'); $('#hud').classList.remove('hide'); paintHeart(0); deal();
 }
 async function deal(){
-  const R = ROUNDS[round], my = seq; picked = null;
-  // ตัวเลือก 5 ข้อ: ช่วยได้ 2 + ไม่ช่วย 3 สุ่มจากคลัง สลับตำแหน่ง
-  opts = shuffle(shuffle(ACTS.filter(a => a.h)).slice(0, 2).concat(shuffle(ACTS.filter(a => !a.h)).slice(0, 3)));
+  const R = ROUNDS[order[round]], my = seq; picked = null;
+  // ตัวเลือก 6 ข้อ: ช่วยได้ 3 + ไม่ช่วย 3 สุ่มจากคลัง สลับตำแหน่ง
+  const pool = ACTS.filter(a => !(R.skip || []).includes(a.id)).map(a => forEvent(a, R));
+  opts = shuffle(shuffle(pool.filter(a => a.h)).slice(0, 3).concat(shuffle(pool.filter(a => !a.h)).slice(0, 3)));
   $('#opts').innerHTML = ''; $('#res').classList.add('hide'); $('#next').classList.add('hide'); $('#ask').textContent = '';
   paint();
   await play(R.lines); if (my !== seq) return;
@@ -235,14 +286,14 @@ function paintOpts(){
 }
 $('#opts').addEventListener('click', async e => {
   const b = e.target.closest('[data-a]'); if (!b || picked || playing) return;
-  const a = ACTS.find(x => x.id === b.dataset.a), my = seq;
-  picked = a.id; hist.push({ round, id: a.id, h: a.h }); paintOpts();
+  const a = opts.find(x => x.id === b.dataset.a), my = seq;
+  picked = a.id; hist.push({ ev: order[round], id: a.id, h: a.h, t: a.t }); paintOpts();
   heart = Math.max(0, Math.min(100, heart + a.d)); paintHeart(a.d);
   await play(a.out); if (my !== seq) return;
   const r = $('#res'); r.className = 'res ' + (a.h ? 'good' : 'no'); r.innerHTML = `<b>${a.h ? U().helped : U().hurt}</b><br>${esc(t(a.why))}`;
   $('#next').classList.remove('hide'); paint();
 });
-$('#next').onclick = () => { if (round >= ROUNDS.length - 1) { seq++; show('sEnd'); renderEnd(); } else { round++; shown.push({ k: 'sys', x: { th: '· · · ต่อมา · · ·', en: '· · · later · · ·' } }); render(); deal(); } };
+$('#next').onclick = () => { if (round >= order.length - 1) { seq++; show('sEnd'); renderEnd(); } else { round++; shown.push({ k: 'sys', x: { th: '· · · ต่อมา · · ·', en: '· · · later · · ·' } }); render(); deal(); } };
 function face(){ return heart < 30 ? '😢' : heart < 55 ? '😟' : heart < 80 ? '🙂' : '😊'; }
 function paintHeart(d){
   $('#face').textContent = face(); $('#hFill').style.width = heart + '%'; $('#hLbl').textContent = `❤️ ${U().heart} ${heart}%`;
@@ -251,15 +302,15 @@ function paintHeart(d){
   if (d) { $('#face').classList.remove('beat'); void $('#face').offsetWidth; $('#face').classList.add('beat'); }
 }
 function paint(){
-  $('#cName').textContent = U().room; $('#cMem').textContent = U().mem; $('#hRound').textContent = U().round(round + 1, ROUNDS.length);
-  $('#next').textContent = round >= ROUNDS.length - 1 ? U().finish : U().next;
+  $('#cName').textContent = U().room; $('#cMem').textContent = U().mem; $('#hRound').textContent = U().round(round + 1, order.length);
+  $('#next').textContent = round >= order.length - 1 ? U().finish : U().next;
   $('#face').textContent = face(); $('#hLbl').textContent = `❤️ ${U().heart} ${heart}%`;
 }
 function renderEnd(){
-  const good = hist.filter(h => h.h).length, n = ROUNDS.length, r = good === n ? 2 : good >= n / 2 ? 1 : 0;
+  const good = hist.filter(h => h.h).length, n = order.length, r = good === n ? 2 : good >= n / 2 ? 1 : 0;
   $('#eBadge').textContent = ['👀', '🤝', '🦸'][r]; $('#eRank').textContent = U().ranks[r];
   $('#eSum').textContent = U().sum(good, n) + ` · ${face()} ❤️ ${heart}%`;
-  $('#eList').innerHTML = hist.map(h => { const a = ACTS.find(x => x.id === h.id); return `<div><span>${esc(t(ROUNDS[h.round].ask))}<br><b>${esc(t(a.t))}</b></span><span>${a.h ? '💚' : '💔'}</span></div>`; }).join('');
+  $('#eList').innerHTML = hist.map(h => { const a = h; return `<div><span>${esc(t(ROUNDS[h.ev].ask))}<br><b>${esc(t(a.t))}</b></span><span>${a.h ? '💚' : '💔'}</span></div>`; }).join('');
   $('#eAgain').textContent = U().again; $('#eTitle').textContent = U().toTitle;
 }
 $('#eAgain').onclick = start;
@@ -273,8 +324,8 @@ function applyLang(){
   $('#tTitle').textContent = U().title; $('#tSub').textContent = U().sub; document.title = U().title;
   $('#goN').textContent = U().go; $('#gback').textContent = U().gback;
   if (!$('#sPlay').classList.contains('hide')) {
-    paint(); render(); if ($('#ask').textContent) { $('#ask').textContent = t(ROUNDS[round].ask); paintOpts(); }
-    if (picked) { const a = ACTS.find(x => x.id === picked); $('#res').innerHTML = `<b>${a.h ? U().helped : U().hurt}</b><br>${esc(t(a.why))}`; }
+    paint(); render(); if ($('#ask').textContent) { $('#ask').textContent = t(ROUNDS[order[round]].ask); paintOpts(); }
+    if (picked) { const a = opts.find(x => x.id === picked); $('#res').innerHTML = `<b>${a.h ? U().helped : U().hurt}</b><br>${esc(t(a.why))}`; }
   }
   if (!$('#sEnd').classList.contains('hide')) renderEnd();
 }

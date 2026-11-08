@@ -147,12 +147,49 @@ const POSTS = [
     why: { th: 'บอกคนอื่นว่าเราอยู่บ้านคนเดียว ไม่ปลอดภัย เรื่องแบบนี้เล่าให้ผู้ใหญ่ฟังแทน', en: 'It tells everyone we are home alone. Not safe. Tell an adult instead.' } },
   { id: 'angry', ok: false, art: ['😡', '📝'], bg: '#fecaca,#e2e8f0', tx: { th: 'เบื่อ ไม่อยากไปเรียนแล้ว ครูดุทั้งวัน', en: 'So fed up. Don’t want to go to school. The teacher scolded us all day' },
     cm: [{ th: 'เหมือนกัน', en: 'Same' }, { th: 'ครูเห็นนะ 👀', en: 'The teacher will see 👀' }],
-    why: { th: 'โพสต์ตอนโกรธ อีกวันอาจเสียใจ แต่ลบไม่ได้แล้ว ถ้าไม่สบายใจ คุยกับผู้ใหญ่ดีกว่า', en: 'Posting while angry: we may regret it tomorrow, but it stays. If we feel upset, talk to an adult.' } }
+    why: { th: 'โพสต์ตอนโกรธ อีกวันอาจเสียใจ แต่ลบไม่ได้แล้ว ถ้าไม่สบายใจ คุยกับผู้ใหญ่ดีกว่า', en: 'Posting while angry: we may regret it tomorrow, but it stays. If we feel upset, talk to an adult.' } },
+  // ---- ชุดที่ 2 (โพสต์ได้ 6 + ไม่ควร 6) ----
+  { id: 'bean', ok: true, art: ['🌱', '🫘'], bg: '#bbf7d0,#fef9c3', tx: { th: 'ปลูกถั่วงอกส่งครูวิทย์ โตแล้ว!', en: 'My bean sprouts for science class have grown!' },
+    cm: [{ th: 'ของเรายังไม่ขึ้นเลย', en: 'Mine haven’t grown yet' }, { th: 'สุดยอด 🌱', en: 'Awesome 🌱' }],
+    why: { th: 'เป็นผลงานของเรา ไม่มีข้อมูลส่วนตัว เพื่อนเห็นแล้วได้ความรู้ด้วย', en: 'Our own work. No private info, and friends can learn from it.' } },
+  { id: 'puppy', ok: true, art: ['🐶', '💛'], bg: '#fef3c7,#fed7aa', tx: { th: 'ลูกหมาตัวใหม่ของเรา ชื่อโมจิ', en: 'Meet our new puppy, Mochi' },
+    cm: [{ th: 'น่ารักมากกก', en: 'Sooo cute' }, { th: 'อยากเล่นด้วย', en: 'I want to play with him' }],
+    why: { th: 'รูปสัตว์เลี้ยงไม่บอกว่าเราอยู่ไหน ไม่ทำให้ใครเสียใจ โพสต์ได้', en: 'A pet photo does not show where we live or hurt anyone. Fine to post.' } },
+  { id: 'swim', ok: true, art: ['🏊', '🏅'], bg: '#bae6fd,#fde68a', tx: { th: 'ได้เหรียญว่ายน้ำ ขอบคุณโค้ชนะครับ', en: 'Got a swimming medal. Thank you, coach!' },
+    cm: [{ th: 'เก่งมาก!', en: 'Amazing!' }, { th: 'ยินดีด้วย 🎉', en: 'Congrats 🎉' }],
+    why: { th: 'เรื่องที่เราภูมิใจ ขอบคุณคนอื่นด้วย ไม่มีชื่อสถานที่หรือข้อมูลส่วนตัว', en: 'Something we are proud of, with a thank-you. No place names or private info.' } },
+  { id: 'grandma', ok: true, art: ['🎂', '👵'], bg: '#fbcfe8,#fde68a', tx: { th: 'สุขสันต์วันเกิดคุณยาย รักยายนะ', en: 'Happy birthday, Grandma. Love you!' },
+    cm: [{ th: 'สุขสันต์วันเกิดค่ะ', en: 'Happy birthday!' }, { th: '🎂🎂', en: '🎂🎂' }],
+    why: { th: 'คำอวยพรดี ๆ เป็นร่องรอยที่ดี ใครเห็นก็อบอุ่นใจ', en: 'Kind wishes leave a good footprint. Anyone who sees it feels warm.' } },
+  { id: 'comic', ok: true, art: ['📖', '⭐'], bg: '#c7d2fe,#fbcfe8', tx: { th: 'แนะนำการ์ตูนเรื่องนี้ สนุกมาก อ่านจบในวันเดียว', en: 'I recommend this comic. So fun, I finished it in one day' },
+    cm: [{ th: 'ขอยืมได้ไหม', en: 'Can I borrow it?' }, { th: 'อ่านแล้ว ชอบเหมือนกัน', en: 'Read it too, loved it' }],
+    why: { th: 'แบ่งปันสิ่งที่ชอบ ไม่มีข้อมูลส่วนตัว เพื่อนคุยต่อได้สนุก', en: 'Sharing something we like. No private info, and friends can chat about it.' } },
+  { id: 'puzzle', ok: true, art: ['🧩', '🎉'], bg: '#a7f3d0,#bfdbfe', tx: { th: 'ต่อจิ๊กซอว์ 500 ชิ้นเสร็จแล้ว!', en: 'Finished a 500-piece jigsaw!' },
+    cm: [{ th: 'อดทนมาก', en: 'So patient!' }, { th: 'ว้าว', en: 'Wow' }],
+    why: { th: 'โชว์ผลงานของเราเอง ไม่มีใครเสียหาย โพสต์ได้', en: 'Showing our own work. Nobody gets hurt. Fine to post.' } },
+  { id: 'card', ok: false, art: ['🪪', '✨'], bg: '#e0f2fe,#e9d5ff', tag: { th: 'ชื่อจริง · โรงเรียน · เลขประจำตัว', en: 'Full name · school · ID number' }, tx: { th: 'ได้บัตรนักเรียนใหม่แล้ว รูปสวยด้วย', en: 'Got my new student card. Nice photo too' },
+    cm: [{ th: 'รูปดีจัง', en: 'Great photo' }, { th: 'เลขประจำตัวเลขสวย', en: 'Cool ID number' }],
+    why: { th: 'บัตรนักเรียนมีชื่อจริง โรงเรียน และเลขประจำตัว เป็นข้อมูลส่วนตัวทั้งหมด', en: 'A student card shows our full name, school and ID number. All private info.' } },
+  { id: 'park', ok: false, art: ['🛝', '📍'], bg: '#bbf7d0,#fecaca', tag: { th: '📍 ตำแหน่งตอนนี้', en: '📍 Live location' }, tx: { th: 'อยู่สวนแถวบ้าน ใครว่างมาเล่นกัน', en: 'At the park near my house. Who wants to play?' },
+    cm: [{ th: 'ไปด้วย!', en: 'Coming!' }, { th: 'สวนนี้อยู่ตรงไหนอะ', en: 'Where is this park?' }],
+    why: { th: 'แนบตำแหน่งจริง คนทั้งกลุ่มรวมถึงคนที่เราไม่รู้จัก รู้ว่าเราอยู่ตรงไหนตอนนี้', en: 'It shares our real location. Everyone in the group, even people we don’t know, can see where we are.' } },
+  { id: 'pass', ok: false, art: ['🔑', '🎮'], bg: '#fef3c7,#e2e8f0', tx: { th: 'ใครอยากเล่นเกมด้วยบัญชีเรา รหัสคือ mochi1234', en: 'Anyone can play on my game account. The password is mochi1234' },
+    cm: [{ th: 'ขอเข้าไปเล่นนะ', en: 'I’ll log in then' }, { th: 'เซฟไว้แล้ว', en: 'Saved it' }],
+    why: { th: 'รหัสผ่านเหมือนกุญแจบ้าน โพสต์แล้วใครก็เข้าบัญชีเราได้ ลบโพสต์ก็ไม่ช่วย', en: 'A password is like a house key. Once posted, anyone can get in, and deleting the post won’t help.' } },
+  { id: 'poll', ok: false, art: ['📊', '👕'], bg: '#fed7aa,#e9d5ff', tx: { th: 'โหวตเลย! ใครแต่งตัวเชยที่สุดในห้อง', en: 'Vote now! Who dresses the worst in our class?' },
+    cm: [{ th: 'โหวตแล้ว 555', en: 'Voted lol' }, { th: 'อย่าเลยมั้ง', en: 'Maybe don’t…' }],
+    why: { th: 'โพลล้อเพื่อนทำให้เพื่อนอายและเสียใจ คนที่แคปไว้เอาไปล้อต่อได้อีกนาน', en: 'A poll mocking friends embarrasses and hurts them. Screenshots keep the teasing going.' } },
+  { id: 'sister', ok: false, art: ['💃', '🎥'], bg: '#fbcfe8,#c7d2fe', tag: { th: 'คลิปน้อง', en: 'Sister’s video' }, tx: { th: 'ดูน้องเต้นในห้องนอน ตลกมาก น้องไม่รู้ว่าถ่ายอยู่ 555', en: 'Watch my sister dancing in her room lol. She doesn’t know I filmed it' },
+    cm: [{ th: '555 ส่งต่อแล้ว', en: 'lol forwarded' }, { th: 'น้องรู้ยัง', en: 'Does she know?' }],
+    why: { th: 'ถ่ายและโพสต์คนอื่นโดยไม่ขออนุญาต ถึงเป็นคนในบ้านก็ต้องถามก่อน น้องอาจอายมาก', en: 'Filming and posting someone without asking. Even family must be asked first. She may feel very embarrassed.' } },
+  { id: 'mum', ok: false, art: ['😤', '🎮'], bg: '#fecaca,#fde68a', tx: { th: 'แม่ไม่ให้เล่นเกม แม่ใจร้ายที่สุดในโลก', en: 'Mum won’t let me play games. Worst mum in the world' },
+    cm: [{ th: 'แม่เราก็เหมือนกัน', en: 'Mine too' }, { th: 'แม่เห็นหรือยัง 👀', en: 'Has your mum seen this? 👀' }],
+    why: { th: 'โพสต์ตอนโกรธ พรุ่งนี้หายโกรธแล้วแต่โพสต์ยังอยู่ แม่หรือคนอื่นอาจเห็นแล้วเสียใจ', en: 'Posting while angry: tomorrow we feel better, but the post stays. Mum or others may see it and feel hurt.' } }
 ];
 const FRIENDS = { th: ['มายด์', 'กาย', 'ต้นข้าว', 'ปิ่น', 'เจได'], en: ['Mind', 'Guy', 'Tonkao', 'Pin', 'Jedi'] };
 const UI = {
   th: { title: 'โพสต์ดีไหมนะ?', sub: 'นี่คือมือถือของเรา มีโพสต์รอส่งอยู่ อ่านให้ดี แล้วเลือกว่าจะโพสต์ลงกลุ่ม หรือเก็บไว้ไม่โพสต์ ทุกโพสต์ทิ้งร่องรอยดิจิทัลไว้ 👣',
-        goE: 'ปกติ<small>6 โพสต์</small>', goH: 'ท้าทาย<small>8 โพสต์</small>', gback: '↩ กลับ', trail: 'รอยเท้าของเรา',
+        goE: 'ปกติ<small>8 โพสต์</small>', goH: 'ท้าทาย<small>12 โพสต์</small>', gback: '↩ กลับ', trail: 'รอยเท้าของเรา',
         app: 'ห้องเรา ป.3 💛', mem: 'สมาชิก 32 คน', me: 'เรา', draft: '✏️ โพสต์ที่รอส่ง', aud: '👥 ทุกคนในกลุ่ม 32 คน', now: 'เมื่อสักครู่',
         count: (a, b) => `โพสต์ที่ ${a} / ${b}`, ask: 'โพสต์นี้ จะโพสต์ไหม?', post: '📤 โพสต์', keep: '🙅 ไม่โพสต์',
         likes: n => `❤️ ${n}`, cmts: n => `💬 ${n}`, shots: n => `📸 แคปไว้ ${n}`, shares: n => `↪️ ส่งต่อ ${n}`,
@@ -162,7 +199,7 @@ const UI = {
         next: 'โพสต์ต่อไป ➜', finish: 'ดูรอยเท้าของเรา ➜', sum: (a, b) => `ตัดสินใจดี ${a} จาก ${b} โพสต์`,
         ranks: ['นักโพสต์ฝึกหัด', 'นักโพสต์รอบคอบ', 'นักโพสต์ใจเย็น'], again: 'เล่นอีกครั้ง ↻', toTitle: 'เลือกโหมดใหม่' },
   en: { title: 'To Post or Not?', sub: 'This is our phone. Some posts are waiting to be sent. Read each one, then choose to post it to the group or keep it. Every post leaves a digital footprint 👣',
-        goE: 'Normal<small>6 posts</small>', goH: 'Challenge<small>8 posts</small>', gback: '↩ Back', trail: 'Our footprints',
+        goE: 'Normal<small>8 posts</small>', goH: 'Challenge<small>12 posts</small>', gback: '↩ Back', trail: 'Our footprints',
         app: 'Our Class Y3 💛', mem: '32 members', me: 'Me', draft: '✏️ Waiting to post', aud: '👥 Everyone in the group (32)', now: 'Just now',
         count: (a, b) => `Post ${a} / ${b}`, ask: 'Will we post this?', post: '📤 Post', keep: '🙅 Don’t post',
         likes: n => `❤️ ${n}`, cmts: n => `💬 ${n}`, shots: n => `📸 Saved ${n}`, shares: n => `↪️ Shared ${n}`,
@@ -179,7 +216,7 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;',
 function shuffle(a){ a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 const show = id => ['sTitle', 'sPlay', 'sEnd'].forEach(s => $('#' + s).classList.toggle('hide', s !== id));
 
-// ปกติ 6 = โพสต์ได้ 3 + ไม่ควร 3 · ท้าทาย 8 = 4 + 4 · สลับลำดับ
+// ปกติ 8 = โพสต์ได้ 4 + ไม่ควร 4 · ท้าทาย 12 = 6 + 6 · สุ่มจากคลังทุกครั้ง แล้วสลับลำดับ
 function start(n){
   mode = n; seq++;
   const ok = shuffle(POSTS.filter(p => p.ok)), no = shuffle(POSTS.filter(p => !p.ok));
@@ -254,7 +291,7 @@ $('#bKeep').onclick = () => choose(false);
 $('#pNext').onclick = () => { clearToasts(); if (cur >= deck.length - 1) { seq++; show('sEnd'); renderEnd(); } else { cur++; deal(); } };
 
 function renderEnd(){
-  const good = marks.filter(m => m === 'g').length, n = deck.length, r = good === n ? 2 : good >= n - 2 ? 1 : 0;
+  const good = marks.filter(m => m === 'g').length, n = deck.length, r = good === n ? 2 : good >= n * 0.75 ? 1 : 0;
   $('#eBadge').textContent = ['👣', '🥈', '🥇'][r]; $('#eRank').textContent = U().ranks[r];
   $('#eSum').textContent = U().sum(good, n);
   $('#ePath').innerHTML = deck.map((p, i) => `<div><i class="${marks[i]}">${marks[i] === 'r' ? '❤️‍🩹' : marks[i] === 'n' ? '🤍' : '💚'}</i><span>${esc(t(p.tx))}</span></div>`).join('');
@@ -264,7 +301,7 @@ function renderEnd(){
 $('#eAgain').onclick = () => start(mode);
 function toTitle(){ seq++; clearToasts(); show('sTitle'); $('#trail').classList.add('hide'); }
 $('#eTitle').onclick = toTitle;
-$('#goE').onclick = () => start(6); $('#goH').onclick = () => start(8);
+$('#goE').onclick = () => start(8); $('#goH').onclick = () => start(12);
 
 function applyLang(){
   document.documentElement.lang = L;
