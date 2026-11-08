@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ฮีโร่กลุ่มแชท</title>
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#0b2545;--navy2:#13315c;--sel:#facc15;--act:#0284c7;--ok:#16a34a;--bad:#dc2626;--ink:#0f172a;--muted:#475569;--line:#cbd5e1}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--navy);color:#fff;font-family:Kanit,Tahoma,sans-serif}
+button{font-family:inherit;cursor:pointer;border:none;border-radius:14px;min-height:48px;font-size:20px;font-weight:600;padding:6px 20px;background:var(--act);color:#fff;box-shadow:0 4px 0 #0005}
+button:disabled{background:#94a3b8;color:#1e293b;box-shadow:none;cursor:not-allowed}
+.hide{display:none!important}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 16px;flex-wrap:wrap}
+.ctls{display:flex;gap:8px;margin-left:auto}
+.ctl{background:var(--navy2);border:2px solid #ffffff55;box-shadow:none;font-size:17px;min-height:44px;padding:4px 14px}
+.ctl.on{background:#fff;color:var(--navy)}
+.hud{display:flex;gap:10px;flex-wrap:wrap;font-size:18px}
+.hud span{background:var(--navy2);border-radius:20px;padding:4px 14px}
+.wrap{max-width:1040px;margin:0 auto;padding:4px 16px 32px}
+.title{text-align:center;display:flex;flex-direction:column;align-items:center;gap:16px;padding-top:24px}
+.badge{font-size:84px;line-height:1}
+.title h1{margin:0;font-size:52px;font-weight:800}
+.title p{margin:0;font-size:21px;color:#bfdbfe;max-width:680px}
+#goN{font-size:26px;padding:14px 40px}
+.play{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:20px;align-items:start}
+/* แชทกลุ่ม */
+.chat{background:#1e293b;border-radius:24px;overflow:hidden;box-shadow:0 10px 0 #020617;display:flex;flex-direction:column;height:620px;cursor:pointer}
+.chathd{background:#0f172a;display:flex;align-items:center;gap:10px;padding:10px 16px}
+.chathd .gav{width:42px;height:42px;border-radius:50%;background:#4f46e5;display:flex;align-items:center;justify-content:center;font-size:22px}
+.chathd b{display:block;font-size:18px}.chathd small{color:#94a3b8;font-size:14px}
+.lines{flex:1;overflow-y:auto;padding:14px 14px 18px;display:flex;flex-direction:column;gap:10px}
+.ln{display:flex;gap:8px;align-items:flex-end;max-width:86%}
+.ln .av{flex:none;width:34px;height:34px;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px}
+.ln .who{color:#93c5fd;font-size:13px;margin-bottom:2px}
+.bub{background:#fff;color:var(--ink);border-radius:16px 16px 16px 4px;padding:8px 14px;font-size:18px;line-height:1.35;position:relative}
+.bub .rx{position:absolute;right:-6px;bottom:-14px;background:#fff;border:2px solid #1e293b;border-radius:12px;font-size:13px;padding:0 6px;color:var(--ink)}
+.stk{font-size:56px;line-height:1;padding:4px 6px;background:transparent}
+.photo{display:flex;flex-direction:column;gap:6px}
+.photo .pic{width:220px;height:130px;border-radius:12px;background:linear-gradient(135deg,#fde68a,#fca5a5);display:flex;align-items:center;justify-content:center;font-size:54px}
+.poll{display:flex;flex-direction:column;gap:6px;min-width:220px}
+.poll span{display:flex;justify-content:space-between;background:#e0f2fe;border-radius:10px;padding:3px 10px;font-size:16px}
+.ln.me{align-self:flex-end;flex-direction:row-reverse}
+.ln.me .bub{background:#0284c7;color:#fff;border-radius:16px 16px 4px 16px}
+.ln.dm .bub{background:#dcfce7;color:#14532d;border:2px dashed #16a34a}
+.ln.dm .who{color:#86efac}
+.sys{align-self:center;background:#334155;color:#cbd5e1;border-radius:14px;padding:3px 14px;font-size:14px;text-align:center;max-width:92%}
+.typing .bub{display:flex;gap:5px;align-items:center;padding:12px 16px}
+.typing i{width:9px;height:9px;border-radius:50%;background:#64748b;animation:dot 1s infinite}
+.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+.skip{color:#64748b;font-size:14px;text-align:center;padding:4px 0 8px}
+/* แผงขวา */
+.side{display:flex;flex-direction:column;gap:14px}
+.card{background:#fff;color:var(--ink);border-radius:24px;padding:20px;display:flex;flex-direction:column;gap:12px;box-shadow:0 10px 0 #020617}
+.heart{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;align-items:center}
+.face{grid-row:1/3;font-size:54px;line-height:1}
+.heart b{font-size:19px}
+.hbar{height:20px;border-radius:12px;background:#e2e8f0;overflow:hidden;position:relative}
+.hbar i{display:block;height:100%;border-radius:12px;background:linear-gradient(90deg,#f472b6,#e11d48);transition:width .6s}
+.delta{font-weight:800;font-size:18px}.delta.up{color:var(--ok)}.delta.dn{color:var(--bad)}
+.ask{font-size:21px;font-weight:600;margin:0}
+.opts{display:flex;flex-direction:column;gap:9px}
+.op{background:#f8fafc;color:var(--ink);border:3px solid var(--line);box-shadow:0 3px 0 var(--line);font-size:18px;text-align:left;font-weight:400;line-height:1.35;padding:8px 14px}
+.op:disabled{cursor:default;color:var(--ink);background:#f8fafc}
+.op.picked{border-color:var(--act);box-shadow:0 3px 0 var(--act);background:#e0f2fe}
+.res{border-radius:14px;padding:12px 16px;font-size:18px;line-height:1.45}
+.res.good{background:#dcfce7;color:#14532d}.res.no{background:#fee2e2;color:#7f1d1d}
+.go{align-self:flex-end}
+.final{text-align:center;align-items:center}
+.final .badge{font-size:100px}
+.final h2{margin:0;font-size:36px}
+.final p{margin:0;font-size:21px;color:var(--muted)}
+.list{display:flex;flex-direction:column;gap:8px;width:100%;text-align:left}
+.list div{background:#f8fafc;border-radius:12px;padding:8px 12px;font-size:17px;display:flex;justify-content:space-between;gap:10px}
+.btns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.pop{animation:pop .35s ease-out both}
+@keyframes dot{0%,60%,100%{transform:translateY(0);opacity:.5}30%{transform:translateY(-6px);opacity:1}}
+@keyframes pop{from{opacity:0;transform:translateY(14px) scale(.9)}to{opacity:1;transform:none}}
+@keyframes beat{0%,100%{transform:scale(1)}40%{transform:scale(1.25)}}
+.beat{animation:beat .5s}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@keyframes blink{0%,60%,100%{opacity:.35}30%{opacity:1}}
+@media (prefers-reduced-motion:reduce){.pop{animation-name:fade}.typing i{animation-name:blink}.beat{animation:none}.hbar i{transition:none}}
+@media (max-width:820px){.play{grid-template-columns:1fr}.chat{height:480px}.title h1{font-size:38px}}
+</style></head><body>
+<div class="top">
+ <div class="hud hide" id="hud"><span id="hRound"></span></div>
+ <div class="ctls"><button class="ctl hide" id="gback"></button><button class="ctl on" id="lth">TH</button><button class="ctl" id="len">EN</button></div>
+</div>
+<div class="wrap">
+ <section id="sTitle" class="title">
+  <div class="badge">💬🦸</div>
+  <h1 id="tTitle"></h1>
+  <p id="tSub"></p>
+  <button id="goN"></button>
+ </section>
+ <section id="sPlay" class="play hide">
+  <div class="chat" id="chat">
+   <div class="chathd"><span class="gav">😎</span><span><b id="cName"></b><small id="cMem"></small></span></div>
+   <div class="lines" id="lines"></div><div class="skip" id="cSkip"></div>
+  </div>
+  <div class="side">
+   <div class="card">
+    <div class="heart"><span class="face" id="face"></span><b id="hLbl"></b><div class="hbar"><i id="hFill"></i></div></div>
+    <span class="delta hide" id="delta"></span>
+   </div>
+   <div class="card">
+    <p class="ask" id="ask"></p>
+    <div class="opts" id="opts"></div>
+    <div class="res hide" id="res"></div>
+    <button class="go hide" id="next"></button>
+   </div>
+  </div>
+ </section>
+ <section id="sEnd" class="card final hide">
+  <div class="badge" id="eBadge"></div>
+  <h2 id="eRank"></h2>
+  <p id="eSum"></p>
+  <div class="list" id="eList"></div>
+  <div class="btns"><button id="eAgain"></button><button id="eTitle" class="ctl"></button></div>
+ </section>
+</div>
+<script>
+// เกมเล่นเฉย ๆ ไม่เก็บคะแนน · เราเป็นคนที่เห็นเพื่อน (ภูมิ) โดนแกล้งในกลุ่มแชทห้อง · ทุกเหตุการณ์เกมหยุดให้เลือกทำ 1 อย่าง
+// ปุ่มตัวเลือกหน้าตาเหมือนกัน สลับลำดับทุกครั้ง · หลอดหัวใจของภูมิขึ้น/ลงตามสิ่งที่เราเลือก · แชทเปลี่ยนตาม
+const $ = s => document.querySelector(s);
+const P = { ta: { th: 'ต้า', en: 'Ta', c: '#c2410c' }, beam: { th: 'บีม', en: 'Beam', c: '#4f46e5' }, por: { th: 'ปอ', en: 'Por', c: '#0f766e' },
+            mint: { th: 'มิ้นท์', en: 'Mint', c: '#be185d' }, june: { th: 'จูน', en: 'June', c: '#15803d' }, phum: { th: 'ภูมิ', en: 'Phum', c: '#0284c7' }, kru: { th: 'ครูแอน', en: 'Ms. Ann', c: '#334155' } };
+// เหตุการณ์ 4 รอบ: k = text | stk (สติกเกอร์) | photo | poll | sys · rx = ปุ่มรีแอคชันใต้ข้อความ
+const ROUNDS = [
+  { ask: { th: 'ภูมิโดนล้อด้วยสติกเกอร์ เราจะทำอะไร?', en: 'Phum is teased with a sticker. What will we do?' }, lines: [
+    { p: 'ta', k: 'text', x: { th: 'เมื่อกี้ดูภูมิวิ่งตอนพละยัง 555', en: 'Did you see Phum running in PE lol' } },
+    { p: 'ta', k: 'stk', x: '🐢💨', rx: '😂 5' },
+    { p: 'beam', k: 'text', x: { th: '555 ช้าจริง', en: 'lol so slow' } },
+    { p: 'phum', k: 'typing' }] },
+  { ask: { th: 'มีคนแชร์รูปที่ทำให้ภูมิอาย เราจะทำอะไร?', en: 'Someone shares a photo that embarrasses Phum. What will we do?' }, lines: [
+    { p: 'beam', k: 'photo', pic: '🤸🍜', x: { th: 'ภาพหลุด ภูมิล้มในโรงอาหาร 555', en: 'Caught on camera: Phum fell in the canteen lol' }, rx: '😂 8' },
+    { p: 'por', k: 'text', x: { th: 'ส่งไปกลุ่มห้อง 2 แล้ว', en: 'Sent it to Class 2’s group' } },
+    { p: 'phum', k: 'text', x: { th: 'ลบได้ไหม 😞', en: 'Can you delete it 😞' } }] },
+  { ask: { th: 'ต้าตั้งกลุ่มใหม่ ไม่ให้ภูมิเข้า เราจะทำอะไร?', en: 'Ta made a new group without Phum. What will we do?' }, lines: [
+    { p: 'ta', k: 'text', x: { th: 'ไปคุยกลุ่มใหม่กัน ไม่ต้องชวนภูมินะ', en: 'Let’s move to a new group. Don’t add Phum' } },
+    { k: 'sys', x: { th: 'ต้า สร้างกลุ่ม "ป.4/1 ตัวจริง" · เพิ่มสมาชิก 30 คน', en: 'Ta created "Y4/1 Real" · added 30 members' } },
+    { p: 'mint', k: 'text', x: { th: 'โอเค 👌', en: 'OK 👌' } },
+    { p: 'phum', k: 'text', x: { th: 'ทำไมเราไม่อยู่ในกลุ่มใหม่อะ', en: 'Why am I not in the new group?' } }] },
+  { ask: { th: 'มีโพลตั้งชื่อเล่นล้อภูมิ เราจะทำอะไร?', en: 'There is a poll to give Phum a mean nickname. What will we do?' }, lines: [
+    { p: 'ta', k: 'poll', x: { th: '📊 โหวตชื่อเล่นใหม่ให้ภูมิ', en: '📊 Vote for Phum’s new nickname' }, o: [[{ th: '🐢 เต่าน้อย', en: '🐢 Little Turtle' }, 7], [{ th: '🥔 มันฝรั่ง', en: '🥔 Potato' }, 5]] },
+    { p: 'june', k: 'text', x: { th: 'โหวตแล้ว 555', en: 'Voted lol' } },
+    { p: 'phum', k: 'typing' }] }
+];
+// ตัวเลือก: h = ช่วยได้ (+) · u = ไม่ช่วย (−) · out = สิ่งที่เกิดในแชทหลังเลือก
+const ACTS = [
+  { id: 'dm', h: 1, d: 15, t: { th: '💌 ทักส่วนตัวไปหาภูมิ ให้กำลังใจ', en: '💌 Message Phum privately to cheer him up' },
+    out: [{ dm: 1, me: 1, x: { th: '(ส่วนตัว) ไม่ต้องสนใจนะ เราอยู่ข้างนาย', en: '(private) Don’t worry, I’m on your side' } }, { dm: 1, p: 'phum', x: { th: '(ส่วนตัว) ขอบคุณนะ 🥲 นึกว่าไม่มีใครเห็น', en: '(private) Thanks 🥲 I thought nobody noticed' } }],
+    why: { th: 'คนที่โดนแกล้งรู้ว่ามีเพื่อนอยู่ข้าง ๆ ใจจะดีขึ้นมาก', en: 'When someone is bullied, knowing a friend is on their side helps a lot.' } },
+  { id: 'proof', h: 1, d: 20, t: { th: '📸 แคปเก็บหลักฐาน แล้วไปบอกครู', en: '📸 Screenshot it as proof, then tell a teacher' },
+    out: [{ sys: 1, x: { th: '📸 บันทึกภาพหน้าจอแล้ว', en: '📸 Screenshot saved' } }, { dm: 1, p: 'kru', x: { th: '(ส่วนตัว) ขอบคุณที่บอกครูนะ เดี๋ยวครูช่วยดูให้', en: '(private) Thank you for telling me. I will help sort this out' } }],
+    why: { th: 'เก็บหลักฐานไว้ ไม่ส่งต่อ แล้วบอกผู้ใหญ่ ผู้ใหญ่ช่วยหยุดการแกล้งได้', en: 'Keep proof without sharing it, then tell an adult. Adults can help stop it.' } },
+  { id: 'stop', h: 1, d: 10, t: { th: '💬 พิมพ์ในกลุ่มว่า "พอเถอะ ไม่ตลกแล้ว"', en: '💬 Type in the group: "Stop it, it’s not funny"' },
+    out: [{ me: 1, x: { th: 'พอเถอะ ไม่ตลกแล้ว', en: 'Stop it, it’s not funny' } }, { p: 'june', x: { th: 'จริง พอเถอะ', en: 'True, let’s stop' } }],
+    why: { th: 'พูดสุภาพ ไม่ด่าใคร เพื่อนคนอื่นก็กล้าหยุดตามเรา', en: 'Said politely without insults, so others feel brave enough to stop too.' } },
+  { id: 'laugh', h: 0, d: -20, t: { th: '😂 กดหัวเราะตามเพื่อน ๆ', en: '😂 Laugh along with everyone' },
+    out: [{ sys: 1, x: { th: 'เรากด 😂 · ตอนนี้มีคนหัวเราะเพิ่มอีก 1 คน', en: 'We tapped 😂 · one more person laughing now' } }, { p: 'ta', x: { th: 'เห็นมะ ใคร ๆ ก็ขำ', en: 'See? Everyone thinks it’s funny' } }],
+    why: { th: 'การกดหัวเราะทำให้คนแกล้งคิดว่าทุกคนเห็นด้วย และภูมิเสียใจกว่าเดิม', en: 'Laughing makes the bully think everyone agrees, and Phum feels worse.' } },
+  { id: 'share', h: 0, d: -25, t: { th: '↪️ ส่งต่อให้เพื่อนห้องอื่นดูด้วย', en: '↪️ Forward it to friends in another class' },
+    out: [{ sys: 1, x: { th: '↪️ ส่งต่อไปอีก 1 กลุ่ม · มีคนเห็นเพิ่มอีก 28 คน', en: '↪️ Forwarded to 1 more group · 28 more people saw it' } }],
+    why: { th: 'ส่งต่อ = แกล้งเพิ่ม คนเห็นมากขึ้น และลบคืนไม่ได้', en: 'Forwarding is more bullying. More people see it, and it can’t be taken back.' } },
+  { id: 'fight', h: 0, d: -10, t: { th: '😠 ด่าต้ากลับแรง ๆ ให้รู้สึกบ้าง', en: '😠 Insult Ta back so he feels it too' },
+    out: [{ me: 1, x: { th: 'ต้า นายมันนิสัยแย่ที่สุด!', en: 'Ta, you’re the worst!' } }, { p: 'ta', x: { th: 'อ้าว มาหาเรื่องทำไม 555', en: 'Whoa, why pick a fight lol' } }, { p: 'por', x: { th: 'ทะเลาะกันแล้ว 🍿', en: 'Fight! 🍿' } }],
+    why: { th: 'ดูเหมือนช่วย แต่การด่ากลับทำให้ทะเลาะกันหนักขึ้น และเรื่องของภูมิยิ่งถูกพูดถึง', en: 'It looks like helping, but insulting back makes the fight bigger, and Phum gets talked about even more.' } },
+  { id: 'quiet', h: 0, d: -5, t: { th: '🙈 เงียบไว้ ทำเป็นไม่เห็น', en: '🙈 Stay quiet and pretend not to see' },
+    out: [{ sys: 1, x: { th: 'อ่านแล้ว 31 คน · ไม่มีใครพูดอะไร', en: 'Read by 31 · nobody says anything' } }],
+    why: { th: 'ไม่ได้แกล้ง แต่ภูมิรู้สึกว่าไม่มีใครช่วย คนที่เห็นช่วยได้มากกว่านี้', en: 'We didn’t bully, but Phum feels nobody cares. People who see it can do more.' } }
+];
+const UI = {
+  th: { title: 'ฮีโร่กลุ่มแชท', sub: 'เราอยู่ในกลุ่มแชทห้อง แล้วเห็นเพื่อนชื่อภูมิโดนแกล้ง ทุกครั้งที่มีเรื่อง เกมจะหยุดให้เราเลือกทำ 1 อย่าง ดูหลอดหัวใจของภูมิว่าเปลี่ยนไปอย่างไร',
+        go: 'เริ่มเล่น ▶', gback: '↩ กลับ', room: 'ป.4/1 ห้องเรา 😎', mem: '31 คน · ออนไลน์ 12', round: (a, b) => `เหตุการณ์ ${a} / ${b}`,
+        heart: 'ใจของภูมิ', skip: 'แตะแชทเพื่อข้าม', next: 'เหตุการณ์ต่อไป ➜', finish: 'ดูผล ➜', helped: 'ช่วยภูมิได้ 💚', hurt: 'ทำให้แย่ลง 💔',
+        sum: (a, b) => `เราช่วยภูมิ ${a} จาก ${b} ครั้ง`, ranks: ['คนที่เห็นฝึกหัด', 'เพื่อนที่ช่วยได้', 'ฮีโร่กลุ่มแชท'], again: 'เล่นอีกครั้ง ↻', toTitle: 'กลับหน้าแรก', you: 'เรา' },
+  en: { title: 'Group Chat Hero', sub: 'We are in the class group chat and see our friend Phum being bullied. Each time something happens, the game stops so we can choose 1 thing to do. Watch Phum’s heart bar change.',
+        go: 'Start ▶', gback: '↩ Back', room: 'Y4/1 Our Class 😎', mem: '31 members · 12 online', round: (a, b) => `Event ${a} / ${b}`,
+        heart: 'Phum’s heart', skip: 'Tap the chat to skip', next: 'Next event ➜', finish: 'See results ➜', helped: 'Helped Phum 💚', hurt: 'Made it worse 💔',
+        sum: (a, b) => `We helped Phum ${a} of ${b} times`, ranks: ['Learning bystander', 'Helpful friend', 'Group Chat Hero'], again: 'Play again ↻', toTitle: 'Back to start', you: 'Me' }
+};
+let L = 'th', round = 0, heart = 60, hist = [], opts = [], picked = null, seq = 0, playing = false, skipTo = null, shown = [];
+const t = o => typeof o === 'string' ? o : o[L], U = () => UI[L];
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+function shuffle(a){ a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+const show = id => ['sTitle', 'sPlay', 'sEnd'].forEach(s => $('#' + s).classList.toggle('hide', s !== id));
+// รอแบบข้ามได้: แตะแชท = ข้ามไปข้อความสุดท้ายทันที
+const wait = ms => new Promise(r => { const id = setTimeout(r, ms); skipTo = () => { clearTimeout(id); r(); }; });
+
+function lineHtml(l){
+  if (l.k === 'sys' || l.sys) return `<div class="sys pop">${esc(t(l.x))}</div>`;
+  if (l.k === 'typing') return '';
+  const who = l.me ? null : P[l.p], cls = 'ln pop' + (l.me ? ' me' : '') + (l.dm ? ' dm' : '');
+  let body;
+  if (l.k === 'stk') body = `<div class="bub stk">${l.x}${l.rx ? `<span class="rx">${l.rx}</span>` : ''}</div>`;
+  else if (l.k === 'photo') body = `<div class="bub photo"><span class="pic">${l.pic}</span>${esc(t(l.x))}${l.rx ? `<span class="rx">${l.rx}</span>` : ''}</div>`;
+  else if (l.k === 'poll') body = `<div class="bub poll"><b>${esc(t(l.x))}</b>${l.o.map(([o, n]) => `<span>${esc(t(o))}<b>${n}</b></span>`).join('')}</div>`;
+  else body = `<div class="bub">${esc(t(l.x))}${l.rx ? `<span class="rx">${l.rx}</span>` : ''}</div>`;
+  return `<div class="${cls}">` + (who ? `<span class="av" style="background:${who.c}">${esc(who[L][0])}</span>` : '') +
+    `<div>${who ? `<div class="who">${esc(who[L])}</div>` : ''}${body}</div></div>`;
+}
+function typingHtml(p){ const w = P[p]; return `<div class="ln typing" id="typing"><span class="av" style="background:${w.c}">${esc(w[L][0])}</span><div><div class="who">${esc(w[L])}</div><div class="bub"><i></i><i></i><i></i></div></div></div>`; }
+function render(){ const el = $('#lines'); el.innerHTML = shown.map(lineHtml).join(''); el.scrollTop = el.scrollHeight; }
+// เด้งข้อความทีละอัน มี "กำลังพิมพ์..." ก่อน (แม้เครื่องปิดภาพเคลื่อนไหว ก็ยังเด้งทีละอัน)
+async function play(list){
+  const my = seq; playing = true; $('#cSkip').textContent = U().skip;
+  for (const l of list) {
+    if (l.k === 'typing' || (!l.me && !l.sys && l.k !== 'sys')) {
+      $('#lines').insertAdjacentHTML('beforeend', typingHtml(l.p)); $('#lines').scrollTop = 1e6;
+      await wait(l.k === 'typing' ? 1600 : 900); if (my !== seq) return;
+      const ty = $('#typing'); if (ty) ty.remove();
+      if (l.k === 'typing') continue;     // พิมพ์แล้วหยุด ไม่ส่ง
+    } else { await wait(500); if (my !== seq) return; }
+    shown.push(l); render();
+  }
+  playing = false; skipTo = null; $('#cSkip').textContent = '';
+}
+$('#chat').addEventListener('click', () => { if (skipTo) skipTo(); });
+
+function start(){
+  seq++; round = 0; heart = 60; hist = []; shown = [];
+  show('sPlay'); $('#hud').classList.remove('hide'); paintHeart(0); deal();
+}
+async function deal(){
+  const R = ROUNDS[round], my = seq; picked = null;
+  // ตัวเลือก 5 ข้อ: ช่วยได้ 2 + ไม่ช่วย 3 สุ่มจากคลัง สลับตำแหน่ง
+  opts = shuffle(shuffle(ACTS.filter(a => a.h)).slice(0, 2).concat(shuffle(ACTS.filter(a => !a.h)).slice(0, 3)));
+  $('#opts').innerHTML = ''; $('#res').classList.add('hide'); $('#next').classList.add('hide'); $('#ask').textContent = '';
+  paint();
+  await play(R.lines); if (my !== seq) return;
+  $('#ask').textContent = t(R.ask); paintOpts();
+}
+function paintOpts(){
+  $('#opts').innerHTML = opts.map(a => `<button type="button" class="op${picked === a.id ? ' picked' : ''}" data-a="${a.id}"${picked ? ' disabled' : ''}>${esc(t(a.t))}</button>`).join('');
+}
+$('#opts').addEventListener('click', async e => {
+  const b = e.target.closest('[data-a]'); if (!b || picked || playing) return;
+  const a = ACTS.find(x => x.id === b.dataset.a), my = seq;
+  picked = a.id; hist.push({ round, id: a.id, h: a.h }); paintOpts();
+  heart = Math.max(0, Math.min(100, heart + a.d)); paintHeart(a.d);
+  await play(a.out); if (my !== seq) return;
+  const r = $('#res'); r.className = 'res ' + (a.h ? 'good' : 'no'); r.innerHTML = `<b>${a.h ? U().helped : U().hurt}</b><br>${esc(t(a.why))}`;
+  $('#next').classList.remove('hide'); paint();
+});
+$('#next').onclick = () => { if (round >= ROUNDS.length - 1) { seq++; show('sEnd'); renderEnd(); } else { round++; shown.push({ k: 'sys', x: { th: '· · · ต่อมา · · ·', en: '· · · later · · ·' } }); render(); deal(); } };
+function face(){ return heart < 30 ? '😢' : heart < 55 ? '😟' : heart < 80 ? '🙂' : '😊'; }
+function paintHeart(d){
+  $('#face').textContent = face(); $('#hFill').style.width = heart + '%'; $('#hLbl').textContent = `❤️ ${U().heart} ${heart}%`;
+  const el = $('#delta'); el.classList.toggle('hide', !d); el.className = 'delta' + (d ? (d > 0 ? ' up' : ' dn') : ' hide');
+  el.textContent = d ? (d > 0 ? `+${d}` : `${d}`) + ' ❤️' : '';
+  if (d) { $('#face').classList.remove('beat'); void $('#face').offsetWidth; $('#face').classList.add('beat'); }
+}
+function paint(){
+  $('#cName').textContent = U().room; $('#cMem').textContent = U().mem; $('#hRound').textContent = U().round(round + 1, ROUNDS.length);
+  $('#next').textContent = round >= ROUNDS.length - 1 ? U().finish : U().next;
+  $('#face').textContent = face(); $('#hLbl').textContent = `❤️ ${U().heart} ${heart}%`;
+}
+function renderEnd(){
+  const good = hist.filter(h => h.h).length, n = ROUNDS.length, r = good === n ? 2 : good >= n / 2 ? 1 : 0;
+  $('#eBadge').textContent = ['👀', '🤝', '🦸'][r]; $('#eRank').textContent = U().ranks[r];
+  $('#eSum').textContent = U().sum(good, n) + ` · ${face()} ❤️ ${heart}%`;
+  $('#eList').innerHTML = hist.map(h => { const a = ACTS.find(x => x.id === h.id); return `<div><span>${esc(t(ROUNDS[h.round].ask))}<br><b>${esc(t(a.t))}</b></span><span>${a.h ? '💚' : '💔'}</span></div>`; }).join('');
+  $('#eAgain').textContent = U().again; $('#eTitle').textContent = U().toTitle;
+}
+$('#eAgain').onclick = start;
+function toTitle(){ seq++; skipTo = null; playing = false; show('sTitle'); $('#hud').classList.add('hide'); }
+$('#eTitle').onclick = toTitle;
+$('#goN').onclick = start;
+
+function applyLang(){
+  document.documentElement.lang = L;
+  $('#lth').classList.toggle('on', L === 'th'); $('#len').classList.toggle('on', L === 'en');
+  $('#tTitle').textContent = U().title; $('#tSub').textContent = U().sub; document.title = U().title;
+  $('#goN').textContent = U().go; $('#gback').textContent = U().gback;
+  if (!$('#sPlay').classList.contains('hide')) {
+    paint(); render(); if ($('#ask').textContent) { $('#ask').textContent = t(ROUNDS[round].ask); paintOpts(); }
+    if (picked) { const a = ACTS.find(x => x.id === picked); $('#res').innerHTML = `<b>${a.h ? U().helped : U().hurt}</b><br>${esc(t(a.why))}`; }
+  }
+  if (!$('#sEnd').classList.contains('hide')) renderEnd();
+}
+$('#lth').onclick = () => { L = 'th'; applyLang(); }; $('#len').onclick = () => { L = 'en'; applyLang(); };
+// เปิดใน iframe (Hub/ใบงาน): ปุ่มกลับส่ง 'closeGame' · รับภาษาจาก postMessage({lang})
+if (window.parent !== window) { $('#gback').classList.remove('hide'); $('#gback').onclick = () => { toTitle(); parent.postMessage('closeGame', '*'); }; }
+addEventListener('message', e => { if (e.data && e.data.lang) { L = e.data.lang === 'en' ? 'en' : 'th'; applyLang(); } });
+applyLang();
+</script>
+</body></html>

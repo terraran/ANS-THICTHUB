@@ -20,6 +20,16 @@
       "path": "worksheet/?act=y4w2", "afterGame": "rescue",
       "frq": { "th": "ทำไมต้องทำตามลำดับนี้ ถ้าข้ามขั้นตอนไป จะเกิดอะไรขึ้น?", "en": "Why do we follow these steps in order? What happens if we skip one?" },
       "frPh": { "th": "เพราะถ้าข้าม...", "en": "Because if we skip..." } },
+    { "id": "y3w3", "level": "Y3", "week": 3, "kind": "sheet",
+      "title": { "th": "คิดก่อนโพสต์ ร่องรอยดิจิทัลลบไม่หาย", "en": "Think before you post" },
+      "path": "worksheet/?act=y3w3", "afterGame": "footprint",
+      "frq": { "th": "ทำไมการคิดก่อนโพสต์จึงสำคัญกับตัวเราและคนอื่น?", "en": "Why is thinking before we post important for us and for others?" },
+      "frPh": { "th": "สำคัญเพราะ...", "en": "It is important because..." } },
+    { "id": "y4w3", "level": "Y4", "week": 3, "kind": "sheet",
+      "title": { "th": "เห็นเพื่อนโดนแกล้งในแชท เราช่วยได้", "en": "A friend is bullied in chat: we can help" },
+      "path": "worksheet/?act=y4w3", "afterGame": "upstander",
+      "frq": { "th": "อะไรทำให้คนอยากแกล้งกันในโลกออนไลน์ และอะไรจะช่วยหยุดได้?", "en": "What makes people want to bully online, and what could help stop it?" },
+      "frPh": { "th": "เพราะ...", "en": "Because..." } },
     { "id": "adventure", "level": "Y3", "kind": "game",
       "tag": { "th": "ป๊อปอัปหลอก", "en": "Trick pop-ups" },
       "title": { "th": "ผจญภัยป่ามหัศจรรย์", "en": "Magic Forest Adventure" },
@@ -35,6 +45,14 @@
     { "id": "rescue", "level": "Y4", "kind": "game",
       "tag": { "th": "ช่วยเพื่อนด้วย 3 ส.", "en": "Help with 3 S" },
       "title": { "th": "หน่วยกู้ภัยแชท", "en": "Chat Rescue Team" },
-      "path": "games/rescue.html", "ownBack": true, "requires": "y4w2" }
+      "path": "games/rescue.html", "ownBack": true, "requires": "y4w2" },
+    { "id": "footprint", "level": "Y3", "kind": "game",
+      "tag": { "th": "คิดก่อนโพสต์", "en": "Think before posting" },
+      "title": { "th": "โพสต์ดีไหมนะ?", "en": "To Post or Not?" },
+      "path": "games/footprint.html", "ownBack": true, "requires": "y3w3" },
+    { "id": "upstander", "level": "Y4", "kind": "game",
+      "tag": { "th": "เป็นคนที่ช่วยได้", "en": "Be an upstander" },
+      "title": { "th": "ฮีโร่กลุ่มแชท", "en": "Group Chat Hero" },
+      "path": "games/upstander.html", "ownBack": true, "requires": "y4w3" }
   ]
 }

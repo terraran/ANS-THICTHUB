@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>โพสต์ดีไหมนะ?</title>
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#0b2545;--navy2:#13315c;--sel:#facc15;--act:#0284c7;--ok:#16a34a;--bad:#dc2626;--ink:#0f172a;--muted:#475569;--line:#cbd5e1}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--navy);color:#fff;font-family:Kanit,Tahoma,sans-serif}
+button{font-family:inherit;cursor:pointer;border:none;border-radius:14px;min-height:48px;font-size:20px;font-weight:600;padding:6px 20px;background:var(--act);color:#fff;box-shadow:0 4px 0 #0005}
+button:disabled{background:#94a3b8;color:#1e293b;box-shadow:none;cursor:not-allowed}
+.hide{display:none!important}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 16px;flex-wrap:wrap}
+.ctls{display:flex;gap:8px;margin-left:auto}
+.ctl{background:var(--navy2);border:2px solid #ffffff55;box-shadow:none;font-size:17px;min-height:44px;padding:4px 14px}
+.ctl.on{background:#fff;color:var(--navy)}
+.trail{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:17px}
+.trail .lbl{background:var(--navy2);border-radius:20px;padding:4px 14px}
+.trail i{font-style:normal;width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;background:#ffffff1a;border:2px dashed #ffffff44}
+.trail i.g{background:#dcfce7;border:2px solid #16a34a}.trail i.r{background:#fee2e2;border:2px solid #dc2626}.trail i.n{background:#e2e8f0;border:2px solid #94a3b8}
+.wrap{max-width:980px;margin:0 auto;padding:4px 16px 32px}
+.title{text-align:center;display:flex;flex-direction:column;align-items:center;gap:16px;padding-top:24px}
+.badge{font-size:84px;line-height:1}
+.title h1{margin:0;font-size:52px;font-weight:800}
+.title p{margin:0;font-size:21px;color:#bfdbfe;max-width:660px}
+.modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr));gap:14px;width:100%;max-width:560px;margin-top:8px}
+.modes button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:14px;font-size:26px}
+.modes small{font-size:16px;font-weight:400;opacity:.9}
+#goE{background:var(--ok)}#goH{background:#c2410c}
+/* เล่น: มือถือซ้าย · กล่องคำถาม/ผลขวา */
+.play{display:grid;grid-template-columns:380px 1fr;gap:24px;align-items:start}
+.phone{background:#020617;border-radius:44px;padding:14px;box-shadow:0 12px 0 #020617aa;position:relative}
+.screen{background:#f1f5f9;color:var(--ink);border-radius:32px;overflow:hidden;height:640px;display:flex;flex-direction:column;position:relative}
+.sbar{display:flex;justify-content:space-between;padding:8px 22px 4px;font-size:14px;font-weight:600;background:#fff}
+.apphd{display:flex;align-items:center;gap:10px;padding:8px 14px;background:#fff;border-bottom:1px solid var(--line)}
+.apphd .gav{width:38px;height:38px;border-radius:50%;background:#4f46e5;display:flex;align-items:center;justify-content:center;font-size:20px}
+.apphd b{display:block;font-size:17px}.apphd small{color:var(--muted);font-size:13px}
+.feed{flex:1;overflow:hidden;padding:12px;display:flex;flex-direction:column;gap:10px}
+.post{background:#fff;border-radius:18px;box-shadow:0 2px 6px #0f172a1a;overflow:hidden;transition:opacity .5s,transform .5s}
+.post.gone{opacity:0;transform:scale(.9)}
+.phd{display:flex;align-items:center;gap:8px;padding:10px 12px 6px;font-size:15px}
+.pav{width:32px;height:32px;border-radius:50%;background:#0284c7;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px}
+.phd small{color:var(--muted);margin-left:auto}
+.ptx{padding:0 12px 8px;font-size:17px;line-height:1.4}
+.pic{height:190px;display:flex;align-items:center;justify-content:center;gap:6px;font-size:64px;position:relative}
+.pic .tag{position:absolute;bottom:8px;left:8px;background:#0f172acc;color:#fff;font-size:13px;border-radius:8px;padding:2px 8px}
+.pft{display:flex;gap:14px;padding:6px 12px 10px;font-size:15px;color:var(--muted)}
+.pft b{color:var(--ink)}
+.cmts{display:flex;flex-direction:column;gap:4px;padding:0 12px 10px}
+.cmt{font-size:14px;background:#f1f5f9;border-radius:12px;padding:3px 10px;align-self:flex-start}
+.cmt b{margin-right:4px}
+.draft{border:3px dashed #94a3b8}
+.dlbl{font-size:13px;color:#64748b;padding:8px 12px 0}
+.aud{display:inline-block;font-size:13px;background:#e0f2fe;color:#075985;border-radius:10px;padding:1px 8px;margin:0 12px 8px}
+.toast{position:absolute;left:12px;right:12px;background:#0f172a;color:#fff;border-radius:14px;padding:10px 14px;font-size:15px;line-height:1.35;box-shadow:0 8px 20px #0006;z-index:3}
+.delbtn{margin-left:8px;background:#fff;color:var(--bad);border:2px solid var(--bad);box-shadow:none;font-size:15px;min-height:36px;padding:0 12px}
+.side{display:flex;flex-direction:column;gap:14px}
+.card{background:#fff;color:var(--ink);border-radius:24px;padding:22px;display:flex;flex-direction:column;gap:14px;box-shadow:0 10px 0 #020617}
+.card h2{margin:0;font-size:26px}
+.count{color:var(--muted);font-size:17px}
+.choice{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.choice button{background:var(--navy2);font-size:22px;min-height:64px}
+.res{border-radius:14px;padding:12px 16px;font-size:19px;line-height:1.45}
+.res.good{background:#dcfce7;color:#14532d}.res.no{background:#fee2e2;color:#7f1d1d}.res.mid{background:#e2e8f0;color:#1e293b}
+.res b{display:block;font-size:21px;margin-bottom:2px}
+.go{align-self:flex-end}
+.final{text-align:center;align-items:center}
+.final .badge{font-size:100px}
+.final h2{margin:0;font-size:36px}
+.final p{margin:0;font-size:21px;color:var(--muted)}
+.path{display:flex;flex-direction:column;gap:8px;width:100%;text-align:left}
+.path div{display:grid;grid-template-columns:44px 1fr;gap:10px;align-items:center;background:#f8fafc;border-radius:12px;padding:6px 10px;font-size:17px}
+.path i{font-style:normal;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px}
+.path i.g{background:#dcfce7}.path i.r{background:#fee2e2}.path i.n{background:#e2e8f0}
+.btns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.pop{animation:pop .35s ease-out both}
+@keyframes pop{from{opacity:0;transform:translateY(14px) scale(.9)}to{opacity:1;transform:none}}
+@keyframes bump{0%{transform:scale(1)}40%{transform:scale(1.35)}100%{transform:scale(1)}}
+.bump{display:inline-block;animation:bump .5s}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@media (prefers-reduced-motion:reduce){.pop{animation-name:fade}.bump{animation:none}.post{transition:none}}
+@media (max-width:820px){.play{grid-template-columns:1fr}.phone{max-width:380px;margin:0 auto;width:100%}.screen{height:560px}.title h1{font-size:38px}}
+</style></head><body>
+<div class="top">
+ <div class="trail hide" id="trail"></div>
+ <div class="ctls"><button class="ctl hide" id="gback"></button><button class="ctl on" id="lth">TH</button><button class="ctl" id="len">EN</button></div>
+</div>
+<div class="wrap">
+ <section id="sTitle" class="title">
+  <div class="badge">📱👣</div>
+  <h1 id="tTitle"></h1>
+  <p id="tSub"></p>
+  <div class="modes"><button id="goE"></button><button id="goH"></button></div>
+ </section>
+ <section id="sPlay" class="play hide">
+  <div class="phone"><div class="screen" id="screen">
+   <div class="sbar"><span>19:42</span><span>📶 🔋</span></div>
+   <div class="apphd"><span class="gav">📷</span><span><b id="aName"></b><small id="aMem"></small></span></div>
+   <div class="feed" id="feed"></div>
+  </div></div>
+  <div class="side"><div class="card">
+   <span class="count" id="pCount"></span>
+   <h2 id="pAsk"></h2>
+   <div class="choice" id="choice"><button id="bPost"></button><button id="bKeep"></button></div>
+   <div class="res hide" id="pRes"></div>
+   <button class="go hide" id="pNext"></button>
+  </div></div>
+ </section>
+ <section id="sEnd" class="card final hide">
+  <div class="badge" id="eBadge"></div>
+  <h2 id="eRank"></h2>
+  <p id="eSum"></p>
+  <div class="path" id="ePath"></div>
+  <div class="btns"><button id="eAgain"></button><button id="eTitle" class="ctl"></button></div>
+ </section>
+</div>
+<script>
+// เกมเล่นเฉย ๆ ไม่เก็บคะแนน · โพสต์ทุกอันหน้าตาเหมือนกัน เดาจากหน้าตาไม่ได้ ต้องอ่านเนื้อหา
+// ok = โพสต์ได้ · ไม่ ok = ควรเก็บไว้ (ถ้าโพสต์: เพื่อนแคป/ส่งต่อ แล้วลบก็ไม่หาย)
+const $ = s => document.querySelector(s);
+const POSTS = [
+  { id: 'draw', ok: true, art: ['🎨', '🐱'], bg: '#fde68a,#fca5a5', tx: { th: 'วาดแมวเสร็จแล้ว! ใช้เวลาทั้งบ่ายเลย', en: 'Finished my cat drawing! It took all afternoon' },
+    cm: [{ th: 'สวยมาก!', en: 'So nice!' }, { th: 'สอนวาดหน่อย', en: 'Teach me!' }],
+    why: { th: 'รูปวาดของเราเอง ไม่มีข้อมูลส่วนตัว ไม่ทำให้ใครเสียใจ เป็นร่องรอยที่ดี', en: 'It is our own drawing. No private info, and it hurts no one. A good footprint.' } },
+  { id: 'exam', ok: true, art: ['📚', '✅'], bg: '#bfdbfe,#c7d2fe', tx: { th: 'สอบเสร็จแล้ว เย้! ขอบคุณเพื่อน ๆ ที่ช่วยติวนะ', en: 'Tests are over, yay! Thanks for helping me study, friends' },
+    cm: [{ th: 'เก่งมาก 👏', en: 'Well done 👏' }, { th: 'ไปเล่นกัน!', en: 'Let’s play!' }],
+    why: { th: 'ขอบคุณเพื่อนด้วยคำดี ๆ ใครมาเห็นในอนาคตก็ไม่อาย', en: 'Kind words to friends. Nobody would be embarrassed to see it later.' } },
+  { id: 'cook', ok: true, art: ['🍳', '👩‍🍳'], bg: '#fed7aa,#fef3c7', tx: { th: 'ทำไข่เจียวกับแม่ครั้งแรก อร่อยมาก', en: 'Made an omelette with Mum for the first time. Yummy!' },
+    cm: [{ th: 'น่ากินจัง', en: 'Looks tasty' }, { th: 'เก่งจัง!', en: 'Great job!' }],
+    why: { th: 'เป็นเรื่องดี ๆ ของเรา ไม่บอกว่าบ้านอยู่ไหน ไม่ทำให้ใครอาย', en: 'A happy moment. It does not show where we live or embarrass anyone.' } },
+  { id: 'ball', ok: true, art: ['⚽', '🌳'], bg: '#bbf7d0,#a7f3d0', tx: { th: 'วันนี้เตะบอลสนุกมาก พรุ่งนี้มาเล่นอีกนะ', en: 'Football was so fun today. Let’s play again tomorrow' },
+    cm: [{ th: 'ไปด้วย!', en: 'I’m in!' }, { th: '⚽⚽⚽', en: '⚽⚽⚽' }],
+    why: { th: 'รูปลูกบอลกับสนาม ไม่เห็นหน้าใคร ไม่มีชื่อสถานที่ โพสต์ได้', en: 'A ball and a field. No faces, no place names. It is fine to post.' } },
+  { id: 'sleep', ok: false, art: ['😴', '🚗'], bg: '#e9d5ff,#fbcfe8', tag: { th: 'มายด์', en: 'Mind' }, tx: { th: 'ดูหน้ามายด์ตอนหลับในรถสิ 555', en: 'Look at Mind’s face sleeping in the car lol' },
+    cm: [{ th: '555 ตลกมาก', en: 'lol so funny' }, { th: 'ขอเซฟนะ', en: 'Saving this' }],
+    why: { th: 'เป็นรูปของเพื่อนที่เพื่อนไม่ได้อนุญาต เพื่อนอาจอาย และคนอื่นแคปเก็บไว้ได้ ต้องถามเจ้าของรูปก่อน', en: 'It is a friend’s photo without asking. They may feel embarrassed, and others can save it. Ask the person first.' } },
+  { id: 'school', ok: false, art: ['🏫', '👕'], bg: '#c7d2fe,#e0f2fe', tag: { th: 'ป้ายชื่อโรงเรียน', en: 'School name sign' }, tx: { th: 'ชุดใหม่ วันแรกของเทอม!', en: 'New uniform, first day of term!' },
+    cm: [{ th: 'น่ารัก', en: 'Cute' }, { th: 'อยู่โรงเรียนนี้เหรอ?', en: 'You go to this school?' }],
+    why: { th: 'รูปเห็นป้ายชื่อโรงเรียน คนแปลกหน้ารู้ได้ว่าเราไปที่ไหนทุกวัน', en: 'The photo shows the school sign. Strangers can find out where we go every day.' } },
+  { id: 'mean', ok: false, art: ['🎮', '👎'], bg: '#fecaca,#fed7aa', tx: { th: 'ภูมิเล่นเกมแย่ที่สุดในห้อง ใครเห็นด้วยกดไลก์', en: 'Phum is the worst gamer in our class. Like if you agree' },
+    cm: [{ th: 'จริง 555', en: 'True lol' }, { th: 'แรงไปไหม', en: 'Isn’t that mean?' }],
+    why: { th: 'คำพูดทำร้ายเพื่อน ถึงลบทีหลัง คนที่แคปไว้ก็ยังเห็น และเพื่อนเสียใจไปแล้ว', en: 'Hurtful words. Even if we delete it, people who saved it still see it, and our friend is already hurt.' } },
+  { id: 'secret', ok: false, art: ['💬', '🤫'], bg: '#fbcfe8,#fde68a', tag: { th: 'แคปแชทของฝ้าย', en: 'Screenshot of Fai’s chat' }, tx: { th: 'ดูสิ ฝ้ายบอกความลับว่าชอบใคร', en: 'Look, Fai told me who she has a crush on' },
+    cm: [{ th: 'ว้าย!', en: 'Whoa!' }, { th: 'ส่งต่อแล้ว', en: 'Forwarded it' }],
+    why: { th: 'แชทส่วนตัวของเพื่อน เพื่อนไว้ใจเรา เอาไปโพสต์ทำให้เพื่อนอายและเสียใจ', en: 'A friend’s private chat. They trusted us. Posting it embarrasses and hurts them.' } },
+  { id: 'home', ok: false, art: ['🏠', '🧒'], bg: '#fef3c7,#d9f99d', tx: { th: 'อยู่บ้านคนเดียวทั้งวัน พ่อแม่ไปต่างจังหวัด', en: 'Home alone all day. Mum and Dad are out of town' },
+    cm: [{ th: 'เหงาไหม', en: 'Lonely?' }, { th: 'บ้านอยู่แถวไหนอะ', en: 'Where’s your house?' }],
+    why: { th: 'บอกคนอื่นว่าเราอยู่บ้านคนเดียว ไม่ปลอดภัย เรื่องแบบนี้เล่าให้ผู้ใหญ่ฟังแทน', en: 'It tells everyone we are home alone. Not safe. Tell an adult instead.' } },
+  { id: 'angry', ok: false, art: ['😡', '📝'], bg: '#fecaca,#e2e8f0', tx: { th: 'เบื่อ ไม่อยากไปเรียนแล้ว ครูดุทั้งวัน', en: 'So fed up. Don’t want to go to school. The teacher scolded us all day' },
+    cm: [{ th: 'เหมือนกัน', en: 'Same' }, { th: 'ครูเห็นนะ 👀', en: 'The teacher will see 👀' }],
+    why: { th: 'โพสต์ตอนโกรธ อีกวันอาจเสียใจ แต่ลบไม่ได้แล้ว ถ้าไม่สบายใจ คุยกับผู้ใหญ่ดีกว่า', en: 'Posting while angry: we may regret it tomorrow, but it stays. If we feel upset, talk to an adult.' } }
+];
+const FRIENDS = { th: ['มายด์', 'กาย', 'ต้นข้าว', 'ปิ่น', 'เจได'], en: ['Mind', 'Guy', 'Tonkao', 'Pin', 'Jedi'] };
+const UI = {
+  th: { title: 'โพสต์ดีไหมนะ?', sub: 'นี่คือมือถือของเรา มีโพสต์รอส่งอยู่ อ่านให้ดี แล้วเลือกว่าจะโพสต์ลงกลุ่ม หรือเก็บไว้ไม่โพสต์ ทุกโพสต์ทิ้งร่องรอยดิจิทัลไว้ 👣',
+        goE: 'ปกติ<small>6 โพสต์</small>', goH: 'ท้าทาย<small>8 โพสต์</small>', gback: '↩ กลับ', trail: 'รอยเท้าของเรา',
+        app: 'ห้องเรา ป.3 💛', mem: 'สมาชิก 32 คน', me: 'เรา', draft: '✏️ โพสต์ที่รอส่ง', aud: '👥 ทุกคนในกลุ่ม 32 คน', now: 'เมื่อสักครู่',
+        count: (a, b) => `โพสต์ที่ ${a} / ${b}`, ask: 'โพสต์นี้ จะโพสต์ไหม?', post: '📤 โพสต์', keep: '🙅 ไม่โพสต์',
+        likes: n => `❤️ ${n}`, cmts: n => `💬 ${n}`, shots: n => `📸 แคปไว้ ${n}`, shares: n => `↪️ ส่งต่อ ${n}`,
+        shot: n => `📸 ${n} แคปหน้าจอโพสต์นี้ไว้`, share: (n, k) => `↪️ ${n} ส่งต่อไปอีก ${k} กลุ่ม`, del: '🗑️ ลบโพสต์', delHint: 'ลองกดลบโพสต์นี้ดูสิ',
+        afterDel: 'ลบแล้ว… แต่รูปที่เพื่อนแคปไว้ ยังอยู่ในกลุ่มอื่นอีก 3 กลุ่ม 😟', kept: '🙅 เก็บไว้ ไม่ได้โพสต์',
+        gGood: '👣💚 ร่องรอยที่ดี', gBad: '👣❤️‍🩹 ร่องรอยที่ลบไม่หาย', gSafe: '👣💚 เยี่ยม! ไม่ทิ้งร่องรอยที่ลบไม่ได้', gMid: '🤍 ไม่โพสต์ก็ได้ แต่อันนี้จริง ๆ โพสต์ได้นะ',
+        next: 'โพสต์ต่อไป ➜', finish: 'ดูรอยเท้าของเรา ➜', sum: (a, b) => `ตัดสินใจดี ${a} จาก ${b} โพสต์`,
+        ranks: ['นักโพสต์ฝึกหัด', 'นักโพสต์รอบคอบ', 'นักโพสต์ใจเย็น'], again: 'เล่นอีกครั้ง ↻', toTitle: 'เลือกโหมดใหม่' },
+  en: { title: 'To Post or Not?', sub: 'This is our phone. Some posts are waiting to be sent. Read each one, then choose to post it to the group or keep it. Every post leaves a digital footprint 👣',
+        goE: 'Normal<small>6 posts</small>', goH: 'Challenge<small>8 posts</small>', gback: '↩ Back', trail: 'Our footprints',
+        app: 'Our Class Y3 💛', mem: '32 members', me: 'Me', draft: '✏️ Waiting to post', aud: '👥 Everyone in the group (32)', now: 'Just now',
+        count: (a, b) => `Post ${a} / ${b}`, ask: 'Will we post this?', post: '📤 Post', keep: '🙅 Don’t post',
+        likes: n => `❤️ ${n}`, cmts: n => `💬 ${n}`, shots: n => `📸 Saved ${n}`, shares: n => `↪️ Shared ${n}`,
+        shot: n => `📸 ${n} took a screenshot of this post`, share: (n, k) => `↪️ ${n} shared it to ${k} more groups`, del: '🗑️ Delete post', delHint: 'Try deleting this post',
+        afterDel: 'Deleted… but the screenshots are still in 3 other groups 😟', kept: '🙅 Kept it, not posted',
+        gGood: '👣💚 A good footprint', gBad: '👣❤️‍🩹 A footprint that won’t go away', gSafe: '👣💚 Great! No footprint we can’t delete', gMid: '🤍 Not posting is OK, but this one was fine to post',
+        next: 'Next post ➜', finish: 'See our footprints ➜', sum: (a, b) => `Good choices: ${a} of ${b} posts`,
+        ranks: ['Trainee poster', 'Careful poster', 'Calm, smart poster'], again: 'Play again ↻', toTitle: 'Choose a mode' }
+};
+let L = 'th', mode = 6, deck = [], cur = 0, marks = [], busy = false, seq = 0, last = null;
+const t = o => o[L], U = () => UI[L];
+const wait = ms => new Promise(r => setTimeout(r, ms));
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+function shuffle(a){ a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+const show = id => ['sTitle', 'sPlay', 'sEnd'].forEach(s => $('#' + s).classList.toggle('hide', s !== id));
+
+// ปกติ 6 = โพสต์ได้ 3 + ไม่ควร 3 · ท้าทาย 8 = 4 + 4 · สลับลำดับ
+function start(n){
+  mode = n; seq++;
+  const ok = shuffle(POSTS.filter(p => p.ok)), no = shuffle(POSTS.filter(p => !p.ok));
+  deck = shuffle(ok.slice(0, n / 2).concat(no.slice(0, n / 2)));
+  cur = 0; marks = []; show('sPlay'); $('#trail').classList.remove('hide'); deal();
+}
+function postHtml(p, draft){
+  return `<div class="post${draft ? ' draft' : ''}" id="post">` + (draft ? `<div class="dlbl">${U().draft}</div>` : '') +
+    `<div class="phd"><span class="pav">🙂</span><b>${esc(U().me)}</b><small>${draft ? '' : U().now}</small></div>` +
+    `<div class="ptx">${esc(t(p.tx))}</div>` +
+    `<div class="pic" style="background:linear-gradient(135deg,${p.bg})">${p.art.map(a => `<span>${a}</span>`).join('')}${p.tag ? `<span class="tag">${esc(t(p.tag))}</span>` : ''}</div>` +
+    (draft ? `<span class="aud">${U().aud}</span>` : `<div class="pft" id="pft"></div><div class="cmts" id="cmts"></div>`) + '</div>';
+}
+function deal(){
+  const p = deck[cur]; busy = false; last = null;
+  $('#feed').innerHTML = postHtml(p, true);
+  $('#choice').classList.remove('hide'); $('#bPost').disabled = $('#bKeep').disabled = false;
+  $('#pRes').classList.add('hide'); $('#pNext').classList.add('hide');
+  paint();
+}
+function paint(){
+  $('#aName').textContent = U().app; $('#aMem').textContent = U().mem;
+  $('#pCount').textContent = U().count(cur + 1, deck.length); $('#pAsk').textContent = U().ask;
+  $('#bPost').textContent = U().post; $('#bKeep').textContent = U().keep;
+  $('#pNext').textContent = cur >= deck.length - 1 ? U().finish : U().next;
+  $('#trail').innerHTML = `<span class="lbl">${U().trail}</span>` + deck.map((p, i) => `<i class="${marks[i] || ''}">${marks[i] ? '👣' : ''}</i>`).join('');
+  if (last) showRes(last);
+}
+function showRes(r){ const p = deck[cur], el = $('#pRes');
+  el.className = 'res ' + r.cls; el.innerHTML = `<b>${U()[r.head]}</b>${esc(t(p.why))}`; }
+function feedEl(){ return $('#feed'); }
+function toast(text, top){ const d = document.createElement('div'); d.className = 'toast pop'; d.style.top = top + 'px'; d.textContent = text; $('#screen').appendChild(d); return d; }
+function clearToasts(){ document.querySelectorAll('.toast, .delbtn').forEach(x => x.remove()); }
+function counters(o){ $('#pft').innerHTML = [U().likes(o.l), U().cmts(o.c)].concat(o.s ? [U().shots(o.s), U().shares(o.h)] : []).map(x => `<span>${x}</span>`).join(''); }
+
+async function choose(post){
+  if (busy) return; busy = true;
+  const my = seq, p = deck[cur];
+  $('#bPost').disabled = $('#bKeep').disabled = true; $('#choice').classList.add('hide');
+  if (!post) {   // ไม่โพสต์: โพสต์หายไปจากหน้าจอ ไม่มีร่องรอย
+    $('#post').classList.add('gone'); await wait(450); if (my !== seq) return;
+    feedEl().innerHTML = `<div class="post pop"><div class="ptx" style="padding:14px">${U().kept}</div></div>`;
+    marks[cur] = p.ok ? 'n' : 'g'; return finish(p.ok ? { cls: 'mid', head: 'gMid' } : { cls: 'good', head: 'gSafe' });
+  }
+  feedEl().innerHTML = postHtml(p, false);
+  const o = { l: 0, c: 0, s: 0, h: 0 }; counters(o);
+  const names = shuffle(FRIENDS[L]);
+  for (let i = 0; i < 2; i++) {    // เพื่อนกดไลก์ + คอมเมนต์ (ทั้งโพสต์ดีและไม่ดี เดาจากตรงนี้ไม่ได้)
+    await wait(650); if (my !== seq) return;
+    o.l += 4 + Math.floor(Math.random() * 5); o.c++; counters(o);
+    $('#cmts').insertAdjacentHTML('beforeend', `<div class="cmt pop"><b>${esc(names[i])}</b>${esc(t(p.cm[i]))}</div>`);
+  }
+  if (p.ok) { marks[cur] = 'g'; await wait(500); if (my !== seq) return; return finish({ cls: 'good', head: 'gGood' }); }
+  // ไม่ควรโพสต์: เพื่อนแคป + ส่งต่อ → ลองลบ → ลบแล้วก็ยังไม่หาย
+  await wait(700); if (my !== seq) return;
+  o.s = 3; counters(o); toast(U().shot(names[2]), 520);
+  await wait(1000); if (my !== seq) return;
+  o.h = 3; counters(o); toast(U().share(names[3], 3), 580);
+  await wait(700); if (my !== seq) return;
+  const b = document.createElement('button'); b.className = 'delbtn pop'; b.id = 'del'; b.textContent = U().del; $('#post .phd').appendChild(b);
+  $('#pRes').className = 'res mid'; $('#pRes').textContent = U().delHint;
+  b.onclick = async () => {
+    b.remove(); clearToasts(); $('#post').classList.add('gone'); await wait(500); if (my !== seq) return;
+    feedEl().innerHTML = '';
+    toast(U().afterDel, 240);
+    marks[cur] = 'r'; finish({ cls: 'no', head: 'gBad' });
+  };
+}
+function finish(r){ last = r; $('#choice').classList.add('hide'); $('#pRes').classList.remove('hide'); $('#pNext').classList.remove('hide'); paint(); }
+$('#bPost').onclick = () => choose(true);
+$('#bKeep').onclick = () => choose(false);
+$('#pNext').onclick = () => { clearToasts(); if (cur >= deck.length - 1) { seq++; show('sEnd'); renderEnd(); } else { cur++; deal(); } };
+
+function renderEnd(){
+  const good = marks.filter(m => m === 'g').length, n = deck.length, r = good === n ? 2 : good >= n - 2 ? 1 : 0;
+  $('#eBadge').textContent = ['👣', '🥈', '🥇'][r]; $('#eRank').textContent = U().ranks[r];
+  $('#eSum').textContent = U().sum(good, n);
+  $('#ePath').innerHTML = deck.map((p, i) => `<div><i class="${marks[i]}">${marks[i] === 'r' ? '❤️‍🩹' : marks[i] === 'n' ? '🤍' : '💚'}</i><span>${esc(t(p.tx))}</span></div>`).join('');
+  $('#eAgain').textContent = U().again; $('#eTitle').textContent = U().toTitle;
+  paint();
+}
+$('#eAgain').onclick = () => start(mode);
+function toTitle(){ seq++; clearToasts(); show('sTitle'); $('#trail').classList.add('hide'); }
+$('#eTitle').onclick = toTitle;
+$('#goE').onclick = () => start(6); $('#goH').onclick = () => start(8);
+
+function applyLang(){
+  document.documentElement.lang = L;
+  $('#lth').classList.toggle('on', L === 'th'); $('#len').classList.toggle('on', L === 'en');
+  $('#tTitle').textContent = U().title; $('#tSub').textContent = U().sub; document.title = U().title;
+  $('#goE').innerHTML = U().goE; $('#goH').innerHTML = U().goH; $('#gback').textContent = U().gback;
+  if (!$('#sPlay').classList.contains('hide') && !busy) deal();   // ยังไม่ได้เลือก = วาดโพสต์ใหม่เป็นภาษาที่เลือก
+  else if (!$('#sPlay').classList.contains('hide')) paint();
+  if (!$('#sEnd').classList.contains('hide')) renderEnd();
+}
+$('#lth').onclick = () => { L = 'th'; applyLang(); }; $('#len').onclick = () => { L = 'en'; applyLang(); };
+// เปิดใน iframe (Hub/ใบงาน): ปุ่มกลับส่ง 'closeGame' · รับภาษาจาก postMessage({lang})
+if (window.parent !== window) { $('#gback').classList.remove('hide'); $('#gback').onclick = () => { toTitle(); parent.postMessage('closeGame', '*'); }; }
+addEventListener('message', e => { if (e.data && e.data.lang) { L = e.data.lang === 'en' ? 'en' : 'th'; applyLang(); } });
+applyLang();
+</script>
+</body></html>

@@ -1,0 +1,46 @@
+{
+ "act": "y4w3",
+ "level": "Y4",
+ "week": 3,
+ "map": "multi",
+ "title": { "th": "เห็นเพื่อนโดนแกล้งในแชท เราช่วยได้", "en": "A friend is bullied in chat: we can help" },
+ "noReason": true,
+ "steps": {
+  "th": ["1 เขียน Multi-Flow Map", "2 คิดย้อนกลับ"],
+  "en": ["1 Write the Multi-Flow Map", "2 Look back"]
+ },
+ "task1": {
+  "th": "<b>ขั้นที่ 1</b> ฝั่งซ้าย เขียน <b>สาเหตุที่ทำให้มีคนอยากแกล้ง</b> · ฝั่งขวา เขียนว่า <b>ถูกแกล้งแล้วเกิดอะไรขึ้นได้บ้าง</b> · กด ➕ เพิ่มกล่อง เขียนอย่างน้อยฝั่งละ 2 กล่อง",
+  "en": "<b>Step 1</b> Left: write <b>why someone wants to bully</b>. Right: write <b>what can happen after being bullied</b>. Tap ➕ to add boxes. Write at least 2 on each side."
+ },
+ "task4": {
+  "th": "<b>ขั้นที่ 2</b> คิดย้อนกลับ: ตอบคำถามในกรอบ หรือกดข้ามได้ถ้าเวลาไม่พอ",
+  "en": "<b>Step 2</b> Look back: answer the question in the frame, or skip if there is no time."
+ },
+ "think": {
+  "th": "🤔 ถ้าเห็นเพื่อนโดนล้อในกลุ่มแชท เรากล้าทำอะไร และอะไรที่ยังไม่กล้า?",
+  "en": "🤔 If a friend is teased in a group chat, what would we dare to do, and what not yet?"
+ },
+ "multi": {
+  "event": { "th": "💬 เกิดการกลั่นแกล้งในโลกออนไลน์", "en": "💬 Cyberbullying happens" },
+  "min": 2,
+  "max": 5,
+  "cause": {
+   "label": { "th": "⬅️ ทำไมถึงมีคนอยากแกล้ง", "en": "⬅️ Why someone wants to bully" },
+   "ph": [
+    { "th": "เพราะคนที่แกล้ง...", "en": "Because the bully..." },
+    { "th": "เพราะเพื่อนในกลุ่ม...", "en": "Because others in the group..." },
+    { "th": "เพราะในเน็ต...", "en": "Because online..." }
+   ]
+  },
+  "effect": {
+   "label": { "th": "ถูกแกล้งแล้วเกิดอะไรขึ้น ➡️", "en": "What happens after being bullied ➡️" },
+   "ph": [
+    { "th": "คนที่โดนแกล้งรู้สึก...", "en": "The person feels..." },
+    { "th": "ที่โรงเรียน...", "en": "At school..." },
+    { "th": "ข้อความนั้น...", "en": "The message..." }
+   ]
+  }
+ },
+ "cards": []
+}

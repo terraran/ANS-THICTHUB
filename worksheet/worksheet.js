@@ -8,6 +8,8 @@
 // add = ขั้น 1 เด็กพิมพ์การ์ดของตัวเองเพิ่มลงกล่องไหนก็ได้ (อย่างน้อย add.min ใบ ไม่ตรวจถูกผิด)
 // write.fields[].hd = หัวข้อเหนือช่อง (แค่แสดง) · noReason = ไม่มีขั้นให้เหตุผล: ขั้น 2 เสร็จแล้วเด้งคำถาม Frame of Reference เลย (หัวขั้นเหลือ 3 ขั้น)
 // write.flex = Flow Map ไม่จำกัดขั้น: กล่องแรกเลือกสัญญาณ (signs + พิมพ์เพิ่มเอง) · เด็กกด ➕ เพิ่มกล่องเอง (min-max กล่อง)
+// map: "multi" = Multi-Flow Map: เหตุการณ์ (multi.event) อยู่กลาง · ซ้าย = สาเหตุ (multi.cause) · ขวา = ผล (multi.effect) · เด็กกด ➕ เพิ่มกล่องเอง (min-max ต่อฝั่ง)
+//   ขั้น 1 เขียน Map → ขั้น 2 คิดย้อนกลับ (FoR) แล้วส่ง · ไม่ตรวจถูกผิด · เก็บใน write.ca / write.ef
 // write.choose[].thumb = รูปบนการ์ดเลือกเรื่อง (ไม่ใส่ = ใช้ art ฉากแรก) · write.choose[].scenes = การ์ตูนสั้น: ขั้น 1 เลือกเรื่องแล้วดูให้จบ · cards: [] = ไม่มีการ์ด ไม่ตรวจถูกผิด ครูอ่านที่เด็กเขียน
 (() => {
 const $ = s => document.querySelector(s);
@@ -25,7 +27,7 @@ const UI = {
         loading: 'กำลังโหลดงานที่ทำค้างไว้...', pairAdd: '+ ทำกับเพื่อน', pairChange: 'เปลี่ยนเพื่อน', pairHd: r => `ทำงานคู่กับใคร? (${r})`,
         solo: 'ทำคนเดียว', pairFt: 'กดส่งครั้งเดียว ใบงานนับให้ทั้งสองคน', rosterErr: 'โหลดรายชื่อไม่สำเร็จ ลองใหม่อีกครั้ง',
         addPh: 'พิมพ์เพิ่ม 1 ข้อ...', addTo: 'ใส่ใน', addN: (n, m) => n >= m ? `เพิ่มแล้ว ${n} ใบ ✓ เพิ่มอีกได้` : `เพิ่มแล้ว ${n} ใบ · อีก ${m - n} ใบ`, del: 'ลบ', myOwn: 'การ์ดที่เราเพิ่ม:', addBubble: '➕ เพิ่มฟอง',
-        replay: '↺ ดูอีกครั้ง', addHere: 'เพิ่มกล่องตรงนี้ไหม?', addBox: 'เพิ่มกล่องไหม?', add: 'เพิ่ม', watchAgain: '▶ ดูการ์ตูนอีกครั้ง', chooseTtl: '🎬 เลือกเรื่องที่อยากดู', watchThis: '▶ ดูเรื่องนี้', change: '⇄ เปลี่ยนเรื่อง', doneWrite: 'ส่ง Flow Map ให้ครูแล้ว ครูจะอ่านที่เราเขียน' },
+        replay: '↺ ดูอีกครั้ง', addMf: '➕ เพิ่มกล่อง', doneMulti: 'ส่ง Multi-Flow Map ให้ครูแล้ว ครูจะอ่านที่เราเขียน', addHere: 'เพิ่มกล่องตรงนี้ไหม?', addBox: 'เพิ่มกล่องไหม?', add: 'เพิ่ม', watchAgain: '▶ ดูการ์ตูนอีกครั้ง', chooseTtl: '🎬 เลือกเรื่องที่อยากดู', watchThis: '▶ ดูเรื่องนี้', change: '⇄ เปลี่ยนเรื่อง', doneWrite: 'ส่ง Flow Map ให้ครูแล้ว ครูจะอ่านที่เราเขียน' },
   en: { steps: ['1 Sort', '2 Find signs', '3 Explain', '4 Look back'], stepTag: (n, m) => `Step ${n} / ${m}`, lib: 'Activities', week: n => `Week ${n}`,
         next: 'Next step ➜', back: '◀ Back', check: 'Check and send to teacher ✔', skip: 'Skip and send', edit: '✏️ Fix and send again', lib2: 'Back to activities',
         pickHint: '👆 Tap the card you were least sure about', picked: 'The card we were least sure about:', reason: 'What makes you think that?', reasonPh: 'Type your reason...',
@@ -38,7 +40,7 @@ const UI = {
         loading: 'Loading your saved work...', pairAdd: '+ Work with a friend', pairChange: 'Change friend', pairHd: r => `Who are you working with? (${r})`,
         solo: 'Work alone', pairFt: 'Send once and it counts for both of you', rosterErr: 'Could not load names. Try again.',
         addPh: 'Type 1 more...', addTo: 'Put in', addN: (n, m) => n >= m ? `${n} added ✓ you can add more` : `${n} added · ${m - n} to go`, del: 'Delete', myOwn: 'Cards we added:', addBubble: '➕ Add bubble',
-        replay: '↺ Watch again', addHere: 'Add a box here?', addBox: 'Add a box?', add: 'Add', watchAgain: '▶ Watch the cartoon again', chooseTtl: '🎬 Pick a story to watch', watchThis: '▶ Watch this', change: '⇄ Change story', doneWrite: 'Your Flow Map was sent. Your teacher will read it.' }
+        replay: '↺ Watch again', addMf: '➕ Add a box', doneMulti: 'Your Multi-Flow Map was sent. Your teacher will read it.', addHere: 'Add a box here?', addBox: 'Add a box?', add: 'Add', watchAgain: '▶ Watch the cartoon again', chooseTtl: '🎬 Pick a story to watch', watchThis: '▶ Watch this', change: '⇄ Change story', doneWrite: 'Your Flow Map was sent. Your teacher will read it.' }
 };
 
 const H = new URLSearchParams(location.hash.slice(1));
@@ -65,18 +67,22 @@ function shuffle(a){ a = a.slice(); for (let i = a.length - 1; i > 0; i--) { con
 const cardOf = id => document.querySelector(`.cardx[data-id="${id}"]`);
 const bins = () => C.bins || [{ id: 'a', label: C.binA }, { id: 'b', label: C.binB }];
 const binLabel = id => (bins().find(b => b.id === id) || {}).label;
-const isWrite = () => !!C.write;
+const MULTI = () => C.map === 'multi';
+const isWrite = () => !!C.write || MULTI();
 const fieldEl = id => document.querySelector(`[data-f="${id}"]`);
 const signsDone = () => C.cards.filter(c => placed[c.id] === 'b').every(c => signs[c.id] && signs[c.id].size);
 const FLEX = () => !!(C.write && C.write.flex);
 const flexDone = () => wr.sg.length + wr.so.length >= 1 && wr.st.length >= (C.write.flex.min || 1) && wr.st.every(x => x.trim().length >= 2);
 const writeDone = () => (!C.write.choose || !!wr.pick) && (FLEX() ? flexDone() : C.write.fields.every(f => (wr.f[f.id] || '').trim().length >= 2));
-const step2Done = () => isWrite() ? writeDone() : signsDone();
+const mfOk = (xs, M) => xs.length >= (M.min || 2) && xs.every(x => x.trim().length >= 2);
+const multiDone = () => mfOk(wr.ca, C.multi) && mfOk(wr.ef, C.multi);
+const step2Done = () => MULTI() ? multiDone() : isWrite() ? writeDone() : signsDone();
 const isAdd = () => !!C.add;
 const WEB = () => C.map === 'bubble';
 const ownDone = () => !isAdd() || (own.length >= (C.add.min || 3) && (!WEB() || own.every(o => o.bin)));
 const skip3 = () => !!C.noReason;
-const stepNo = n => skip3() && n === 4 ? 3 : n;   // เลขขั้นที่เด็กเห็น
+const stepNo = n => n >= 3 && MULTI() ? 2 : skip3() && n === 4 ? 3 : n;   // เลขขั้นที่เด็กเห็น
+const stepMax = () => MULTI() ? 2 : skip3() ? 3 : 4;
 const STORY = () => !!(C.write && C.write.choose && C.write.choose.some(c => c.scenes));
 const story = () => STORY() && C.write.choose.find(c => c.id === wr.pick);
 const storyDone = () => !STORY() || (!!wr.pick && seen);
@@ -102,6 +108,9 @@ function buildMap(){
     m.className = 'map flow';
     m.innerHTML = '<div class="frow">' + steps.map(box).join('<div class="arrow">➜</div>') + '</div>' + off.map(box).join('');
     if (FLEX()) { m.className = 'map flow flex'; m.innerHTML = '<div class="frow" id="frow"></div>'; Object.assign(wr, { sg: [], so: [], st: [] }); bindFlex(); }
+  } else if (MULTI()) {
+    m.className = 'map multi'; m.innerHTML = '<div class="mf" id="mf"></div>';
+    Object.assign(wr, { ca: [''], ef: [''] }); bindMulti();
   }
   if (C.add) {
     $('#addBins').innerHTML = WEB() ? '<button type="button" class="ab add" data-b=""></button>'
@@ -180,6 +189,48 @@ function bindFlex(){
   });
   fr.addEventListener('input', e => { const i = e.target.dataset.st; if (i == null) return; wr.st[+i] = e.target.value; dirty = true; update(); });
   fr.addEventListener('keydown', e => { if (e.target.id === 'sgTx' && e.key === 'Enter') { e.preventDefault(); addSign(); } });
+}
+
+// ---- Multi-Flow Map (map: "multi"): wr.ca = กล่องสาเหตุ · wr.ef = กล่องผล ----
+let mfNew = '';   // กล่องที่เพิ่งกด ➕ (เด้งเข้าเฉพาะกล่องนี้ ไม่เด้งทุกครั้งที่วาดใหม่)
+function renderMulti(){
+  const M = C.multi, U = UI[L], ed = step === 1 && !checked;
+  const col = k => { const xs = wr[k], S = k === 'ca' ? M.cause : M.effect, ph = i => t(S.ph[Math.min(i, S.ph.length - 1)]);
+    return `<div class="mcol ${k}"><h2>${esc(t(S.label))}</h2><div class="mlist">` + xs.map((x, i) =>
+      `<div class="mbox${mfNew === k + i ? ' nw' : ''}"><textarea data-mf="${k}" data-i="${i}" maxlength="120" placeholder="${esc(ph(i))}"${ed ? '' : ' readonly'}>${esc(x)}</textarea>` +
+      (ed && xs.length > 1 ? `<button type="button" class="x" data-mdel="${k}" data-i="${i}" aria-label="${U.del}">✕</button>` : '') + '</div>').join('') +
+      (ed && xs.length < (M.max || 5) ? `<button type="button" class="madd" data-madd="${k}">${U.addMf}</button>` : '') + '</div></div>'; };
+  $('#mf').innerHTML = '<svg class="mfl" id="mfl" aria-hidden="true"></svg>' + col('ca') +
+    `<div class="mev"><div class="mevb" id="mev">${esc(t(M.event))}</div></div>` + col('ef');
+  mfNew = ''; requestAnimationFrame(drawMulti);
+}
+// เส้นลูกศร: กล่องสาเหตุ → เหตุการณ์ → กล่องผล (คิดจากตำแหน่งจริง หารด้วย scale ของจอ)
+function drawMulti(){
+  const mf = $('#mf'), ev = $('#mev'), svg = $('#mfl'); if (!mf || !ev || !svg) return;
+  const o = mf.getBoundingClientRect(), r = el => { const b = el.getBoundingClientRect(); return { l: (b.left - o.left) / scale, r: (b.right - o.left) / scale, y: (b.top + b.height / 2 - o.top) / scale }; };
+  const e = r(ev);
+  svg.setAttribute('viewBox', `0 0 ${o.width / scale} ${o.height / scale}`);
+  const line = (x1, y1, x2, y2, k) => `<path class="${k}" d="M${x1},${y1} C${(x1 + x2) / 2},${y1} ${(x1 + x2) / 2},${y2} ${x2},${y2}" marker-end="url(#mfa-${k})"/>`;
+  const spread = (i, n) => e.y + (i - (n - 1) / 2) * 16;
+  const ca = [...mf.querySelectorAll('.ca .mbox')], ef = [...mf.querySelectorAll('.ef .mbox')];
+  svg.innerHTML = '<defs>' + ['ca', 'ef'].map(k => `<marker id="mfa-${k}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path class="${k}" d="M0,0 L10,5 L0,10 z"/></marker>`).join('') + '</defs>' +
+    ca.map((b, i) => { const p = r(b); return line(p.r + 4, p.y, e.l - 16, spread(i, ca.length), 'ca'); }).join('') +
+    ef.map((b, i) => { const p = r(b); return line(e.r + 12, spread(i, ef.length), p.l - 8, p.y, 'ef'); }).join('');
+}
+addEventListener('resize', () => { if (C && MULTI()) drawMulti(); });
+function bindMulti(){
+  const mf = $('#mf');
+  mf.addEventListener('click', e => {
+    if (step !== 1 || checked) return;
+    const a = e.target.closest('[data-madd]'), d = e.target.closest('[data-mdel]');
+    if (a) { wr[a.dataset.madd].push(''); mfNew = a.dataset.madd + (wr[a.dataset.madd].length - 1); }
+    else if (d) wr[d.dataset.mdel].splice(+d.dataset.i, 1);
+    else return;
+    dirty = true; renderMulti(); update();
+    if (a) { const xs = mf.querySelectorAll(`.${a.dataset.madd} textarea`); xs[xs.length - 1].focus(); }
+  });
+  mf.addEventListener('input', e => { const k = e.target.dataset.mf; if (!k) return; wr[k][+e.target.dataset.i] = e.target.value; dirty = true; update(); });
+  mf.addEventListener('pointerdown', e => e.stopPropagation());
 }
 
 // ---- การ์ดที่เด็กเพิ่มเอง (ขั้น 1) ----
@@ -297,7 +348,10 @@ function paintWrite(){
   w.fields.forEach(f => { const el = fieldEl(f.id); if (!el) return; el.placeholder = t(f.ph); el.previousElementSibling.textContent = t(f.hd || f.label); });
 }
 const writeSummary = () => {
-  const th = o => (o && typeof o === 'object') ? o.th : o, w = C.write, p = (w.choose || []).find(c => c.id === wr.pick);
+  const th = o => (o && typeof o === 'object') ? o.th : o;
+  if (MULTI()) { const xs = k => wr[k].map(x => x.trim()).filter(Boolean).join(', ');
+    return `${plain(th(C.multi.event))} | ${plain(th(C.multi.cause.label))}: ${xs('ca')} | ${plain(th(C.multi.effect.label))}: ${xs('ef')}`; }
+  const w = C.write, p = (w.choose || []).find(c => c.id === wr.pick);
   if (w.flex) return (p ? plain(th(p.text)) + ' | ' : '') + 'สัญญาณ: ' + w.flex.signs.filter(g => wr.sg.includes(g.id)).map(g => th(g.text)).concat(wr.so).join(', ') +
     wr.st.map((x, i) => ` | ขั้น ${i + 2}: ${x.trim()}`).join('');
   return (p ? plain(th(p.text)) + ' | ' : '') + w.fields.map(f => plain(th(f.label || binLabel(f.in)) || f.id) + ': ' + (wr.f[f.id] || '').trim()).join(' | ');
@@ -370,11 +424,11 @@ function applyLang(){
   $('#toLib').href = libHref();
   $('#ttl').textContent = `${U.week(C.week)} · ${t(C.title)}`; document.title = t(C.title);
   (t(C.steps) || U.steps).forEach((s, i) => $('#s' + (i + 1)).textContent = s);
-  $('#s4').classList.toggle('hide', skip3());
-  $('#stag').textContent = U.stepTag(stepNo(Math.min(step, 4)), skip3() ? 3 : 4);
+  $('#s4').classList.toggle('hide', skip3()); $('#s3').classList.toggle('hide', MULTI());
+  $('#stag').textContent = U.stepTag(stepNo(Math.min(step, 4)), stepMax());
   let task = t(C['task' + step]) || '';
   if (step === 3) task += hes ? '' : `<br><b>${U.pickHint}</b>`;
-  if (checked) task = `<b>${U.round(round)}</b> · ${C.cards.length ? U.doneTask : U.doneWrite}`;
+  if (checked) task = `<b>${U.round(round)}</b> · ${C.cards.length ? U.doneTask : MULTI() ? U.doneMulti : U.doneWrite}`;
   $('#task').innerHTML = task;
   if ($('#root')) $('#root').textContent = t(C.root);
   if ($('#topA')) { $('#topA').textContent = t(C.topicA); $('#topB').textContent = t(C.topicB); }
@@ -382,6 +436,7 @@ function applyLang(){
   paintWrite();
   if (STORY()) { paintStrip(); if (step === 1 && !checked) paintScene(); }
   if (FLEX()) renderFlex();
+  if (MULTI()) renderMulti();
   if (C.add) {
     $('#addTx').placeholder = t(C.add.ph) || U.addPh;
     document.querySelectorAll('.ab').forEach(b => b.textContent = b.dataset.b ? `${U.addTo} ${t(binLabel(b.dataset.b))}` : U.addBubble);
@@ -446,7 +501,7 @@ function place(el, bin){ bin.querySelector('.list').appendChild(el); placed[el.d
 function update(){
   if (!C) return;
   if (dirty && !checked) scheduleSave();
-  if (step === 1) $('#next').disabled = Object.keys(placed).length !== C.cards.length || !ownDone() || !storyDone();
+  if (step === 1) $('#next').disabled = Object.keys(placed).length !== C.cards.length || !ownDone() || !storyDone() || (MULTI() && !multiDone());
   if (C.add) { $('#addN').textContent = UI[L].addN(own.length, C.add.min || 3);
     const full = own.length >= (C.add.max || 9);
     document.querySelectorAll('.ab').forEach(b => b.disabled = full || !$('#addTx').value.trim()); $('#addTx').disabled = full; }
@@ -485,10 +540,10 @@ function setStep(n){
   applyLang(); update();
   if (dirty && !checked) saveNow();
 }
-$('#next').onclick = () => setStep(step === 2 && skip3() ? 4 : step + 1);
+$('#next').onclick = () => setStep(MULTI() || (step === 2 && skip3()) ? 4 : step + 1);
 $('#back').onclick = () => setStep(step - 1);
 $('#toFor').onclick = () => setStep(4);
-$('#forBack').onclick = () => setStep(skip3() ? 2 : 3);
+$('#forBack').onclick = () => setStep(MULTI() ? 1 : skip3() ? 2 : 3);
 
 const score = () => C.cards.filter(c => placed[c.id] === c.bin).length;
 function showSent(){ const U = UI[L], s = $('#sent'); s.className = 'sent ' + sendState;
@@ -587,6 +642,10 @@ function restore(d){
   if (isAdd() && Array.isArray(d.own)) { own = []; document.querySelectorAll('.cardx.own').forEach(x => x.remove()); d.own.forEach(o => addOwn(o.text, o.bin, o.id)); }
   layout();
   Object.keys(d.signs || {}).forEach(id => { if (placed[id] === 'b') { signs[id] = new Set(d.signs[id]); cardOf(id).querySelectorAll('.chip').forEach(ch => ch.classList.toggle('on', signs[id].has(+ch.dataset.s))); } });
+  if (MULTI() && d.write) {
+    const arr = x => Array.isArray(x) && x.length ? x.slice(0, C.multi.max || 5).map(String) : [''];
+    wr = { pick: '', f: {}, ca: arr(d.write.ca), ef: arr(d.write.ef) };
+  }
   if (C.write && d.write) {
     wr = { pick: d.write.pick || '', f: Object.assign({}, d.write.f) }; seen = !!wr.pick; choosing = false;
     if (FLEX()) { const arr = x => Array.isArray(x) ? x.map(String) : []; Object.assign(wr, { sg: arr(d.write.sg), so: arr(d.write.so), st: arr(d.write.st) }); }
@@ -596,6 +655,7 @@ function restore(d){
   $('#reason').value = d.reason || ''; $('#fr').value = d.fr || '';
   setPartner(d.partner && d.partner !== me.name ? d.partner : '');
   // ไปขั้นที่ไกลที่สุดที่ทำได้จริง (กันข้อมูลไม่ครบ)
+  if (MULTI()) return (d.step || 1) >= 4 && multiDone() ? 4 : 1;
   let n = 1;
   if (Object.keys(placed).length === C.cards.length && ownDone() && storyDone()) n = 2;
   if (n === 2 && step2Done()) n = 3;

@@ -1,0 +1,46 @@
+{
+ "act": "y3w3",
+ "level": "Y3",
+ "week": 3,
+ "map": "multi",
+ "title": { "th": "คิดก่อนโพสต์ ร่องรอยดิจิทัลลบไม่หาย", "en": "Think before you post" },
+ "noReason": true,
+ "steps": {
+  "th": ["1 เขียน Multi-Flow Map", "2 คิดย้อนกลับ"],
+  "en": ["1 Write the Multi-Flow Map", "2 Look back"]
+ },
+ "task1": {
+  "th": "<b>ขั้นที่ 1</b> ฝั่งซ้าย เขียนว่า <b>เราสร้างร่องรอยดิจิทัลได้อย่างไร</b> · ฝั่งขวา เขียนว่า <b>ร่องรอยนั้นทำอะไรกับชีวิตเราได้</b> · กด ➕ เพิ่มกล่อง เขียนอย่างน้อยฝั่งละ 2 กล่อง",
+  "en": "<b>Step 1</b> Left: write <b>how we make digital footprints</b>. Right: write <b>what those footprints can do to our life</b>. Tap ➕ to add boxes. Write at least 2 on each side."
+ },
+ "task4": {
+  "th": "<b>ขั้นที่ 2</b> คิดย้อนกลับ: ตอบคำถามในกรอบ หรือกดข้ามได้ถ้าเวลาไม่พอ",
+  "en": "<b>Step 2</b> Look back: answer the question in the frame, or skip if there is no time."
+ },
+ "think": {
+  "th": "🤔 ก่อนจะโพสต์ครั้งหน้า เราจะถามตัวเองว่าอะไร?",
+  "en": "🤔 Before we post next time, what will we ask ourselves?"
+ },
+ "multi": {
+  "event": { "th": "👣 เกิดร่องรอยดิจิทัล", "en": "👣 A digital footprint is made" },
+  "min": 2,
+  "max": 5,
+  "cause": {
+   "label": { "th": "⬅️ เราสร้างร่องรอยได้อย่างไร", "en": "⬅️ How we make footprints" },
+   "ph": [
+    { "th": "เวลาเรา...", "en": "When we..." },
+    { "th": "เมื่อเรากด...", "en": "When we tap..." },
+    { "th": "ตอนที่เราพิมพ์...", "en": "When we type..." }
+   ]
+  },
+  "effect": {
+   "label": { "th": "ร่องรอยทำอะไรกับชีวิตเรา ➡️", "en": "What footprints can do to our life ➡️" },
+   "ph": [
+    { "th": "คนอื่นอาจ...", "en": "Other people might..." },
+    { "th": "ในอนาคต...", "en": "In the future..." },
+    { "th": "เราอาจรู้สึก...", "en": "We might feel..." }
+   ]
+  }
+ },
+ "cards": []
+}

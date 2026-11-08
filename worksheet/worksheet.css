@@ -320,3 +320,27 @@ main{min-width:0}
 .scard:hover .go{background:#0369a1}
 #change{position:absolute;left:0;font-size:18px}
 @media (prefers-reduced-motion:reduce){.scard,.sart span{animation:none}}
+/* Multi-Flow Map (map: "multi") · ซ้าย = สาเหตุ → เหตุการณ์กลาง → ขวา = ผล · เส้นลูกศรวาดด้วย SVG (#mfl) */
+.multi{display:block;position:relative}
+.mf{--ca:#c2410c;--ef:#7c3aed;position:relative;height:100%;display:grid;grid-template-columns:minmax(0,1fr) 300px minmax(0,1fr);gap:0 90px;background:#fff;border:3px solid var(--line);border-radius:24px;padding:14px 22px}
+.mfl{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+.mfl path{fill:none;stroke-width:4;stroke-linecap:round}
+.mfl path.ca{stroke:var(--ca)}.mfl path.ef{stroke:var(--ef)}
+.mfl marker path{stroke:none!important}.mfl marker path.ca{fill:var(--ca)}.mfl marker path.ef{fill:var(--ef)}
+.mcol{display:flex;flex-direction:column;gap:10px;min-height:0;position:relative;z-index:1}
+.mcol h2{margin:0;text-align:center;font-size:22px;color:#fff;border-radius:12px;padding:4px 10px}
+.mcol.ca h2{background:var(--ca)}.mcol.ef h2{background:var(--ef)}
+.mlist{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:center;gap:12px}
+.mbox{position:relative;flex:0 1 128px;min-height:0;display:flex}
+.mbox.nw{animation:boxin .3s cubic-bezier(.34,1.56,.64,1)}
+.mbox textarea{flex:1;height:auto;resize:none;font-family:inherit;font-size:20px;line-height:1.4;border:4px solid;border-radius:16px;padding:8px 14px;background:#fff;color:var(--ink)}
+.ca .mbox textarea{border-color:var(--ca)}.ef .mbox textarea{border-color:var(--ef)}
+.mbox textarea:read-only{background:#f8fafc}
+.mbox textarea:focus{outline:none;box-shadow:0 0 0 4px #fde68a}
+.mbox .x{position:absolute;top:-10px;right:-10px;width:32px;height:32px;min-height:0;padding:0;border-radius:50%;background:#fff;color:#64748b;border:2px solid #94a3b8;box-shadow:none;font-size:16px;opacity:.8}
+.mbox .x:hover{opacity:1;color:#dc2626;border-color:#dc2626}
+.madd{align-self:center;flex:none;background:transparent;color:#64748b;border:3px dashed #94a3b8;box-shadow:none;border-radius:999px;padding:4px 22px;min-height:46px;font-size:19px}
+.madd:hover,.madd:focus-visible{background:#e0f2fe;border-color:var(--accent);color:var(--accent)}
+.mev{display:flex;align-items:center;justify-content:center;position:relative;z-index:1}
+.mevb{width:100%;min-height:170px;display:flex;align-items:center;justify-content:center;text-align:center;background:var(--navy);color:#fff;font-size:27px;font-weight:800;line-height:1.35;border-radius:22px;padding:18px;box-shadow:0 0 0 6px #fff,0 0 0 10px var(--navy)}
+@media (prefers-reduced-motion:reduce){.mbox.nw{animation:none}}

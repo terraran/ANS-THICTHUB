@@ -135,7 +135,7 @@ test('เปิด/ปิดกิจกรรม: สวิตช์เขี�
   await page.click('#rooms button:has-text("Y3.2")');
   await page.click('#tabs button:has-text("เปิด/ปิดกิจกรรม")');
   const sw = id => page.locator(`.sw[data-act="${id}"]`);
-  await expect(page.locator('.sw')).toHaveCount(4);                                  // Y3: ใบงาน 2 + เกม 2
+  await expect(page.locator('.sw')).toHaveCount(6);                                  // Y3: ใบงาน 3 + เกม 3
   await expect(sw('profile')).toHaveText('ปิดอยู่');
   await expect(sw('y3w1')).toHaveAttribute('aria-checked', 'true');
   await expect(sw('y3w2')).toHaveText('เปิดอยู่');

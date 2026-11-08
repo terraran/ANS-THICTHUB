@@ -142,7 +142,7 @@ test('การ์ดที่ครูยังไม่เปิดถูก�
   await expect(page.locator('.card[data-act="y3w1"] .lockbox')).toBeVisible();
   await expect(page.locator('.card[data-act="y3w1"] a')).toHaveCount(0);
   await page.click('[data-tab="game"]');
-  await expect(page.locator('.card')).toHaveCount(2);   // Y3 เห็นแค่เกมของ Y3 (ผจญภัย + ตั้งโปรไฟล์)
+  await expect(page.locator('.card')).toHaveCount(3);   // Y3 เห็นแค่เกมของ Y3 (ผจญภัย + ตั้งโปรไฟล์ + โพสต์ดีไหมนะ)
   await expect(page.locator('.card[data-act="profile"] .lockbox')).toBeVisible();   // ครูยังไม่เปิด
   await expect(page.locator('.card[data-act="profile"] button')).toHaveCount(0);
   await expect(page.locator('.card[data-act="adventure"] .st')).toHaveText('เล่นได้เลย');
