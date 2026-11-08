@@ -274,19 +274,30 @@ test('เกมฮีโร่กลุ่มแชท (Y4): แชทเด้�
   }
   // ตัวเลือกเฉพาะเหตุการณ์ 2 ข้อ (ช่วยได้ 1 + ไม่ช่วย 1) อยู่ในตัวเลือกทุกรอบ
   expect(await page.evaluate(() => { const R = ROUNDS[order[round]]; return R.sp.every(a => opts.some(o => o.id === a.id)) && R.sp.map(a => a.h).join(); })).toBe('1,0');
-  // จบ → ฉาก 1 สัปดาห์ต่อมา: การ์ดมาจากตัวเลือกที่เลือกจริง · ตอนจบตามหัวใจของภูมิ
+  // จบ → ฉาก 1 สัปดาห์ต่อมา: อนิเมชันทีละฉาก (1 ตัวเลือก = 1 ฉาก) แล้วต่อด้วยฉากตอนจบตามหัวใจของภูมิ
   await page.click('#next');
   await expect(page.locator('#sEpi')).toBeVisible();
   await expect(page.locator('#epTitle')).toHaveText('📅 1 สัปดาห์ต่อมา…');
+  const want = await page.evaluate(() => ({ x: epS.map(c => c.x.th), lbl: epS[0].lbl, end: endKey(), cards: epiCards().length, n: ENDS[endKey()].c.length }));
+  expect(want.x.length).toBe(want.cards + want.n);
+  expect(want.lbl).toMatch(/^เพราะเราเลือก: /);
+  await expect(page.locator('.edot')).toHaveCount(want.x.length);
+  await expect(page.locator('.escn .esay')).toHaveText(want.x[0]);
+  await expect(page.locator('.escn')).toHaveClass(/bg-bad/);                // รอบแรกเลือกไม่ช่วย = ฉากหม่น
+  await expect(page.locator('.escn .eart span')).toHaveCount(3);
   await expect(page.locator('#toSum')).toBeHidden();
-  await expect(page.locator('#epCards .ecard')).toHaveCount(1, { timeout: 4000 });   // เด้งทีละใบ
-  const want = await page.evaluate(() => ({ cards: epiCards().map(h => h.af.x.th), end: endKey(), n: ENDS[endKey()].c.length }));
-  for (let k = 0; k < 12; k++) await page.click('#epTitle');              // แตะเพื่อข้าม
-  await expect(page.locator('#toSum')).toBeVisible({ timeout: 8000 });
-  await expect(page.locator('#epCards .ecard span:last-child')).toHaveText(want.cards);
-  await expect(page.locator('#ending')).toHaveClass(new RegExp(want.end));
-  await expect(page.locator('#enCards .ecard')).toHaveCount(want.n);
-  await expect(page.locator('#epCards .ecard.b')).toHaveCount(1);            // รอบแรกเลือกไม่ช่วย = การ์ดผลเสีย 1 ใบ
+  await expect(page.locator('.escn .esay')).toHaveText(want.x[1], { timeout: 6000 });   // เปลี่ยนฉากเอง
+  for (let i = 2; i < want.x.length; i++) {                                  // แตะจอ = ฉากถัดไป
+    await page.click('#epStage');
+    await expect(page.locator('.escn .esay')).toHaveText(want.x[i]);
+  }
+  await expect(page.locator('.escn')).toHaveClass(new RegExp('bg-end-' + want.end));
+  await expect(page.locator('#toSum')).toBeVisible();
+  await page.click('.edot >> nth=0');                                       // กดจุดย้อนดูฉากแรกได้
+  await expect(page.locator('.escn .esay')).toHaveText(want.x[0]);
+  await page.click('#len');
+  await expect(page.locator('.escn .elbl')).toContainText('Because we chose:');
+  await page.click('#lth');
   await page.click('#toSum');
   await expect(page.locator('#eSum')).toContainText('เราช่วยภูมิ 4 จาก 5 ครั้ง');
   await expect(page.locator('#eList > div')).toHaveCount(5);
@@ -318,6 +329,10 @@ test('เกมสัปดาห์ 3: คลังโพสต์ 22 แบบ
     af: ROUNDS.every(R => ACTS.concat(R.sp).every(a => forEvent(a, R).af.x.th && forEvent(a, R).af.x.en)), ends: Object.keys(ENDS).join(),
     who: forEvent(ACTS.find(a => a.id === 'fight'), ROUNDS[6]).af.x.th, sad: ENDS.sad.c.map(c => c.x.th).join(' ') }));
   expect(sp).toMatchObject({ every: true, af: true, ends: 'good,mid,sad' });
+  // ทุกฉากผลที่ตามมามีตัวละคร 3 ตัว + ท่าทาง · ตอนจบมีภาพครบทุกการ์ด
+  const art = await page.evaluate(() => ({ sp: ROUNDS.every(R => R.sp.every(a => SCENE[a.id] && SCENE[a.id][0].length === 3)), gen: Object.keys(AFTER).every(k => SCENE[k]),
+    ends: Object.keys(ENDS).every(k => ENDART[k].length === ENDS[k].c.length) }));
+  expect(art).toEqual({ sp: true, gen: true, ends: true });
   expect(sp.who).toContain('มิ้นท์'); expect(sp.sad).toContain('ย้ายไปเรียนโรงเรียนอื่น');
   expect(names.fake).toEqual(expect.arrayContaining(['talkta', 'fight', 'revenge']));
 });
