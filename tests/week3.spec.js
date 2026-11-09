@@ -37,7 +37,7 @@ function mockApi(page, open, api = { posts: [], done: {}, drafts: {}, members: {
   return api;
 }
 
-test('เนื้อหาสัปดาห์ 3: Multi-Flow Map ครบ TH/EN · แถวใน activities มี frq/afterGame · เกมล็อกด้วยใบงานคู่', async () => {
+test('เนื้อหาสัปดาห์ 3: Multi-Flow Map ครบ TH/EN · แถวใน activities มี frq/afterGame · เกมเล่นก่อนทำใบงานได้ (ไม่มี requires)', async () => {
   const A = ACTS();
   for (const [id, level, game] of [['y3w3', 'Y3', 'footprint'], ['y4w3', 'Y4', 'upstander']]) {
     const C = content(id);
@@ -49,7 +49,8 @@ test('เนื้อหาสัปดาห์ 3: Multi-Flow Map ครบ TH/
     expect(row).toMatchObject({ level, week: 3, kind: 'sheet', path: 'worksheet/?act=' + id, afterGame: game });
     expect(row.frq.th && row.frq.en && row.frPh.th && row.frPh.en).toBeTruthy();
     const g = A.find(a => a.id === game);
-    expect(g).toMatchObject({ kind: 'game', level, ownBack: true, requires: id, path: `games/${game}.html` });
+    expect(g).toMatchObject({ kind: 'game', level, ownBack: true, path: `games/${game}.html` });
+    expect(g.requires).toBeUndefined();                                     // สัปดาห์นี้ครูให้เล่นเกมก่อนทำใบงานได้
     expect(g.tag.th && g.tag.en && g.title.th && g.title.en).toBeTruthy();
     expect(fs.existsSync(path.join(__dirname, '..', g.path))).toBe(true);
   }
@@ -175,17 +176,23 @@ test('Y4 สัปดาห์ 3 Multi-Flow Map: ภาษาอังกฤษ 
   expect(errs).toEqual([]);
 });
 
-test('เกม Y3/Y4 สัปดาห์ 3 ล็อกในคลังจนกว่าจะส่งใบงานคู่กัน', async ({ page }) => {
+test('เกม Y3/Y4 สัปดาห์ 3 เล่นได้ก่อนส่งใบงาน (ครูเปิดแล้ว) · ถ้าครูยังไม่เปิด ยังล็อก', async ({ page }) => {
   for (const [room, sheet, game] of [['Y3.2', 'y3w3', 'footprint'], ['Y4.1', 'y4w3', 'upstander']]) {
-    const api = mockApi(page, { [sheet]: true, [game]: true });
+    mockApi(page, { [sheet]: true, [game]: true });                          // ยังไม่ได้ส่งใบงาน
+    const card = page.locator(`.card[data-act="${game}"]`);
     await page.goto(`/#/lib/${room}/` + encodeURIComponent('ขิม'));
     await page.click('[data-tab="game"]');
-    await expect(page.locator(`.card[data-act="${game}"] .lockbox`)).toHaveText('ทำใบงานสัปดาห์ 3 ให้เสร็จก่อน');
-    await expect(page.locator(`.card[data-act="${game}"] button`)).toHaveCount(0);
-    api.done['ขิม'] = { act: sheet, round: 1 };
+    await expect(card.locator('.st')).toHaveText('เล่นได้เลย');
+    await expect(card.locator('.lockbox')).toHaveCount(0);
+    await card.locator('button').click();
+    await expect(page.locator('#gameWrap')).toBeVisible();
+    await page.frameLocator('#gameFrame').locator('#gback').click();
+    await expect(page.locator('#gameWrap')).toBeHidden();
+    await page.unrouteAll({ behavior: 'ignoreErrors' });
+    mockApi(page, { [sheet]: true });                                        // ครูยังไม่เปิดเกม
     await page.reload();
     await page.click('[data-tab="game"]');
-    await expect(page.locator(`.card[data-act="${game}"] .st`)).toHaveText('เล่นได้เลย');
+    await expect(card.locator('.lockbox')).toHaveText('ครูยังไม่เปิด');
     await page.unrouteAll({ behavior: 'ignoreErrors' });
   }
 });

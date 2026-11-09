@@ -49,10 +49,10 @@
     { "id": "footprint", "level": "Y3", "kind": "game",
       "tag": { "th": "คิดก่อนโพสต์", "en": "Think before posting" },
       "title": { "th": "โพสต์ดีไหมนะ?", "en": "To Post or Not?" },
-      "path": "games/footprint.html", "ownBack": true, "requires": "y3w3" },
+      "path": "games/footprint.html", "ownBack": true },
     { "id": "upstander", "level": "Y4", "kind": "game",
       "tag": { "th": "เป็นคนที่ช่วยได้", "en": "Be an upstander" },
       "title": { "th": "ฮีโร่กลุ่มแชท", "en": "Group Chat Hero" },
-      "path": "games/upstander.html", "ownBack": true, "requires": "y4w3" }
+      "path": "games/upstander.html", "ownBack": true }
   ]
 }
