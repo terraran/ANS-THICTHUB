@@ -116,7 +116,10 @@ const TG = {
   pointy: ['หูแหลม', 'pointy ears'], floppy: ['หูตก', 'floppy ears'], roundear: ['หูกลม', 'round ears'], longear: ['หูยาว', 'long ears'], whisk: ['มีหนวด', 'whiskers'], tail: ['มีหาง', 'a tail'], fur: ['มีขน', 'fur'],
   stripes: ['มีลาย', 'stripes'], spots: ['มีจุด', 'spots'], big: ['ตัวใหญ่', 'big'], tiny: ['ตัวเล็ก', 'small'], wild: ['สัตว์ป่า', 'wild'], pet: ['สัตว์เลี้ยง', 'pet'], mane: ['มีแผงคอ', 'a mane'],
   fins: ['มีครีบ', 'fins'], scales: ['มีเกล็ด', 'scales'], gills: ['มีเหงือก', 'gills'], water: ['อยู่ในน้ำ', 'lives in water'], smooth: ['ผิวเรียบ', 'smooth skin'], blow: ['มีรูหายใจบนหัว', 'a blowhole'],
-  shell: ['มีเปลือกแข็ง', 'a hard shell'], legs: ['มีขาหลายขา', 'many legs'], spikes: ['มีหนาม', 'spikes'], colorful: ['สีสด', 'bright colours'], flipper: ['มีครีบเท้า', 'flippers']
+  shell: ['มีเปลือกแข็ง', 'a hard shell'], legs: ['มีขาหลายขา', 'many legs'], spikes: ['มีหนาม', 'spikes'], colorful: ['สีสด', 'bright colours'], flipper: ['มีครีบเท้า', 'flippers'],
+  wings: ['มีปีก', 'wings'], fly: ['บินได้', 'can fly'], feathers: ['มีขนนก', 'feathers'], beak: ['มีจะงอยปาก', 'a beak'], eggs: ['ออกไข่', 'lays eggs'], swim: ['ว่ายน้ำได้', 'can swim'], bigear: ['หูใหญ่', 'big ears'], machine: ['เป็นเครื่องจักร', 'a machine'],
+  legs6: ['มี 6 ขา', '6 legs'], legs8: ['มี 8 ขา', '8 legs'], antenna: ['มีหนวดยาว', 'antennae'], body3: ['ตัวแบ่ง 3 ส่วน', '3 body parts'], web: ['ชักใย', 'spins webs'], slow: ['เดินช้า', 'slow'],
+  bark: ['เห่า', 'barks'], meow: ['ร้องเหมียว', 'meows'], curly: ['ขนหยิก', 'curly fur'], farm: ['สัตว์ในฟาร์ม', 'farm animal'], horns: ['มีเขา', 'horns']
 };
 // ด่าน: goal = สิ่งที่สอน · train = ภาพตัวอย่างให้ติดป้าย · test = ของใหม่ให้หุ่นทาย (is = เป็นจริงไหม)
 const LV = [
@@ -132,7 +135,24 @@ const LV = [
     train: [['🐟', 'ปลา', 'Fish', 'fins tail scales gills water tiny'], ['🐬', 'โลมา', 'Dolphin', 'fins tail water big smooth blow'], ['🦀', 'ปู', 'Crab', 'shell legs water tiny'], ['🐠', 'ปลาการ์ตูน', 'Clownfish', 'fins tail scales gills water tiny colorful'],
             ['🐙', 'ปลาหมึก', 'Octopus', 'legs water smooth'], ['🐡', 'ปลาปักเป้า', 'Pufferfish', 'fins gills water tiny spikes'], ['🦭', 'แมวน้ำ', 'Seal', 'flipper whisk water big smooth'], ['🐳', 'วาฬ', 'Whale', 'fins tail water big smooth blow']],
     test: [['🐟', 'ปลาตัวใหม่', 'A new fish', 'fins tail scales gills water tiny', 1], ['🦈', 'ฉลาม', 'A shark', 'fins tail gills water big smooth', 1], ['🐋', 'วาฬอีกตัว', 'Another whale', 'fins tail water big smooth blow', 0], ['🦞', 'กุ้งมังกร', 'A lobster', 'shell legs water', 0]],
-    note: ['🦈 ฉลามเป็นปลาจริง ๆ แต่หน้าตาคล้ายโลมา หุ่นที่ดูแค่หน้าตาจึงสับสนได้ ต่อให้สอนดีแล้ว AI ก็ยังผิดได้', '🦈 A shark really is a fish, but it looks like a dolphin. A robot that only looks can get confused. Even well-taught AI can be wrong.'] }
+    note: ['🦈 ฉลามเป็นปลาจริง ๆ แต่หน้าตาคล้ายโลมา หุ่นที่ดูแค่หน้าตาจึงสับสนได้ ต่อให้สอนดีแล้ว AI ก็ยังผิดได้', '🦈 A shark really is a fish, but it looks like a dolphin. A robot that only looks can get confused. Even well-taught AI can be wrong.'] },
+  { goal: ['🐦 นก', '🐦 Bird'],
+    train: [['🐦', 'นกกระจอก', 'Sparrow', 'feathers beak wings fly eggs tiny'], ['🦇', 'ค้างคาว', 'Bat', 'wings fly fur bigear tiny'], ['🦋', 'ผีเสื้อ', 'Butterfly', 'wings fly tiny colorful antenna'], ['🦆', 'เป็ด', 'Duck', 'feathers beak wings fly swim eggs'],
+            ['🐓', 'ไก่', 'Chicken', 'feathers beak wings eggs'], ['🐿️', 'กระรอก', 'Squirrel', 'fur tail tiny'], ['✈️', 'เครื่องบิน', 'Plane', 'wings fly machine'], ['🦉', 'นกฮูก', 'Owl', 'feathers beak wings fly eggs']],
+    test: [['🦜', 'นกแก้ว', 'A parrot', 'feathers beak wings fly eggs tiny colorful', 1], ['🐧', 'เพนกวิน', 'A penguin', 'feathers beak wings swim eggs', 1], ['🦇', 'ค้างคาวอีกตัว', 'Another bat', 'wings fly fur bigear tiny', 0], ['🐝', 'ผึ้ง', 'A bee', 'wings fly tiny stripes antenna', 0]],
+    note: ['🐧 เพนกวินบินไม่ได้แต่เป็นนก 🦇 ค้างคาวบินได้แต่ไม่ใช่นก นกทุกตัวมีขนนกและจะงอยปาก ไม่ใช่ทุกตัวที่บินได้', "🐧 A penguin can't fly but is a bird. 🦇 A bat can fly but is not a bird. Every bird has feathers and a beak; not every bird can fly."] },
+  { goal: ['🐞 แมลง', '🐞 Insect'],
+    train: [['🐜', 'มด', 'Ant', 'legs6 antenna body3 tiny'], ['🕷️', 'แมงมุม', 'Spider', 'legs8 web tiny'], ['🦋', 'ผีเสื้อ', 'Butterfly', 'legs6 antenna body3 wings tiny colorful'], ['🐌', 'หอยทาก', 'Snail', 'shell slow tiny smooth'],
+            ['🐞', 'เต่าทอง', 'Ladybird', 'legs6 antenna body3 wings tiny spots'], ['🦂', 'แมงป่อง', 'Scorpion', 'legs8 tail shell tiny'], ['🐝', 'ผึ้ง', 'Bee', 'legs6 antenna body3 wings tiny stripes'], ['🪱', 'ไส้เดือน', 'Worm', 'slow smooth tiny']],
+    test: [['🦗', 'จิ้งหรีด', 'A cricket', 'legs6 antenna body3 wings tiny', 1], ['🕷️', 'แมงมุมขนดก', 'A hairy spider', 'legs8 web tiny fur', 0], ['🦋', 'ผีเสื้อสีฟ้า', 'A blue butterfly', 'legs6 antenna body3 wings tiny colorful', 1], ['🦂', 'แมงป่องดำ', 'A black scorpion', 'legs8 tail shell', 0]],
+    note: ['🕷️ แมงมุมกับแมงป่องมี 8 ขา จึงไม่ใช่แมลง แมลงมี 6 ขา (ผีเสื้อก็มี 6 ขา จึงเป็นแมลง)', '🕷️ Spiders and scorpions have 8 legs, so they are not insects. Insects have 6 legs (a butterfly has 6, so it is an insect).'] },
+  // ด่านพิเศษ: มีคนติดป้ายไว้แล้ว ผิด 2 ภาพ (แมว = ใช่ · หมาพันธุ์ใหญ่ = ไม่ใช่) เด็กต้องหาแล้วแก้
+  { goal: ['🐶 หมา', '🐶 Dog'], fix: true,
+    pre: { 'หมาตัวน้อย': 'y', 'แมว': 'y', 'หมาพันธุ์ใหญ่': 'n', 'พุดเดิ้ล': 'y', 'วัว': 'n', 'กระต่าย': 'n', 'ม้า': 'n', 'แฮมสเตอร์': 'n' },
+    train: [['🐶', 'หมาตัวน้อย', 'Puppy', 'floppy tail fur pet bark'], ['🐱', 'แมว', 'Cat', 'pointy whisk tail fur pet meow'], ['🐕', 'หมาพันธุ์ใหญ่', 'Big dog', 'floppy tail fur pet bark big'], ['🐩', 'พุดเดิ้ล', 'Poodle', 'floppy tail fur pet bark curly'],
+            ['🐮', 'วัว', 'Cow', 'tail big farm horns'], ['🐰', 'กระต่าย', 'Rabbit', 'longear whisk fur pet'], ['🐴', 'ม้า', 'Horse', 'tail fur big farm mane'], ['🐹', 'แฮมสเตอร์', 'Hamster', 'roundear whisk fur pet tiny']],
+    test: [['🐕‍🦺', 'หมานำทาง', 'A guide dog', 'floppy tail fur pet bark big', 1], ['🐈', 'แมวลาย', 'A striped cat', 'pointy whisk tail fur pet meow stripes', 0], ['🐶', 'หมาจิ๋ว', 'A tiny dog', 'floppy tail fur pet bark tiny', 1], ['🐭', 'หนู', 'A mouse', 'roundear whisk tail tiny', 0]],
+    note: ['🔍 ดูว่าหุ่นบอกว่า "เหมือนภาพไหน" ภาพนั้นอาจติดป้ายผิดอยู่', '🔍 Look at which picture the robot says it looks like. That picture may have the wrong label.'] }
 ];
 const UI = {
   th: { title: 'สอนหุ่นยนต์ AI', sub: 'หุ่นยนต์ของเราเรียนรู้จากภาพตัวอย่างที่เราสอน สอนให้ดี แล้วดูว่าหุ่นทายถูกไหม!',
@@ -141,22 +161,28 @@ const UI = {
         tip: 'ต้องมี ✅ อย่างน้อย 2 ภาพ และ ❌ อย่างน้อย 1 ภาพ', ready: 'พร้อมแล้ว! กดทดสอบได้เลย', test: '🧪 ทดสอบหุ่น', count: (y, n) => `✅ ${y} ภาพ · ❌ ${n} ภาพ`,
         hi: g => `สวัสดี! ฉันยังไม่รู้จัก${g} เลย ช่วยสอนฉันด้วยภาพตัวอย่างหน่อยนะ`, learn: 'จำแล้ว! 👀', think: 'กำลังคิด...',
         isIt: g => `นี่คือ${g} 🙂`, notIt: g => `นี่ไม่ใช่${g} 🙅`, unsure: 'ไม่แน่ใจ 🤔 เหมือนทั้งสองแบบเลย',
-        because: (e, tags, y) => `เพราะเหมือน ${e} ที่เธอบอกว่า${y ? 'ใช่' : 'ไม่ใช่'}${tags ? ' (' + tags + ')' : ''}`,
+        because: (e, tags, y) => `เพราะเหมือน ${e} ที่${LV[lv].fix ? 'ติดป้ายว่า' : 'เธอบอกว่า'}${y ? 'ใช่' : 'ไม่ใช่'}${tags ? ' (' + tags + ')' : ''}`,
+        hdFix: g => `มีคนสอนหุ่นให้รู้จัก <b>${g}</b> ไว้แล้ว แต่ติดป้ายผิด <b>2 ภาพ</b> · ลองทดสอบก่อนก็ได้ แล้วแตะภาพเพื่อแก้ป้าย`,
+        hiFix: g => `สวัสดี! มีคนสอนฉันเรื่อง${g}ไว้แล้ว แต่ฉันทายผิดบ่อยจัง ช่วยหาภาพที่ติดป้ายผิดหน่อยนะ`,
+        fixGood: 'แก้ป้ายถูกแล้ว! ข้อมูลที่สอนผิด ทำให้ AI ทายผิด ข้อมูลถูก AI ก็ทายถูก',
         right: 'ทายถูก 🎉', wrong: 'ทายผิด 😵', score: (a, n) => `หุ่นทายถูก ${a}/${n}`,
         good: 'เยี่ยม! หุ่นเรียนรู้ได้ดีเพราะตัวอย่างหลากหลาย', meh: 'หุ่นยังสับสน ลองสอนเพิ่มด้วยภาพที่หลากหลายขึ้น เช่น ของที่หน้าตาคล้ายแต่ไม่ใช่',
         again: '✏️ สอนเพิ่มแล้วทดสอบใหม่', next: 'ด่านต่อไป ➜', last: 'ดูผล ➜', isReal: v => v ? 'ใช่จริง' : 'ไม่ใช่จริง',
-        endT: 'หุ่นยนต์ของเราเรียนจบแล้ว!', lvl: n => `ด่าน ${n}`, best: 'ทายถูกดีที่สุด', lesson: '🤖 AI เรียนรู้จากตัวอย่างที่เราให้ ถ้าตัวอย่างน้อยหรือไม่หลากหลาย AI ก็ทายผิดได้ เราจึงไม่ควรเชื่อทุกอย่างที่ AI บอก', play: '↺ เล่นอีกครั้ง' },
+        endT: 'หุ่นยนต์ของเราเรียนจบแล้ว!', lvl: n => `ด่าน ${n}`, best: 'ทายถูกดีที่สุด', lesson: '🤖 AI เรียนรู้จากตัวอย่างที่เราให้ ถ้าตัวอย่างน้อย ไม่หลากหลาย หรือติดป้ายผิด AI ก็ทายผิดได้ เราจึงไม่ควรเชื่อทุกอย่างที่ AI บอก', play: '↺ เล่นอีกครั้ง' },
   en: { title: 'Teach the Robot', sub: 'Our robot learns from the example pictures we teach it. Teach it well, then see if it guesses right!',
         how: ['1️⃣ Tap pictures to label ✅ Yes / ❌ No', '2️⃣ Test the robot', '3️⃣ See how many it gets right'], go: '▶ Start', gback: '↩ Back',
         hd: g => `Teach the robot what a <b>${g}</b> is. Tap once = ✅ yes, twice = ❌ no, three times = not used.`, yes: '✅ Yes', no: '❌ No',
         tip: 'You need at least 2 ✅ and 1 ❌', ready: 'Ready! Tap Test.', test: '🧪 Test the robot', count: (y, n) => `✅ ${y} · ❌ ${n}`,
         hi: g => `Hello! I don't know what a ${g} is yet. Please teach me with example pictures.`, learn: 'Got it! 👀', think: 'Thinking...',
         isIt: g => `This is a ${g} 🙂`, notIt: g => `This is not a ${g} 🙅`, unsure: "Not sure 🤔 It looks like both.",
-        because: (e, tags, y) => `Because it looks like the ${e} you said is ${y ? 'one' : 'not one'}${tags ? ' (' + tags + ')' : ''}`,
+        because: (e, tags, y) => `Because it looks like the ${e} ${LV[lv].fix ? 'labelled ' + (y ? 'yes' : 'no') : 'you said is ' + (y ? 'one' : 'not one')}${tags ? ' (' + tags + ')' : ''}`,
+        hdFix: g => `Someone already taught the robot what a <b>${g}</b> is, but <b>2 pictures</b> have the wrong label. Test first if you like, then tap pictures to fix the labels.`,
+        hiFix: g => `Hello! Someone taught me what a ${g} is, but I keep getting it wrong. Please find the pictures with the wrong label.`,
+        fixGood: 'You fixed the labels! Wrong examples make AI wrong. Right examples make AI right.',
         right: 'Right 🎉', wrong: 'Wrong 😵', score: (a, n) => `The robot got ${a}/${n}`,
         good: 'Great! The robot learned well because the examples were varied.', meh: 'The robot is still confused. Teach more varied pictures, like things that look similar but are not the same.',
         again: '✏️ Teach more and test again', next: 'Next level ➜', last: 'See results ➜', isReal: v => v ? 'really is' : 'really is not',
-        endT: 'Our robot finished school!', lvl: n => `Level ${n}`, best: 'best score', lesson: '🤖 AI learns from the examples we give it. With too few or too similar examples it can be wrong, so we should not believe everything AI says.', play: '↺ Play again' }
+        endT: 'Our robot finished school!', lvl: n => `Level ${n}`, best: 'best score', lesson: '🤖 AI learns from the examples we give it. With too few, too similar or wrongly labelled examples it can be wrong, so we should not believe everything AI says.', play: '↺ Play again' }
 };
 let L = 'th', lv = 0, lab = {}, best = [], phase = 'title', seq = 0;
 const U = () => UI[L], T = a => a[L === 'th' ? 0 : 1];
@@ -175,9 +201,10 @@ function guess(t){
   const ans = ys.length && ns.length ? null : !!ys.length, x = (ans === null ? near : ans ? ys : ns)[0];
   return { ans, x, shared: x.tags.filter(g => t.tags.includes(g)).slice(0, 3).map(g => TG[g][L === 'th' ? 0 : 1]).join(', ') };
 }
+const hello = () => { $('#say').textContent = (LV[lv].fix ? U().hiFix : U().hi)(goalName()); };
 function startLevel(i){
-  lv = i; lab = {}; phase = 'teach'; show('sPlay');
-  $('#say').textContent = U().hi(goalName()); paint();
+  lv = i; lab = Object.assign({}, LV[i].pre || {}); phase = 'teach'; show('sPlay');
+  hello(); paint();
 }
 function paintLvl(){
   $('#lvl').classList.toggle('hide', phase === 'title');
@@ -186,7 +213,7 @@ function paintLvl(){
 function paint(){
   const [y, n] = counts(), ok = y >= 2 && n >= 1;
   $('#goal').textContent = T(LV[lv].goal);
-  $('#hd').innerHTML = U().hd(esc(goalName()));
+  $('#hd').innerHTML = (LV[lv].fix ? U().hdFix : U().hd)(esc(goalName()));
   $('#count').textContent = U().count(y, n);
   const teach = phase === 'teach';
   $('#tray').classList.toggle('hide', !teach); $('#tests').classList.toggle('hide', teach);
@@ -219,17 +246,17 @@ async function runTest(){
   }
   const a = res.filter((g, i) => g.ans === !!tests[i].is).length;
   best[lv] = Math.max(best[lv] || 0, a);
-  $('#say').textContent = U().score(a, tests.length) + ' · ' + (a === tests.length ? U().good : U().meh) + (LV[lv].note && a < tests.length ? ' ' + T(LV[lv].note) : '');
+  $('#say').textContent = U().score(a, tests.length) + ' · ' + (a === tests.length ? (LV[lv].fix ? U().fixGood : U().good) : U().meh) + (LV[lv].note && a < tests.length ? ' ' + T(LV[lv].note) : '');
   $('#face').textContent = a === tests.length ? '🤩' : a >= 2 ? '🤖' : '😵‍💫';
   paintLvl();
 }
 $('#test').onclick = runTest;
-$('#again').onclick = () => { seq++; phase = 'teach'; $('#face').textContent = '🤖'; $('#face').classList.remove('think'); $('#say').textContent = U().hi(goalName()); paint(); };
+$('#again').onclick = () => { seq++; phase = 'teach'; $('#face').textContent = '🤖'; $('#face').classList.remove('think'); hello(); paint(); };
 $('#next').onclick = () => { seq++; $('#face').textContent = '🤖'; $('#face').classList.remove('think'); if (lv < LV.length - 1) startLevel(lv + 1); else end(); };
 function end(){
   phase = 'end'; show('sEnd'); paintLvl();
   const tot = best.reduce((s, x) => s + (x || 0), 0);
-  $('#eBadge').textContent = tot >= 11 ? '🏆' : tot >= 8 ? '🥈' : '🤖';
+  $('#eBadge').textContent = tot >= 22 ? '🏆' : tot >= 16 ? '🥈' : '🤖';
   $('#eTitle').textContent = U().endT;
   $('#eSum').innerHTML = LV.map((x, i) => `<div>${x.goal[0].split(' ')[0]} ${esc(U().lvl(i + 1))}<br><b>${best[i] || 0}/4</b></div>`).join('');
   $('#eLesson').textContent = U().lesson; $('#eAgain').textContent = U().play;
@@ -242,8 +269,8 @@ function applyLang(){
   $('#lth').classList.toggle('on', L === 'th'); $('#len').classList.toggle('on', L === 'en');
   $('#tTitle').textContent = U().title; $('#tSub').textContent = U().sub; $('#go').textContent = U().go; $('#gback').textContent = U().gback;
   $('#how').innerHTML = U().how.map(h => `<span>${esc(h)}</span>`).join('');
-  if (phase === 'teach') { $('#say').textContent = U().hi(goalName()); paint(); }
-  else if (phase === 'test') { seq++; phase = 'teach'; $('#face').textContent = '🤖'; $('#face').classList.remove('think'); $('#say').textContent = U().hi(goalName()); paint(); }
+  if (phase === 'teach') { hello(); paint(); }
+  else if (phase === 'test') { seq++; phase = 'teach'; $('#face').textContent = '🤖'; $('#face').classList.remove('think'); hello(); paint(); }
   else if (phase === 'end') end();
   else paintLvl();
 }

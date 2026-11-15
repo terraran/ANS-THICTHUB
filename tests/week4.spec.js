@@ -273,7 +273,7 @@ test('ใบงานเก่ายังเหมือนเดิม: Double
   await expect(page.locator('#writer')).toBeHidden();
 });
 
-test('เกม Y3 สอนหุ่นยนต์ AI: ติดป้าย → ทดสอบ → สอนเพิ่ม → ครบ 3 ด่าน · TH/EN · ไม่ล้นจอ · ปุ่มกลับใน iframe', async ({ page }) => {
+test('เกม Y3 สอนหุ่นยนต์ AI: ติดป้าย → ทดสอบ → สอนเพิ่ม → ครบ 6 ด่าน (รวมด่านแก้ป้ายผิด) · TH/EN · ไม่ล้นจอ · ปุ่มกลับใน iframe', async ({ page }) => {
   const errs = []; page.on('pageerror', e => errs.push(e.message));
   page.route('**/fonts.googleapis.com/**', r => r.abort());
   await page.emulateMedia({ reducedMotion: 'reduce' });
@@ -317,8 +317,44 @@ test('เกม Y3 สอนหุ่นยนต์ AI: ติดป้าย �
   await page.click('#test');
   await expect(page.locator('#say')).toContainText('3/4');
   await expect(page.locator('#say')).toContainText('ฉลามเป็นปลา');
+  // ด่าน 4 นก: ค้างคาวบินได้แต่ไม่ใช่นก · สอนแต่นกที่บินได้ก็ยังทายเพนกวินถูก เพราะมีขนนก/จะงอยปาก
   await page.click('#next');
-  await expect(page.locator('#eSum div')).toHaveCount(3);
+  await expect(page.locator('#goal')).toHaveText('🐦 นก');
+  await tap('นกกระจอก'); await tap('ค้างคาว'); await tap('นกฮูก'); await tap('เครื่องบิน', 2);
+  await page.click('#test');
+  await expect(page.locator('#say')).toContainText('2/4');                  // ค้างคาว = นก → ค้างคาวอีกตัวผิด · ผึ้งก็สับสน
+  await expect(page.locator('#say')).toContainText('ค้างคาวบินได้แต่ไม่ใช่นก');
+  await page.click('#again'); await tap('ค้างคาว'); await tap('ผีเสื้อ', 2);  // ใช่ → ไม่ใช่
+  await page.click('#test');
+  await expect(page.locator('#say')).toContainText('4/4');
+  // ด่าน 5 แมลง: แมงมุม 8 ขาไม่ใช่แมลง
+  await page.click('#next');
+  await expect(page.locator('#goal')).toHaveText('🐞 แมลง');
+  for (const n of ['มด', 'ผึ้ง', 'แมงมุม']) await tap(n);
+  await tap('หอยทาก', 2);
+  await page.click('#test');
+  await expect(page.locator('.tc', { hasText: 'แมงมุมขนดก' }).locator('.res')).toHaveText('ทายผิด 😵');
+  await page.click('#again'); await tap('แมงมุม'); await tap('แมงป่อง', 2);
+  await page.click('#test');
+  await expect(page.locator('#say')).toContainText('4/4');
+  // ด่าน 6 ช่วยแก้หุ่น: ป้ายมาให้แล้ว ผิด 2 ภาพ → ทดสอบได้ทันที 2/4 → แก้แมว/หมาพันธุ์ใหญ่ → 4/4
+  await page.click('#next');
+  await expect(page.locator('#goal')).toHaveText('🐶 หมา');
+  await expect(page.locator('#hd')).toContainText('ติดป้ายผิด');
+  await expect(page.locator('.it.yes')).toHaveCount(3); await expect(page.locator('.it.no')).toHaveCount(5);
+  await expect(page.locator('#test')).toBeEnabled();
+  await page.click('#test');
+  await expect(page.locator('#say')).toContainText('2/4');
+  await expect(page.locator('.tc', { hasText: 'แมวลาย' }).locator('.why')).toContainText('ติดป้ายว่าใช่');
+  await page.click('#again');
+  await tap('แมว'); await tap('หมาพันธุ์ใหญ่', 2);                       // ใช่→ไม่ใช่ · ไม่ใช่→ไม่ใช้→ใช่
+  await expect(page.locator('.it.yes')).toHaveCount(3);
+  await page.click('#test');
+  await expect(page.locator('#say')).toContainText('4/4');
+  await expect(page.locator('#say')).toContainText('แก้ป้ายถูกแล้ว');
+  await shot(page, 'teachbot-6');
+  await page.click('#next');
+  await expect(page.locator('#eSum div')).toHaveCount(6);
   await expect(page.locator('#eBadge')).toHaveText('🏆');
   await page.click('#len');
   await expect(page.locator('#eTitle')).toHaveText('Our robot finished school!');
