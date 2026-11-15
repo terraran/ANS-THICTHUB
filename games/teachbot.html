@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>สอนหุ่นยนต์ AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#0b2545;--navy2:#13315c;--sel:#facc15;--act:#0284c7;--ok:#16a34a;--bad:#dc2626;--ink:#0f172a;--muted:#475569;--line:#cbd5e1}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--navy);color:#fff;font-family:Kanit,Tahoma,sans-serif}
+body{display:flex;flex-direction:column}
+button{font-family:inherit;cursor:pointer;border:none;border-radius:14px;min-height:48px;font-size:20px;font-weight:600;padding:6px 20px;background:var(--act);color:#fff;box-shadow:0 4px 0 #0005}
+button:disabled{background:#94a3b8;color:#1e293b;box-shadow:none;cursor:not-allowed}
+.hide{display:none!important}
+.top{display:flex;align-items:center;gap:10px;padding:10px 16px;flex:none}
+.lvl{display:flex;gap:6px;align-items:center;font-size:17px}
+.lvl i{font-style:normal;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#ffffff1a;border:2px dashed #ffffff44;font-size:18px}
+.lvl i.on{background:var(--sel);border:2px solid var(--sel);color:var(--navy);font-weight:800}
+.lvl i.done{background:#dcfce7;border:2px solid var(--ok);color:#166534}
+.ctls{display:flex;gap:8px;margin-left:auto}
+.ctl{background:var(--navy2);border:2px solid #ffffff55;box-shadow:none;font-size:17px;min-height:44px;padding:4px 14px}
+.ctl.on{background:#fff;color:var(--navy)}
+main{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;padding:0 16px 14px}
+/* หน้าแรก */
+.title{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center}
+.title .badge{font-size:min(96px,14vh);line-height:1;animation:bob 2.4s ease-in-out infinite}
+.title h1{margin:0;font-size:min(52px,8vh);font-weight:800}
+.title p{margin:0;font-size:20px;color:#bfdbfe;max-width:640px}
+.how{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.how span{background:var(--navy2);border-radius:14px;padding:6px 14px;font-size:17px}
+#go{background:var(--ok);font-size:26px;padding:10px 40px}
+/* เล่น */
+.play{flex:1;min-height:0;width:100%;max-width:1180px;display:grid;grid-template-columns:260px 1fr;gap:16px}
+.bot{background:#fff;color:var(--ink);border-radius:24px;padding:14px;display:flex;flex-direction:column;align-items:center;gap:10px;min-height:0}
+.face{font-size:min(110px,16vh);line-height:1;animation:bob 2.4s ease-in-out infinite}
+.face.think{animation:shake .5s ease-in-out infinite}
+.say{background:#e0f2fe;border-radius:18px 18px 18px 4px;padding:10px 14px;font-size:18px;line-height:1.4;width:100%;animation:pop .35s ease-out}
+.goal{background:var(--sel);color:var(--navy);border-radius:14px;padding:6px 12px;font-weight:800;font-size:20px;text-align:center;width:100%}
+.count{font-size:16px;color:var(--muted);text-align:center}
+.right{display:flex;flex-direction:column;gap:10px;min-height:0}
+.hd{font-size:19px;line-height:1.35}
+.hd b{color:var(--sel)}
+.tray{flex:1;min-height:0;display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:1fr;gap:10px}
+.it{background:#fff;color:var(--ink);border:4px solid #fff;border-radius:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:6px;font-size:17px;font-weight:600;box-shadow:0 5px 0 #0004;position:relative;min-height:0;line-height:1.2;white-space:normal}
+.it .em{font-size:min(56px,8vh);line-height:1.1}
+.it .tag{position:absolute;top:6px;right:8px;font-size:15px;border-radius:999px;padding:0 8px;font-weight:800}
+.it.yes{border-color:var(--ok);background:#f0fdf4}.it.yes .tag{background:#dcfce7;color:#166534}
+.it.no{border-color:var(--bad);background:#fef2f2}.it.no .tag{background:#fee2e2;color:#991b1b}
+.it:hover{transform:translateY(-3px)}
+.bar{display:flex;gap:10px;align-items:center;flex:none}
+.bar .tip{flex:1;font-size:16px;color:#bfdbfe}
+#test{background:var(--ok);font-size:22px}
+/* ทดสอบ */
+.tests{flex:1;min-height:0;display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.tc{background:#fff;color:var(--ink);border-radius:20px;padding:10px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;animation:pop .4s ease-out backwards;min-height:0}
+.tc .em{font-size:min(72px,10vh);line-height:1.1}
+.tc .nm{font-weight:800;font-size:18px}
+.tc .ans{border-radius:14px;padding:6px 10px;font-size:17px;font-weight:600;width:100%;background:#f1f5f9}
+.tc .why{font-size:15px;color:var(--muted);line-height:1.35}
+.tc .res{font-size:20px;font-weight:800;border-radius:12px;padding:2px 10px}
+.tc .res.g{background:#dcfce7;color:#166534}.tc .res.b{background:#fee2e2;color:#991b1b}
+.tc.wait .ans,.tc.wait .why,.tc.wait .res{visibility:hidden}
+#again{background:var(--navy2);border:2px solid #ffffff66}
+#next{background:var(--ok)}
+/* จบ */
+.end{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center}
+.end .badge{font-size:min(90px,13vh)}
+.end h2{margin:0;font-size:36px}
+.sum{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+.sum div{background:var(--navy2);border-radius:16px;padding:10px 18px;font-size:19px}
+.sum b{font-size:26px;color:var(--sel)}
+.lesson{background:#fff;color:var(--ink);border-radius:18px;padding:12px 18px;font-size:19px;max-width:700px;line-height:1.45}
+@keyframes bob{0%,100%{transform:none}50%{transform:translateY(-8px)}}
+@keyframes shake{0%,100%{transform:rotate(0)}25%{transform:rotate(-8deg)}75%{transform:rotate(8deg)}}
+@keyframes pop{from{opacity:0;transform:scale(.85)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+@media (max-width:820px){.play{grid-template-columns:1fr}.bot{flex-direction:row;padding:8px}.face{font-size:56px}.tray,.tests{grid-template-columns:repeat(2,1fr)}.tests{overflow:auto}.goal{width:auto}}
+</style>
+</head><body>
+<div class="top">
+ <div class="lvl hide" id="lvl"></div>
+ <div class="ctls"><button class="ctl hide" id="gback"></button><button class="ctl on" id="lth">TH</button><button class="ctl" id="len">EN</button></div>
+</div>
+<main>
+ <section id="sTitle" class="title">
+  <div class="badge">🤖</div>
+  <h1 id="tTitle"></h1>
+  <p id="tSub"></p>
+  <div class="how" id="how"></div>
+  <button id="go"></button>
+ </section>
+ <section id="sPlay" class="play hide">
+  <div class="bot"><div class="goal" id="goal"></div><div class="face" id="face">🤖</div><div class="say" id="say"></div><div class="count" id="count"></div></div>
+  <div class="right">
+   <div class="hd" id="hd"></div>
+   <div class="tray" id="tray"></div>
+   <div class="tests hide" id="tests"></div>
+   <div class="bar"><span class="tip" id="tip"></span><button id="again" class="hide"></button><button id="next" class="hide"></button><button id="test"></button></div>
+  </div>
+ </section>
+ <section id="sEnd" class="end hide">
+  <div class="badge" id="eBadge"></div>
+  <h2 id="eTitle"></h2>
+  <div class="sum" id="eSum"></div>
+  <div class="lesson" id="eLesson"></div>
+  <button id="eAgain"></button>
+ </section>
+</main>
+<script>
+// สอนหุ่นยนต์ AI (Y3 สัปดาห์ 4): เด็กติดป้าย ✅ใช่ / ❌ไม่ใช่ ให้ภาพตัวอย่าง แล้วหุ่นทายของใหม่ 4 อย่าง
+// หุ่นทายแบบ "เหมือนตัวอย่างไหนที่สุด" (นับลักษณะที่ต่างกันน้อยที่สุด) · เสมอกันระหว่างใช่/ไม่ใช่ = ไม่แน่ใจ (นับว่าผิด)
+// เล่นเฉย ๆ ไม่เก็บคะแนน · เปิดใน iframe ได้ (รับ postMessage({lang}) · ปุ่มกลับส่ง 'closeGame')
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const TG = {
+  red: ['สีแดง', 'red'], green: ['สีเขียว', 'green'], orange: ['สีส้ม', 'orange'], pink: ['สีชมพู', 'pink'], black: ['สีดำ', 'black'],
+  round: ['ทรงกลม', 'round'], stem: ['มีก้าน', 'a stem'], leaf: ['มีใบ', 'leaves'], fruit: ['ผลไม้', 'fruit'], veg: ['ผัก', 'vegetable'], toy: ['ของเล่น', 'toy'], small: ['ลูกเล็ก', 'small'], pear: ['ทรงหยดน้ำ', 'drop shape'],
+  pointy: ['หูแหลม', 'pointy ears'], floppy: ['หูตก', 'floppy ears'], roundear: ['หูกลม', 'round ears'], longear: ['หูยาว', 'long ears'], whisk: ['มีหนวด', 'whiskers'], tail: ['มีหาง', 'a tail'], fur: ['มีขน', 'fur'],
+  stripes: ['มีลาย', 'stripes'], spots: ['มีจุด', 'spots'], big: ['ตัวใหญ่', 'big'], tiny: ['ตัวเล็ก', 'small'], wild: ['สัตว์ป่า', 'wild'], pet: ['สัตว์เลี้ยง', 'pet'], mane: ['มีแผงคอ', 'a mane'],
+  fins: ['มีครีบ', 'fins'], scales: ['มีเกล็ด', 'scales'], gills: ['มีเหงือก', 'gills'], water: ['อยู่ในน้ำ', 'lives in water'], smooth: ['ผิวเรียบ', 'smooth skin'], blow: ['มีรูหายใจบนหัว', 'a blowhole'],
+  shell: ['มีเปลือกแข็ง', 'a hard shell'], legs: ['มีขาหลายขา', 'many legs'], spikes: ['มีหนาม', 'spikes'], colorful: ['สีสด', 'bright colours'], flipper: ['มีครีบเท้า', 'flippers']
+};
+// ด่าน: goal = สิ่งที่สอน · train = ภาพตัวอย่างให้ติดป้าย · test = ของใหม่ให้หุ่นทาย (is = เป็นจริงไหม)
+const LV = [
+  { goal: ['🍎 แอปเปิล', '🍎 Apple'],
+    train: [['🍎', 'แอปเปิลแดง', 'Red apple', 'red round stem fruit'], ['🍅', 'มะเขือเทศ', 'Tomato', 'red round leaf veg'], ['🍒', 'เชอร์รี่', 'Cherries', 'red round stem fruit small'], ['🍐', 'ลูกแพร์', 'Pear', 'green pear stem fruit'],
+            ['🍏', 'แอปเปิลเขียว', 'Green apple', 'green round stem fruit'], ['🔴', 'ลูกบอลแดง', 'Red ball', 'red round toy'], ['🍊', 'ส้ม', 'Orange', 'orange round leaf fruit'], ['🍑', 'ลูกพีช', 'Peach', 'pink round leaf fruit']],
+    test: [['🍎', 'แอปเปิลลูกใหม่', 'A new apple', 'red round stem fruit', 1], ['🔴', 'ลูกบอลแดง', 'A red ball', 'red round toy', 0], ['🍏', 'แอปเปิลเขียว', 'A green apple', 'green round stem fruit', 1], ['🍅', 'มะเขือเทศ', 'A tomato', 'red round leaf veg', 0]] },
+  { goal: ['🐱 แมว', '🐱 Cat'],
+    train: [['🐱', 'แมวส้ม', 'Orange cat', 'pointy whisk tail fur tiny pet orange'], ['🐶', 'หมา', 'Dog', 'floppy tail fur tiny pet'], ['🦊', 'จิ้งจอก', 'Fox', 'pointy whisk tail fur orange wild'], ['🐈‍⬛', 'แมวดำ', 'Black cat', 'pointy whisk tail fur tiny pet black'],
+            ['🐯', 'เสือ', 'Tiger', 'pointy whisk tail fur stripes orange big wild'], ['🐭', 'หนู', 'Mouse', 'roundear whisk tail tiny'], ['🐰', 'กระต่าย', 'Rabbit', 'longear whisk fur tiny pet'], ['🐻', 'หมี', 'Bear', 'roundear fur big wild']],
+    test: [['🐈', 'แมวลาย', 'A striped cat', 'pointy whisk tail fur tiny pet stripes', 1], ['🐕', 'หมาอีกตัว', 'Another dog', 'floppy tail fur pet', 0], ['🦁', 'สิงโต', 'A lion', 'roundear whisk tail fur big wild orange mane', 0], ['🐆', 'เสือดาว', 'A leopard', 'pointy whisk tail fur big wild spots', 0]] },
+  { goal: ['🐟 ปลา', '🐟 Fish'],
+    train: [['🐟', 'ปลา', 'Fish', 'fins tail scales gills water tiny'], ['🐬', 'โลมา', 'Dolphin', 'fins tail water big smooth blow'], ['🦀', 'ปู', 'Crab', 'shell legs water tiny'], ['🐠', 'ปลาการ์ตูน', 'Clownfish', 'fins tail scales gills water tiny colorful'],
+            ['🐙', 'ปลาหมึก', 'Octopus', 'legs water smooth'], ['🐡', 'ปลาปักเป้า', 'Pufferfish', 'fins gills water tiny spikes'], ['🦭', 'แมวน้ำ', 'Seal', 'flipper whisk water big smooth'], ['🐳', 'วาฬ', 'Whale', 'fins tail water big smooth blow']],
+    test: [['🐟', 'ปลาตัวใหม่', 'A new fish', 'fins tail scales gills water tiny', 1], ['🦈', 'ฉลาม', 'A shark', 'fins tail gills water big smooth', 1], ['🐋', 'วาฬอีกตัว', 'Another whale', 'fins tail water big smooth blow', 0], ['🦞', 'กุ้งมังกร', 'A lobster', 'shell legs water', 0]],
+    note: ['🦈 ฉลามเป็นปลาจริง ๆ แต่หน้าตาคล้ายโลมา หุ่นที่ดูแค่หน้าตาจึงสับสนได้ ต่อให้สอนดีแล้ว AI ก็ยังผิดได้', '🦈 A shark really is a fish, but it looks like a dolphin. A robot that only looks can get confused. Even well-taught AI can be wrong.'] }
+];
+const UI = {
+  th: { title: 'สอนหุ่นยนต์ AI', sub: 'หุ่นยนต์ของเราเรียนรู้จากภาพตัวอย่างที่เราสอน สอนให้ดี แล้วดูว่าหุ่นทายถูกไหม!',
+        how: ['1️⃣ แตะภาพเพื่อติดป้าย ✅ใช่ / ❌ไม่ใช่', '2️⃣ กดทดสอบหุ่น', '3️⃣ ดูว่าหุ่นทายถูกกี่ข้อ'], go: '▶ เริ่มเล่น', gback: '↩ กลับ',
+        hd: g => `สอนหุ่นให้รู้จัก <b>${g}</b> · แตะภาพ 1 ครั้ง = ✅ ใช่ · 2 ครั้ง = ❌ ไม่ใช่ · 3 ครั้ง = ไม่ใช้`, yes: '✅ ใช่', no: '❌ ไม่ใช่',
+        tip: 'ต้องมี ✅ อย่างน้อย 2 ภาพ และ ❌ อย่างน้อย 1 ภาพ', ready: 'พร้อมแล้ว! กดทดสอบได้เลย', test: '🧪 ทดสอบหุ่น', count: (y, n) => `✅ ${y} ภาพ · ❌ ${n} ภาพ`,
+        hi: g => `สวัสดี! ฉันยังไม่รู้จัก${g} เลย ช่วยสอนฉันด้วยภาพตัวอย่างหน่อยนะ`, learn: 'จำแล้ว! 👀', think: 'กำลังคิด...',
+        isIt: g => `นี่คือ${g} 🙂`, notIt: g => `นี่ไม่ใช่${g} 🙅`, unsure: 'ไม่แน่ใจ 🤔 เหมือนทั้งสองแบบเลย',
+        because: (e, tags, y) => `เพราะเหมือน ${e} ที่เธอบอกว่า${y ? 'ใช่' : 'ไม่ใช่'}${tags ? ' (' + tags + ')' : ''}`,
+        right: 'ทายถูก 🎉', wrong: 'ทายผิด 😵', score: (a, n) => `หุ่นทายถูก ${a}/${n}`,
+        good: 'เยี่ยม! หุ่นเรียนรู้ได้ดีเพราะตัวอย่างหลากหลาย', meh: 'หุ่นยังสับสน ลองสอนเพิ่มด้วยภาพที่หลากหลายขึ้น เช่น ของที่หน้าตาคล้ายแต่ไม่ใช่',
+        again: '✏️ สอนเพิ่มแล้วทดสอบใหม่', next: 'ด่านต่อไป ➜', last: 'ดูผล ➜', isReal: v => v ? 'ใช่จริง' : 'ไม่ใช่จริง',
+        endT: 'หุ่นยนต์ของเราเรียนจบแล้ว!', lvl: n => `ด่าน ${n}`, best: 'ทายถูกดีที่สุด', lesson: '🤖 AI เรียนรู้จากตัวอย่างที่เราให้ ถ้าตัวอย่างน้อยหรือไม่หลากหลาย AI ก็ทายผิดได้ เราจึงไม่ควรเชื่อทุกอย่างที่ AI บอก', play: '↺ เล่นอีกครั้ง' },
+  en: { title: 'Teach the Robot', sub: 'Our robot learns from the example pictures we teach it. Teach it well, then see if it guesses right!',
+        how: ['1️⃣ Tap pictures to label ✅ Yes / ❌ No', '2️⃣ Test the robot', '3️⃣ See how many it gets right'], go: '▶ Start', gback: '↩ Back',
+        hd: g => `Teach the robot what a <b>${g}</b> is. Tap once = ✅ yes, twice = ❌ no, three times = not used.`, yes: '✅ Yes', no: '❌ No',
+        tip: 'You need at least 2 ✅ and 1 ❌', ready: 'Ready! Tap Test.', test: '🧪 Test the robot', count: (y, n) => `✅ ${y} · ❌ ${n}`,
+        hi: g => `Hello! I don't know what a ${g} is yet. Please teach me with example pictures.`, learn: 'Got it! 👀', think: 'Thinking...',
+        isIt: g => `This is a ${g} 🙂`, notIt: g => `This is not a ${g} 🙅`, unsure: "Not sure 🤔 It looks like both.",
+        because: (e, tags, y) => `Because it looks like the ${e} you said is ${y ? 'one' : 'not one'}${tags ? ' (' + tags + ')' : ''}`,
+        right: 'Right 🎉', wrong: 'Wrong 😵', score: (a, n) => `The robot got ${a}/${n}`,
+        good: 'Great! The robot learned well because the examples were varied.', meh: 'The robot is still confused. Teach more varied pictures, like things that look similar but are not the same.',
+        again: '✏️ Teach more and test again', next: 'Next level ➜', last: 'See results ➜', isReal: v => v ? 'really is' : 'really is not',
+        endT: 'Our robot finished school!', lvl: n => `Level ${n}`, best: 'best score', lesson: '🤖 AI learns from the examples we give it. With too few or too similar examples it can be wrong, so we should not believe everything AI says.', play: '↺ Play again' }
+};
+let L = 'th', lv = 0, lab = {}, best = [], phase = 'title', seq = 0;
+const U = () => UI[L], T = a => a[L === 'th' ? 0 : 1];
+const goalName = () => T(LV[lv].goal).replace(/^\S+\s/, '');
+const item = a => ({ e: a[0], n: [a[1], a[2]], tags: a[3].split(' '), is: a[4] });
+const show = id => ['sTitle', 'sPlay', 'sEnd'].forEach(s => $('#' + s).classList.toggle('hide', s !== id));
+const counts = () => { const v = Object.values(lab); return [v.filter(x => x === 'y').length, v.filter(x => x === 'n').length]; };
+
+// หุ่นทาย: ตัวอย่างที่ลักษณะต่างกันน้อยที่สุด
+function guess(t){
+  const ex = LV[lv].train.map(item).filter(x => lab[x.n[0]]);
+  let bestD = 99, near = [];
+  ex.forEach(x => { const d = x.tags.filter(g => !t.tags.includes(g)).length + t.tags.filter(g => !x.tags.includes(g)).length;
+    if (d < bestD) { bestD = d; near = [x]; } else if (d === bestD) near.push(x); });
+  const ys = near.filter(x => lab[x.n[0]] === 'y'), ns = near.filter(x => lab[x.n[0]] === 'n');
+  const ans = ys.length && ns.length ? null : !!ys.length, x = (ans === null ? near : ans ? ys : ns)[0];
+  return { ans, x, shared: x.tags.filter(g => t.tags.includes(g)).slice(0, 3).map(g => TG[g][L === 'th' ? 0 : 1]).join(', ') };
+}
+function startLevel(i){
+  lv = i; lab = {}; phase = 'teach'; show('sPlay');
+  $('#say').textContent = U().hi(goalName()); paint();
+}
+function paintLvl(){
+  $('#lvl').classList.toggle('hide', phase === 'title');
+  $('#lvl').innerHTML = LV.map((x, i) => `<i class="${i === lv && phase !== 'end' ? 'on' : best[i] != null ? 'done' : ''}" title="${esc(U().lvl(i + 1))}">${x.goal[0].split(' ')[0]}</i>`).join('');
+}
+function paint(){
+  const [y, n] = counts(), ok = y >= 2 && n >= 1;
+  $('#goal').textContent = T(LV[lv].goal);
+  $('#hd').innerHTML = U().hd(esc(goalName()));
+  $('#count').textContent = U().count(y, n);
+  const teach = phase === 'teach';
+  $('#tray').classList.toggle('hide', !teach); $('#tests').classList.toggle('hide', teach);
+  $('#test').classList.toggle('hide', !teach); $('#again').classList.toggle('hide', teach); $('#next').classList.toggle('hide', teach);
+  $('#test').disabled = !ok; $('#test').textContent = U().test;
+  $('#tip').textContent = teach ? (ok ? U().ready : U().tip) : '';
+  $('#tray').innerHTML = LV[lv].train.map(item).map(x => { const s = lab[x.n[0]];
+    return `<button type="button" class="it${s === 'y' ? ' yes' : s === 'n' ? ' no' : ''}" data-n="${esc(x.n[0])}"><span class="em">${x.e}</span>${esc(T(x.n))}${s ? `<span class="tag">${s === 'y' ? U().yes : U().no}</span>` : ''}</button>`; }).join('');
+  $('#again').textContent = U().again; $('#next').textContent = lv < LV.length - 1 ? U().next : U().last;
+  paintLvl();
+}
+$('#tray').addEventListener('click', e => {
+  const b = e.target.closest('.it'); if (!b) return;
+  const k = b.dataset.n; lab[k] = !lab[k] ? 'y' : lab[k] === 'y' ? 'n' : undefined; if (!lab[k]) delete lab[k];
+  $('#say').textContent = U().learn; paint();
+});
+// ทดสอบ: เปิดการ์ดทีละใบ หุ่นคิดแล้วตอบ
+async function runTest(){
+  phase = 'test'; paint();
+  const my = ++seq, tests = LV[lv].test.map(item), wait = ms => new Promise(r => setTimeout(r, matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : ms));
+  const res = tests.map(guess);
+  $('#tests').innerHTML = tests.map((t, i) => { const g = res[i], ok = g.ans === !!t.is;
+    return `<div class="tc wait" style="animation-delay:${i * .15}s"><span class="em">${t.e}</span><span class="nm">${esc(T(t.n))}</span>` +
+      `<div class="ans">🤖 ${esc(g.ans === null ? U().unsure : g.ans ? U().isIt(goalName()) : U().notIt(goalName()))}</div>` +
+      `<div class="why">${g.ans === null ? '' : esc(U().because(g.x.e, g.shared, g.ans))}</div><div class="res ${ok ? 'g' : 'b'}">${ok ? U().right : U().wrong}</div></div>`; }).join('');
+  const cards = [...document.querySelectorAll('.tc')];
+  for (let i = 0; i < cards.length; i++) {
+    $('#face').classList.add('think'); $('#say').textContent = U().think; await wait(700); if (my !== seq) return;
+    $('#face').classList.remove('think'); cards[i].classList.remove('wait'); await wait(500); if (my !== seq) return;
+  }
+  const a = res.filter((g, i) => g.ans === !!tests[i].is).length;
+  best[lv] = Math.max(best[lv] || 0, a);
+  $('#say').textContent = U().score(a, tests.length) + ' · ' + (a === tests.length ? U().good : U().meh) + (LV[lv].note && a < tests.length ? ' ' + T(LV[lv].note) : '');
+  $('#face').textContent = a === tests.length ? '🤩' : a >= 2 ? '🤖' : '😵‍💫';
+  paintLvl();
+}
+$('#test').onclick = runTest;
+$('#again').onclick = () => { seq++; phase = 'teach'; $('#face').textContent = '🤖'; $('#face').classList.remove('think'); $('#say').textContent = U().hi(goalName()); paint(); };
+$('#next').onclick = () => { seq++; $('#face').textContent = '🤖'; $('#face').classList.remove('think'); if (lv < LV.length - 1) startLevel(lv + 1); else end(); };
+function end(){
+  phase = 'end'; show('sEnd'); paintLvl();
+  const tot = best.reduce((s, x) => s + (x || 0), 0);
+  $('#eBadge').textContent = tot >= 11 ? '🏆' : tot >= 8 ? '🥈' : '🤖';
+  $('#eTitle').textContent = U().endT;
+  $('#eSum').innerHTML = LV.map((x, i) => `<div>${x.goal[0].split(' ')[0]} ${esc(U().lvl(i + 1))}<br><b>${best[i] || 0}/4</b></div>`).join('');
+  $('#eLesson').textContent = U().lesson; $('#eAgain').textContent = U().play;
+}
+$('#go').onclick = () => { best = []; startLevel(0); };
+$('#eAgain').onclick = () => { best = []; startLevel(0); };
+function toTitle(){ seq++; phase = 'title'; show('sTitle'); paintLvl(); }
+function applyLang(){
+  document.documentElement.lang = L; document.title = U().title;
+  $('#lth').classList.toggle('on', L === 'th'); $('#len').classList.toggle('on', L === 'en');
+  $('#tTitle').textContent = U().title; $('#tSub').textContent = U().sub; $('#go').textContent = U().go; $('#gback').textContent = U().gback;
+  $('#how').innerHTML = U().how.map(h => `<span>${esc(h)}</span>`).join('');
+  if (phase === 'teach') { $('#say').textContent = U().hi(goalName()); paint(); }
+  else if (phase === 'test') { seq++; phase = 'teach'; $('#face').textContent = '🤖'; $('#face').classList.remove('think'); $('#say').textContent = U().hi(goalName()); paint(); }
+  else if (phase === 'end') end();
+  else paintLvl();
+}
+$('#lth').onclick = () => { L = 'th'; applyLang(); }; $('#len').onclick = () => { L = 'en'; applyLang(); };
+// เปิดใน iframe (Hub/ใบงาน): ปุ่มกลับส่ง 'closeGame' · รับภาษาจาก postMessage({lang})
+if (window.parent !== window) { $('#gback').classList.remove('hide'); $('#gback').onclick = () => { toTitle(); parent.postMessage('closeGame', '*'); }; }
+addEventListener('message', e => { if (e.data && e.data.lang) { L = e.data.lang === 'en' ? 'en' : 'th'; applyLang(); } });
+applyLang();
+</script>
+</body></html>

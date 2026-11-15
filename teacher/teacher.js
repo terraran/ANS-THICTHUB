@@ -231,7 +231,7 @@ async function drawShare(force){
   if (!shareGroups.length) { $('#view').innerHTML = bar + '<div class="empty">ห้องนี้ยังไม่มีใครส่งใบงานนี้</div>'; return; }
   const latest = shareGroups.map(g => g.rows[g.rows.length - 1]);
   // การ์ดที่ผิดบ่อย: นับจากรอบล่าสุดของแต่ละงาน
-  const all = C.cards.concat(C.retired || []), bins = C.bins || [{ id: 'a', label: C.binA }, { id: 'b', label: C.binB }];
+  const all = C.cards.concat(C.retired || []).filter(c => c.bin), graded = C.cards.some(c => c.bin), bins = C.bins || [{ id: 'a', label: C.binA }, { id: 'b', label: C.binB }];
   const binName = id => plain(th((bins.find(b => b.id === id) || {}).label || ''));
   const miss = all.map(c => { const seen = latest.filter(r => r.data.place && r.data.place[c.id]); const bad = seen.filter(r => r.data.place[c.id] !== c.bin).length;
     return { c, bad, n: seen.length }; }).filter(x => x.bad).sort((x, y) => y.bad / y.n - x.bad / x.n).slice(0, 5);
@@ -241,9 +241,9 @@ async function drawShare(force){
     (compare ? `<div class="note">เทียบ 2 ชิ้น: กดเลือกผลงาน ${cmpSel.length ? 'อีก 1 ชิ้น' : '2 ชิ้น'}</div>` : '') +
     `<div class="share"><div class="subs">${shareGroups.map((g, i) => { const r = g.rows[g.rows.length - 1];
       return `<button class="sub" data-g="${i}" aria-pressed="${cmpSel.includes(i)}"><span class="nm">${who(g.label)}</span>
-        <span class="info">${C.cards.length ? 'จัดถูก ' + esc(r.score) : 'ส่งแล้ว'} · รอบที่ ${r.data.round || 1}${g.rows.length > 1 ? ` · ส่ง ${g.rows.length} ครั้ง` : ''}</span></button>`; }).join('')}</div>
+        <span class="info">${graded ? 'จัดถูก ' + esc(r.score) : 'ส่งแล้ว'} · รอบที่ ${r.data.round || 1}${g.rows.length > 1 ? ` · ส่ง ${g.rows.length} ครั้ง` : ''}</span></button>`; }).join('')}</div>
      <div class="side">
-      ${C.cards.length ? `<div class="panel miss"><h3>การ์ดที่จัดผิดบ่อย <small>(${latest.length} ผลงาน รอบล่าสุด)</small></h3>${miss.length ? miss.map(x =>
+      ${graded ? `<div class="panel miss"><h3>การ์ดที่จัดผิดบ่อย <small>(${latest.length} ผลงาน รอบล่าสุด)</small></h3>${miss.length ? miss.map(x =>
         `<div><span>${esc(plain(th(x.c.text)))}<br><small>ควรอยู่ใน "${esc(binName(x.c.bin))}"</small></span><span class="p">${x.bad}/${x.n}</span></div>`).join('') : '<small>ทุกงานจัดถูกหมด 🎉</small>'}</div>` : ''}
       <div class="panel fr"><h3>คำตอบ Frame of Reference <small>(ตอบ ${frs.length}/${shareGroups.length})</small></h3><div class="q">${esc(frq)}</div>${frs.length ? `<ul>${frs.map(g =>
         `<li><b>${who(g.label)}:</b> ${esc(g.rows[g.rows.length - 1].data.fr)}</li>`).join('')}</ul>` : '<small>ยังไม่มีใครตอบ</small>'}</div>

@@ -10,6 +10,10 @@
 // write.flex = Flow Map ไม่จำกัดขั้น: กล่องแรกเลือกสัญญาณ (signs + พิมพ์เพิ่มเอง) · เด็กกด ➕ เพิ่มกล่องเอง (min-max กล่อง)
 // map: "multi" = Multi-Flow Map: เหตุการณ์ (multi.event) อยู่กลาง · ซ้าย = สาเหตุ (multi.cause) · ขวา = ผล (multi.effect) · เด็กกด ➕ เพิ่มกล่องเอง (min-max ต่อฝั่ง)
 //   ขั้น 1 เขียน Map → ขั้น 2 คิดย้อนกลับ (FoR) แล้วส่ง · ไม่ตรวจถูกผิด · เก็บใน write.ca / write.ef
+// map: "single" = Bubble Map วงเดียว (topicA อยู่กลาง) · ฟองลอยรอบ เด็กต่อเส้นเฉพาะฟองที่ใช่ (อย่างน้อย single.min ฟอง) · การ์ดไม่มี bin = ไม่ตรวจถูกผิด
+// gallery = แถบภาพ SVG เหนือแผนภาพในขั้น 1 (ภาพจาก pics.js · items[].pics 1–2 ภาพ · tags = ป้ายใต้ภาพคู่) แตะภาพเพื่อขยาย
+// ขั้น 2 แบบใหม่ (เก็บใน s2): aitest = AI ทายภาพทดสอบจากฟองที่เด็กต่อเส้น (ตรงอย่างน้อย pass% = ใช่) เด็กกดว่า AI ทายถูก/ผิด + เขียนเหตุผล
+//   · mystery = ภาพปริศนา: โหวต votes (จริง/AI/ดูไม่ออก) + แตะฟองเบาะแสจาก Map · เฉลยหลังส่ง (ไม่นับคะแนน)
 // write.choose[].thumb = รูปบนการ์ดเลือกเรื่อง (ไม่ใส่ = ใช้ art ฉากแรก) · write.choose[].scenes = การ์ตูนสั้น: ขั้น 1 เลือกเรื่องแล้วดูให้จบ · cards: [] = ไม่มีการ์ด ไม่ตรวจถูกผิด ครูอ่านที่เด็กเขียน
 (() => {
 const $ = s => document.querySelector(s);
@@ -27,6 +31,9 @@ const UI = {
         loading: 'กำลังโหลดงานที่ทำค้างไว้...', pairAdd: '+ ทำกับเพื่อน', pairChange: 'เปลี่ยนเพื่อน', pairHd: r => `ทำงานคู่กับใคร? (${r})`,
         solo: 'ทำคนเดียว', pairFt: 'กดส่งครั้งเดียว ใบงานนับให้ทั้งสองคน', rosterErr: 'โหลดรายชื่อไม่สำเร็จ ลองใหม่อีกครั้ง',
         addPh: 'พิมพ์เพิ่ม 1 ข้อ...', addTo: 'ใส่ใน', addN: (n, m) => n >= m ? `เพิ่มแล้ว ${n} ใบ ✓ เพิ่มอีกได้` : `เพิ่มแล้ว ${n} ใบ · อีก ${m - n} ใบ`, del: 'ลบ', myOwn: 'การ์ดที่เราเพิ่ม:', addBubble: '➕ เพิ่มฟอง',
+        doneAi: 'ส่งให้ครูแล้ว ดูเฉลยของขั้น 2 ได้ที่แท็บด้านบน', tabMap: '🗺️ Bubble Map', tabS2: n => `🔎 ${n}`, zoomClose: 'แตะที่ไหนก็ได้เพื่อปิด',
+        addOpt: (n, m) => n >= m ? `เพิ่มครบ ${m} ฟองแล้ว` : `เพิ่มเองได้อีก ${m - n} ฟอง (ไม่บังคับ)`,
+        aiOk: '✅ AI ทายถูก', aiNo: '❌ AI ทายผิด', youRight: 'เราตัดสินถูก ✓', youWrong: 'ลองดูอีกที ✗', isReally: 'ภาพนี้คือ', aiThinking: 'กำลังคิด...',
         replay: '↺ ดูอีกครั้ง', addMf: '➕ เพิ่มกล่อง', doneMulti: 'ส่ง Multi-Flow Map ให้ครูแล้ว ครูจะอ่านที่เราเขียน', addHere: 'เพิ่มกล่องตรงนี้ไหม?', addBox: 'เพิ่มกล่องไหม?', add: 'เพิ่ม', watchAgain: '▶ ดูการ์ตูนอีกครั้ง', chooseTtl: '🎬 เลือกเรื่องที่อยากดู', watchThis: '▶ ดูเรื่องนี้', change: '⇄ เปลี่ยนเรื่อง', doneWrite: 'ส่ง Flow Map ให้ครูแล้ว ครูจะอ่านที่เราเขียน' },
   en: { steps: ['1 Sort', '2 Find signs', '3 Explain', '4 Look back'], stepTag: (n, m) => `Step ${n} / ${m}`, lib: 'Activities', week: n => `Week ${n}`,
         next: 'Next step ➜', back: '◀ Back', check: 'Check and send to teacher ✔', skip: 'Skip and send', edit: '✏️ Fix and send again', lib2: 'Back to activities',
@@ -40,6 +47,9 @@ const UI = {
         loading: 'Loading your saved work...', pairAdd: '+ Work with a friend', pairChange: 'Change friend', pairHd: r => `Who are you working with? (${r})`,
         solo: 'Work alone', pairFt: 'Send once and it counts for both of you', rosterErr: 'Could not load names. Try again.',
         addPh: 'Type 1 more...', addTo: 'Put in', addN: (n, m) => n >= m ? `${n} added ✓ you can add more` : `${n} added · ${m - n} to go`, del: 'Delete', myOwn: 'Cards we added:', addBubble: '➕ Add bubble',
+        doneAi: 'Sent to your teacher. See the step 2 answers in the tab above.', tabMap: '🗺️ Bubble Map', tabS2: n => `🔎 ${n}`, zoomClose: 'Tap anywhere to close',
+        addOpt: (n, m) => n >= m ? `All ${m} added` : `You can add ${m - n} more (optional)`,
+        aiOk: '✅ AI is right', aiNo: '❌ AI is wrong', youRight: 'You judged right ✓', youWrong: 'Look again ✗', isReally: 'This is', aiThinking: 'Thinking...',
         replay: '↺ Watch again', addMf: '➕ Add a box', doneMulti: 'Your Multi-Flow Map was sent. Your teacher will read it.', addHere: 'Add a box here?', addBox: 'Add a box?', add: 'Add', watchAgain: '▶ Watch the cartoon again', chooseTtl: '🎬 Pick a story to watch', watchThis: '▶ Watch this', change: '⇄ Change story', doneWrite: 'Your Flow Map was sent. Your teacher will read it.' }
 };
 
@@ -76,10 +86,21 @@ const flexDone = () => wr.sg.length + wr.so.length >= 1 && wr.st.length >= (C.wr
 const writeDone = () => (!C.write.choose || !!wr.pick) && (FLEX() ? flexDone() : C.write.fields.every(f => (wr.f[f.id] || '').trim().length >= 2));
 const mfOk = (xs, M) => xs.length >= (M.min || 2) && xs.every(x => x.trim().length >= 2);
 const multiDone = () => mfOk(wr.ca, C.multi) && mfOk(wr.ef, C.multi);
-const step2Done = () => MULTI() ? multiDone() : isWrite() ? writeDone() : signsDone();
+const AIT = () => !!C.aitest, MYS = () => !!C.mystery, S2 = () => AIT() || MYS();
+let x2 = { j: {}, why: '', v: {}, cl: {} };   // ขั้น 2 แบบ aitest/mystery: j = เด็กตัดสิน AI · why = เหตุผล · v = โหวตภาพปริศนา · cl = ฟองเบาะแส
+let vtab = 'map';                              // หลังส่ง: แท็บ Map หรือ ขั้น 2
+const s2Done = () => AIT() ? C.aitest.tests.every(x => x2.j[x.id]) && x2.why.trim().length >= 2
+  : C.mystery.items.every(q => x2.v[q.id] && (x2.v[q.id] === 'unsure' || (x2.cl[q.id] || []).length));
+const step2Done = () => S2() ? s2Done() : MULTI() ? multiDone() : isWrite() ? writeDone() : signsDone();
 const isAdd = () => !!C.add;
-const WEB = () => C.map === 'bubble';
-const ownDone = () => !isAdd() || (own.length >= (C.add.min || 3) && (!WEB() || own.every(o => o.bin)));
+const SINGLE = () => C.map === 'single';
+// add.min = 0 = เพิ่มเองไม่บังคับ: บอกว่าเพิ่มได้อีกกี่ฟอง
+const addNTxt = () => C.add.min === 0 ? UI[L].addOpt(own.length, C.add.max || 9) : UI[L].addN(own.length, C.add.min || 3);
+const WEB = () => C.map === 'bubble' || SINGLE();
+const GRADED = () => C.cards.some(c => c.bin);
+const linkedN = () => Object.keys(placed).length + own.filter(o => o.bin).length;
+const mapDone = () => SINGLE() ? linkedN() >= ((C.single && C.single.min) || 3) : Object.keys(placed).length === C.cards.length;
+const ownDone = () => !isAdd() || (own.length >= (C.add.min ?? 3) && (!WEB() || SINGLE() || own.every(o => o.bin)));
 const skip3 = () => !!C.noReason;
 const stepNo = n => n >= 3 && MULTI() ? 2 : skip3() && n === 4 ? 3 : n;   // เลขขั้นที่เด็กเห็น
 const stepMax = () => MULTI() ? 2 : skip3() ? 3 : 4;
@@ -89,13 +110,19 @@ const storyDone = () => !STORY() || (!!wr.pick && seen);
 
 // สร้างแผนภาพตามชนิด (tree ใช้ HTML เดิมใน index.html)
 function buildMap(){
-  stage.classList.toggle('popfor', skip3()); app.classList.toggle('bubblemap', C.map === 'bubble'); app.classList.toggle('nocards', !C.cards.length);
+  stage.classList.toggle('popfor', skip3()); app.classList.toggle('bubblemap', WEB()); app.classList.toggle('nocards', !C.cards.length);
   const m = $('#map'), box = b => `<div class="bin ${b.id}" data-bin="${b.id}"><h2></h2><div class="list"></div>` +
     (C.write ? C.write.fields.filter(f => f.in === b.id).map(fieldHtml).join('') : '') + '</div>';
+  if (S2()) {
+    m.insertAdjacentHTML('afterend', '<div class="s2p hide" id="s2p"></div>'); bindS2();
+    m.insertAdjacentHTML('beforebegin', '<div class="vtabs hide" id="vtabs"><button type="button" data-vt="map"></button><button type="button" data-vt="s2"></button></div>');
+    $('#vtabs').addEventListener('click', e => { const b = e.target.closest('[data-vt]'); if (b) { vtab = b.dataset.vt; showS2(); applyLang(); } });
+  }
+  if (C.gallery) buildGallery();
   if (WEB()) {
-    m.className = 'map web';
+    m.className = 'map web' + (SINGLE() ? ' single' : '');
     m.innerHTML = '<svg class="links" id="links" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>' +
-      '<div class="topic a" id="topA" data-topic="a"></div><div class="topic b" id="topB" data-topic="b"></div><div id="web"></div>';
+      '<div class="topic a" id="topA" data-topic="a"></div>' + (SINGLE() ? '' : '<div class="topic b" id="topB" data-topic="b"></div>') + '<div id="web"></div>';
     m.addEventListener('click', e => {
       if (step !== 1 || checked || e.target.closest('#web .cardx')) return;
       const hit = e.target.closest('.hit');                // แตะเส้น = ตัดเส้นนั้นทิ้ง
@@ -249,7 +276,7 @@ function addOwn(text, bin, id){
   text = String(text || '').trim().slice(0, 50);
   const list = WEB() ? $('#web') : document.querySelector(`.bin[data-bin="${bin}"] .list`);
   if (!text || !list || (!id && (step !== 1 || checked || own.length >= (C.add.max || 9)))) return;
-  const o = { id: id || 'o' + Date.now().toString(36) + own.length, text, bin: bin || '' };
+  const o = { id: id || 'o' + Date.now().toString(36) + own.length, text, bin: bin || (SINGLE() && !id ? 'a' : '') };
   const el = ownEl(o);
   own.push(o); list.appendChild(el);
   if (!id) { $('#addTx').value = ''; dirty = true; if (WEB()) select(el); else $('#addTx').focus(); }
@@ -257,7 +284,7 @@ function addOwn(text, bin, id){
 }
 
 // ---- Double Bubble: ฟองลอยรอบหัวข้อ 2 วง · เส้นเชื่อมฟองกับหัวข้อ ----
-const TOPIC = { a: [31, 50], b: [69, 50] };          // จุดกลางหัวข้อ (% ของแผนภาพ)
+let TOPIC = { a: [31, 50], b: [69, 50] };            // จุดกลางหัวข้อ (% ของแผนภาพ) · single = วงเดียวกลางแผนภาพ
 let lineEls = [];                                     // ฟองของเส้นแต่ละเส้น (ใช้ตอนแตะเส้น)
 const linksOf = bin => bin === 'm' ? ['a', 'b'] : bin ? [bin] : [];
 const binOf = set => set.has('a') && set.has('b') ? 'm' : set.has('a') ? 'a' : set.has('b') ? 'b' : '';
@@ -285,8 +312,9 @@ function layout(){
   const g = { a: [], m: [], b: [], '': [] };
   $('#web').querySelectorAll('.cardx').forEach(el => { const b = binFor(el); g[b].push(el); el.classList.toggle('free', !b); });
   const sp = (n, i, lo, hi) => n < 2 ? (lo + hi) / 2 : lo + (hi - lo) * i / (n - 1);
-  const right = el => { const c = C.cards.find(x => x.id === el.dataset.id); return !c || placed[c.id] === c.bin; };
+  const right = el => { const c = C.cards.find(x => x.id === el.dataset.id); return !c || !c.bin || placed[c.id] === c.bin; };
   let lines = '', hits = ''; lineEls = [];
+  if (SINGLE()) TOPIC = { a: [50, 50] };
   const put = (el, x, y) => {
     el.style.left = x + '%'; el.style.top = y + '%';
     if (!el.style.animationDelay) el.style.animationDelay = (-Math.random() * 3).toFixed(2) + 's';
@@ -296,6 +324,16 @@ function layout(){
       lineEls.push(el);
     });
   };
+  if (SINGLE()) {   // ฟองที่ต่อแล้ววนเป็นวงรอบวงกลาง · ฟองลอยเรียงสองข้างซ้าย/ขวา
+    const xs = g.a;
+    xs.forEach((el, i) => { const r = (-90 + 360 * i / xs.length) * Math.PI / 180; put(el, 50 + 24 * Math.cos(r), 50 + 37 * Math.sin(r)); });
+    const fr = g[''], half = Math.ceil(fr.length / 2);
+    fr.forEach((el, i) => { const left = i < half, k = left ? i : i - half, n = left ? half : fr.length - half;
+      put(el, left ? 9 : 91, sp(n, k, 11, 89)); });
+    $('#links').innerHTML = lines + hits;
+    $('#web').classList.add('tight');
+    return;
+  }
   const roomy = !g[''].length;                         // มีฟองลอยว่าง ๆ อยู่ = เว้นบน/ล่างไว้ให้
   const many = C.cards.length > 10;                    // ฟองเยอะ = ฟองลอยเรียงแถวบน/ล่างแถวละ 6 ฟองที่ต่อแล้วอยู่แถบกลาง
   ['a', 'b'].forEach(side => {
@@ -336,6 +374,90 @@ function startLink(e, el){
     const tp = topicAt(ev); if (tp) toggleLink(el, tp.dataset.topic);
   }, { once: true });
 }
+// ---- แถบภาพ (gallery) + หน้าต่างขยายภาพ ----
+const pic = id => (window.WSPics && WSPics.get(id)) || '';
+function buildGallery(){
+  $('#map').insertAdjacentHTML('beforebegin', '<div class="gal" id="gal"><div class="galhd" id="galHd"></div><div class="galrow">' +
+    C.gallery.items.map((it, i) => `<button type="button" class="gi${it.pics.length > 1 ? ' pair' : ''}" data-g="${i}">` +
+      it.pics.map((p, k) => `<span class="gp">${pic(p)}${C.gallery.tags ? `<i class="gt t${k}" data-k="${k}"></i>` : ''}</span>`).join('') +
+      (it.label ? '<b class="gl"></b>' : '') + '</button>').join('') + '</div></div>');
+  $('#gal').addEventListener('click', e => { const b = e.target.closest('[data-g]'); if (b) zoom(C.gallery.items[+b.dataset.g].pics, C.gallery.items[+b.dataset.g].label, !!C.gallery.tags); });
+}
+function paintGallery(){
+  if (!C.gallery) return;
+  $('#galHd').textContent = t(C.gallery.title);
+  document.querySelectorAll('#gal .gi').forEach(b => { const it = C.gallery.items[+b.dataset.g];
+    b.querySelectorAll('.gt').forEach(x => x.textContent = t(C.gallery.tags[+x.dataset.k]));
+    if (it.label) b.querySelector('.gl').textContent = t(it.label); });
+}
+function zoom(pics, label, tags){
+  const z = $('#zoom') || (() => { stage.insertAdjacentHTML('beforeend', '<div id="zoom" class="hide" role="dialog"></div>'); const el = $('#zoom'); el.onclick = () => el.classList.add('hide'); return el; })();
+  z.innerHTML = `<div class="zbox">${pics.map((p, k) => `<figure>${pic(p)}${tags ? `<figcaption class="gt t${k}">${esc(t(C.gallery.tags[k]))}</figcaption>` : ''}</figure>`).join('')}</div>` +
+    `<div class="zcap">${label ? `<b>${esc(t(label))}</b> · ` : ''}${UI[L].zoomClose}</div>`;
+  z.classList.remove('hide');
+}
+
+// ---- ขั้น 2: AI ทาย (aitest) / ภาพปริศนา (mystery) ----
+const linkedCards = () => C.cards.filter(c => placed[c.id]).concat(own.filter(o => o.bin).map(o => ({ id: o.id, own: true, text: o.text })));
+const cardTx = c => c.own ? esc(c.text) : esc(plain(t(c.text)));
+function aiGuess(x){   // ฟองที่ต่อเส้นเทียบกับสิ่งที่เห็นในภาพ (ฟองที่เด็กพิมพ์เอง AI ไม่รู้จัก ไม่นับ)
+  const ch = linkedCards(), known = ch.filter(c => !c.own), hit = known.filter(c => x.has.includes(c.id));
+  const pct = known.length ? Math.round(100 * hit.length / known.length) : 0;
+  return { ch, pct, yes: pct >= (C.aitest.pass || 70) };
+}
+function renderS2(){
+  const p = $('#s2p'); if (!p) return;
+  const U = UI[L], ed = step === 2 && !checked;
+  if (AIT()) {
+    const A2 = C.aitest;
+    p.innerHTML = '<div class="tests">' + A2.tests.map((x, i) => { const g = aiGuess(x), j = x2.j[x.id], aiRight = g.yes === x.cat;
+      return `<div class="tcard" style="--k:${i}"><button type="button" class="tpic" data-z="${x.pic}">${pic(x.pic)}</button>` +
+        `<div class="tbot"><span class="robo" aria-hidden="true">🤖</span><div class="tsay ${g.yes ? 'y' : 'n'}"><small>${esc(t(A2.bot))}:</small> ${esc(t(g.yes ? A2.yes : A2.no))} <b>${g.pct}%</b></div></div>` +
+        `<div class="tchk">${g.ch.map(c => { const k = c.own ? 'u' : x.has.includes(c.id) ? 'y' : 'n';
+          return `<span class="tk ${k}" title="${k === 'u' ? esc(t(A2.unknown)) : k === 'n' ? esc(t(A2.unseen)) : ''}">${k === 'y' ? '✓' : k === 'n' ? '✗' : '🤷'} ${cardTx(c)}</span>`; }).join('')}</div>` +
+        `<div class="tj"><button type="button" class="jb${j === 'ok' ? ' on' : ''}" data-j="ok" data-t="${x.id}"${ed ? '' : ' disabled'}>${U.aiOk}</button>` +
+        `<button type="button" class="jb no${j === 'no' ? ' on' : ''}" data-j="no" data-t="${x.id}"${ed ? '' : ' disabled'}>${U.aiNo}</button></div>` +
+        (checked ? `<div class="truth ${j === (aiRight ? 'ok' : 'no') ? 'good' : 'bad'}">${U.isReally}: <b>${esc(t(x.name))}</b><br>${j === (aiRight ? 'ok' : 'no') ? U.youRight : U.youWrong}</div>` : '') + '</div>'; }).join('') + '</div>' +
+      `<div class="twhy"><label for="s2why">${esc(t(A2.whyQ))}</label><textarea id="s2why" maxlength="200" placeholder="${esc(t(A2.whyPh))}"${ed ? '' : ' readonly'}>${esc(x2.why)}</textarea></div>`;
+  } else {
+    const M = C.mystery, ch = linkedCards();
+    p.innerHTML = '<div class="mys">' + M.items.map((q, i) => { const v = x2.v[q.id], cl = x2.cl[q.id] || [];
+      const good = v && (v === q.truth || v === q.best);
+      return `<div class="qcard" style="--k:${i}"><button type="button" class="tpic" data-z="${q.pic}">${pic(q.pic)}<span class="qn">${i + 1}</span></button>` +
+        `<div class="votes">${M.votes.map(o => `<button type="button" class="vb v-${o.id}${v === o.id ? ' on' : ''}" data-v="${o.id}" data-q="${q.id}"${ed ? '' : ' disabled'}>${esc(t(o.text))}</button>`).join('')}</div>` +
+        `<div class="clhd">${esc(t(M.clueHd))}</div><div class="clues">${ch.length ? ch.map(c => `<button type="button" class="cl${cl.includes(c.id) ? ' on' : ''}" data-c="${c.id}" data-q="${q.id}"${ed ? '' : ' disabled'}>${c.icon ? c.icon + ' ' : ''}${cardTx(c)}</button>`).join('') : `<small>${esc(t(M.noClue))}</small>`}</div>` +
+        (checked ? `<div class="truth ${good ? 'good' : 'bad'}"><b>${esc(t(M.truthHd))}</b> ${esc(t(q.why))}</div>` : '') + '</div>'; }).join('') + '</div>';
+  }
+}
+function bindS2(){
+  const p = $('#s2p');
+  p.addEventListener('click', e => {
+    const z = e.target.closest('[data-z]'); if (z) return zoom([z.dataset.z]);
+    if (step !== 2 || checked) return;
+    const j = e.target.closest('[data-j]'), v = e.target.closest('[data-v]'), c = e.target.closest('[data-c]');
+    if (j) x2.j[j.dataset.t] = j.dataset.j;
+    else if (v) x2.v[v.dataset.q] = v.dataset.v;
+    else if (c) { const a = x2.cl[c.dataset.q] || (x2.cl[c.dataset.q] = []), k = a.indexOf(c.dataset.c); k < 0 ? a.push(c.dataset.c) : a.splice(k, 1); }
+    else return;
+    dirty = true; renderS2(); update();
+  });
+  p.addEventListener('input', e => { if (e.target.id === 's2why') { x2.why = e.target.value; dirty = true; update(); } });
+}
+// หลังส่ง: สลับดู Map / ขั้น 2
+function showS2(){
+  const on = S2() && ((step === 2 && !checked) || (checked && vtab === 's2'));
+  if ($('#s2p')) $('#s2p').classList.toggle('hide', !on);
+  $('#map').classList.toggle('hide', on);
+  if ($('#gal')) $('#gal').classList.toggle('hide', on || (step !== 1 && !checked));
+  if ($('#vtabs')) $('#vtabs').classList.toggle('hide', !(checked && S2()));
+  if (on) renderS2();
+}
+const s2Summary = () => {
+  const th = o => (o && typeof o === 'object') ? o.th : o;
+  if (AIT()) return 'AI ทาย: ' + C.aitest.tests.map(x => { const g = aiGuess(x); return `${plain(th(x.name))} = AI ว่า${th(g.yes ? C.aitest.yes : C.aitest.no)} ${g.pct}% · เราว่า${x2.j[x.id] === 'ok' ? 'ถูก' : 'ผิด'}`; }).join(' | ') + ' | เหตุผล: ' + x2.why.trim();
+  const tx = id => { const c = C.cards.find(x => x.id === id) || own.find(o => o.id === id); return c ? (c.text.th ? plain(c.text.th) : c.text) : id; };
+  return 'ภาพปริศนา: ' + C.mystery.items.map((q, i) => `${i + 1} = ${plain(th((C.mystery.votes.find(o => o.id === x2.v[q.id]) || {}).text) || '-')} (${(x2.cl[q.id] || []).map(tx).join(', ')})`).join(' | ');
+};
 const ownSummary = () => bins().map(b => { const xs = own.filter(o => o.bin === b.id).map(o => o.text);
   return xs.length ? plain(HubUtil.t(b.label, 'th')) + ': ' + xs.join(', ') : ''; }).filter(Boolean).join(' | ');
 const fieldHtml = f => `<div class="wfield"><label></label><textarea rows="2" data-f="${f.id}"></textarea></div>`;
@@ -428,10 +550,16 @@ function applyLang(){
   $('#stag').textContent = U.stepTag(stepNo(Math.min(step, 4)), stepMax());
   let task = t(C['task' + step]) || '';
   if (step === 3) task += hes ? '' : `<br><b>${U.pickHint}</b>`;
-  if (checked) task = `<b>${U.round(round)}</b> · ${C.cards.length ? U.doneTask : MULTI() ? U.doneMulti : U.doneWrite}`;
+  if (checked) task = `<b>${U.round(round)}</b> · ${S2() && !GRADED() ? U.doneAi : GRADED() ? U.doneTask : MULTI() ? U.doneMulti : U.doneWrite}`;
   $('#task').innerHTML = task;
   if ($('#root')) $('#root').textContent = t(C.root);
-  if ($('#topA')) { $('#topA').textContent = t(C.topicA); $('#topB').textContent = t(C.topicB); }
+  if ($('#topA')) $('#topA').textContent = t(C.topicA);
+  if ($('#topB')) $('#topB').textContent = t(C.topicB);
+  paintGallery();
+  if ($('#vtabs')) { const [bm, bs] = $('#vtabs').querySelectorAll('button');
+    bm.textContent = SINGLE() ? U.tabMap : t(C.steps)[0]; bs.textContent = U.tabS2(t(C.steps)[1].replace(/^\d+\s*/, ''));
+    bm.classList.toggle('on', vtab === 'map'); bs.classList.toggle('on', vtab === 's2'); }
+  if (S2() && !$('#s2p').classList.contains('hide')) renderS2();
   document.querySelectorAll('.bin').forEach(el => el.querySelector('h2').textContent = t(binLabel(el.dataset.bin)));
   paintWrite();
   if (STORY()) { paintStrip(); if (step === 1 && !checked) paintScene(); }
@@ -440,7 +568,7 @@ function applyLang(){
   if (C.add) {
     $('#addTx').placeholder = t(C.add.ph) || U.addPh;
     document.querySelectorAll('.ab').forEach(b => b.textContent = b.dataset.b ? `${U.addTo} ${t(binLabel(b.dataset.b))}` : U.addBubble);
-    $('#addN').textContent = U.addN(own.length, C.add.min || 3);
+    $('#addN').textContent = addNTxt();
     document.querySelectorAll('.cardx.own .del').forEach(b => b.setAttribute('aria-label', U.del));
   }
   $('#back').textContent = U.back; $('#next').textContent = U.next; $('#toFor').textContent = U.next;
@@ -458,7 +586,7 @@ function applyLang(){
     el.querySelectorAll('.chip').forEach(ch => ch.textContent = t(C.signs[ch.dataset.s - 1].short));
     el.querySelector('.exp').innerHTML = checked ? (placed[c.id] === c.bin ? '' : `<b>${U.should} "${t(binLabel(c.bin))}"</b> · `) + t(c.why) : '';
   });
-  if (checked) { $('#result').textContent = C.cards.length ? U.result(score(), C.cards.length) : '✍️'; $('#think').innerHTML = t(C.think); showSent(); }
+  if (checked) { $('#result').textContent = GRADED() ? U.result(score(), C.cards.length) : S2() ? '🤖' : '✍️'; $('#think').innerHTML = t(C.think); showSent(); }
 }
 // คำถาม FoR: ครูตั้งได้ใบงานละ 1 ข้อใน activities.json · ค่าเริ่มต้นคือคำถามหลักข้อ 1 ของโรงเรียน
 const frq = () => (A && A.frq) || { th: 'เรารู้ได้อย่างไรว่าการ์ดไหนอยู่กลุ่มไหน?', en: 'How do we know which group each card belongs to?' };
@@ -501,8 +629,8 @@ function place(el, bin){ bin.querySelector('.list').appendChild(el); placed[el.d
 function update(){
   if (!C) return;
   if (dirty && !checked) scheduleSave();
-  if (step === 1) $('#next').disabled = Object.keys(placed).length !== C.cards.length || !ownDone() || !storyDone() || (MULTI() && !multiDone());
-  if (C.add) { $('#addN').textContent = UI[L].addN(own.length, C.add.min || 3);
+  if (step === 1) $('#next').disabled = !mapDone() || !ownDone() || !storyDone() || (MULTI() && !multiDone());
+  if (C.add) { $('#addN').textContent = addNTxt();
     const full = own.length >= (C.add.max || 9);
     document.querySelectorAll('.ab').forEach(b => b.disabled = full || !$('#addTx').value.trim()); $('#addTx').disabled = full; }
   if (step === 2) $('#next').disabled = !step2Done();
@@ -521,6 +649,7 @@ function setStep(n){
   $('#forPanel').classList.toggle('hide', n !== 4);
   const adder = isAdd() && n === 1 && !checked;
   $('#adder').classList.toggle('hide', !adder);
+  if (!C.write) $('#writer').classList.toggle('hide', !adder);
   if (C.write) {
     const box = !!C.write.choose || C.write.fields.some(f => !f.in);   // มีอะไรให้แสดงนอกแผนภาพไหม
     $('#writer').classList.toggle('hide', !(adder || (box && (n === 2 || checked))));
@@ -537,6 +666,8 @@ function setStep(n){
   if (n === 2 && !isWrite()) C.cards.forEach(c => { if (placed[c.id] !== 'b') delete signs[c.id]; const el = cardOf(c.id); el && el.querySelectorAll('.chip').forEach(ch => ch.classList.toggle('on', !!(signs[c.id] && signs[c.id].has(+ch.dataset.s)))); });
   if (n === 4) setTimeout(() => $('#fr').focus(), 0);
   if (WEB() && n !== 1) select(null);
+  if (n === 2 && MYS() && !checked) { const ok = new Set(linkedCards().map(c => c.id)); Object.keys(x2.cl).forEach(k => { x2.cl[k] = x2.cl[k].filter(id => ok.has(id)); }); }
+  if (S2() || C.gallery) showS2();
   applyLang(); update();
   if (dirty && !checked) saveNow();
 }
@@ -558,16 +689,19 @@ function buildRow(fr){
   const th = o => (o && typeof o === 'object') ? o.th : o;
   const wrong = C.cards.filter(c => placed[c.id] !== c.bin).map(c => plain(th(c.text)));
   const inB = C.cards.filter(c => placed[c.id] === 'b');
-  const exact = isWrite() ? null : inB.filter(c => c.bin === 'b' && [...(signs[c.id] || [])].sort().join() === (c.signs || []).slice().sort().join()).length;
-  const chosen = (isAdd() && own.length ? 'เพิ่มเอง ' + ownSummary() + (isWrite() ? ' || ' : '') : '') + (isWrite() ? writeSummary() : inB.map(c => plain(th(c.text)) + ' = ' + [...(signs[c.id] || [])].sort().map(n => plain(th(C.signs[n - 1].short))).join(', ')).join(' | '));
+  const exact = isWrite() || S2() ? null : inB.filter(c => c.bin === 'b' && [...(signs[c.id] || [])].sort().join() === (c.signs || []).slice().sort().join()).length;
+  const chosen = (isAdd() && own.length ? 'เพิ่มเอง ' + ownSummary() + (isWrite() || S2() ? ' || ' : '') : '') +
+    (SINGLE() ? 'ต่อเส้น: ' + C.cards.filter(c => placed[c.id]).map(c => plain(th(c.text))).join(', ') + ' || ' : '') +
+    (S2() ? s2Summary() : isWrite() ? writeSummary() : inB.map(c => plain(th(c.text)) + ' = ' + [...(signs[c.id] || [])].sort().map(n => plain(th(C.signs[n - 1].short))).join(', ')).join(' | '));
   const hc = C.cards.find(c => c.id === hes);
   const sg = {}; if (!isWrite()) inB.forEach(c => sg[c.id] = [...(signs[c.id] || [])].sort());
   const reason = $('#reason').value.trim();
   const data = { v: 3, act: C.act, round, place: placed, signs: sg, hes, reason, fr, frq: th(frq()) };
   if (isWrite()) Object.assign(data, { map: C.map, write: wr });
   if (isAdd()) Object.assign(data, { map: C.map, own });
-  return [C.level, C.week, th(C.title), me.room, members().join(' + '), L.toUpperCase(), C.cards.length ? `${score()}/${C.cards.length}` : '✓',
-          wrong.join(' | ') || '-', isWrite() ? '-' : `${exact}/${C.cards.filter(c => c.bin === 'b').length}`, chosen, hc ? plain(th(hc.text)) : '', reason, JSON.stringify(data), fr || '-', round];
+  if (S2()) Object.assign(data, { map: C.map, s2: x2 });
+  return [C.level, C.week, th(C.title), me.room, members().join(' + '), L.toUpperCase(), GRADED() ? `${score()}/${C.cards.length}` : '✓',
+          (GRADED() && wrong.join(' | ')) || '-', isWrite() || S2() ? '-' : `${exact}/${C.cards.filter(c => c.bin === 'b').length}`, chosen, hc ? plain(th(hc.text)) : '', reason, JSON.stringify(data), fr || '-', round];
 }
 const members = () => [me.name, partner].filter(Boolean);
 async function send(fr){
@@ -579,7 +713,9 @@ async function send(fr){
   if (sendState === 'err') { uncheck(); setStep(4); alert(UI[L].err); }
 }
 function markResults(){
+  vtab = GRADED() ? 'map' : 's2';
   C.cards.forEach(c => {
+    if (!c.bin) return;   // การ์ดที่ไม่ตรวจถูกผิด (Bubble Map วงเดียว)
     const el = cardOf(c.id), right = placed[c.id] === c.bin;
     el.classList.add(right ? 'good' : 'bad'); el.insertAdjacentHTML('beforeend', `<div class="mark ${right ? 'ok' : 'no'}">${right ? '✓' : '✗'}</div>`);
     if (placed[c.id] === 'b') el.querySelectorAll('.chip').forEach(ch => {
@@ -594,7 +730,7 @@ function submit(fr){ checked = true; markResults(); setStep(3); send(fr); }
 // งานที่ส่งล่าสุด: วางการ์ดตามที่ส่ง แสดงผลตรวจ · กด "แก้แล้วส่งใหม่" ทำรอบถัดไปจากคำตอบเดิมได้
 function showSubmitted(last){
   const d = last.data, key = n => String(n).replace(/\s+/g, '').toUpperCase();
-  restore({ placed: d.place, signs: d.signs, hes: d.hes, reason: d.reason, fr: d.fr, write: d.write, own: d.own,
+  restore({ placed: d.place, signs: d.signs, hes: d.hes, reason: d.reason, fr: d.fr, write: d.write, own: d.own, s2: d.s2,
             partner: (last.members || []).find(n => key(n) !== key(me.name)) || '' });
   round = d.round || 1; sentAt = last.time ? new Date(last.time) : null;
   checked = true; markResults(); setStep(3);
@@ -622,7 +758,7 @@ let saveTimer = 0, savedAt = null, resumedAt = null;
 const hm = d => d.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
 function snapshot(){
   const sg = {}; Object.keys(signs).forEach(id => { if (signs[id].size) sg[id] = [...signs[id]].sort(); });
-  return { v: 1, step, round, placed, signs: sg, write: wr, own, hes, reason: $('#reason').value, fr: $('#fr').value, partner };
+  return { v: 1, step, round, placed, signs: sg, write: wr, own, s2: x2, hes, reason: $('#reason').value, fr: $('#fr').value, partner };
 }
 function scheduleSave(){ clearTimeout(saveTimer); saveTimer = setTimeout(saveNow, 8000); }
 function saveNow(){
@@ -651,13 +787,18 @@ function restore(d){
     if (FLEX()) { const arr = x => Array.isArray(x) ? x.map(String) : []; Object.assign(wr, { sg: arr(d.write.sg), so: arr(d.write.so), st: arr(d.write.st) }); }
     Object.keys(wr.f).forEach(id => { const el = fieldEl(id); if (el) el.value = wr.f[id]; }); paintPick();
   }
+  if (S2() && d.s2 && typeof d.s2 === 'object') {
+    const obj = o => o && typeof o === 'object' && !Array.isArray(o) ? o : {};
+    const cl = obj(d.s2.cl); Object.keys(cl).forEach(k => { cl[k] = Array.isArray(cl[k]) ? cl[k].map(String) : []; });
+    x2 = { j: obj(d.s2.j), why: String(d.s2.why || ''), v: obj(d.s2.v), cl };
+  }
   if (d.hes && cardOf(d.hes)) { hes = d.hes; cardOf(hes).classList.add('hes'); }
   $('#reason').value = d.reason || ''; $('#fr').value = d.fr || '';
   setPartner(d.partner && d.partner !== me.name ? d.partner : '');
   // ไปขั้นที่ไกลที่สุดที่ทำได้จริง (กันข้อมูลไม่ครบ)
   if (MULTI()) return (d.step || 1) >= 4 && multiDone() ? 4 : 1;
   let n = 1;
-  if (Object.keys(placed).length === C.cards.length && ownDone() && storyDone()) n = 2;
+  if (mapDone() && ownDone() && storyDone()) n = 2;
   if (n === 2 && step2Done()) n = 3;
   const s = Math.min(Math.max(1, d.step || 1), n === 3 && (skip3() || (hes && $('#reason').value.trim().length >= 5)) ? 4 : n);
   return skip3() && s === 3 ? 2 : s;

@@ -1,0 +1,68 @@
+{
+ "act": "y3w4",
+ "level": "Y3",
+ "week": 4,
+ "map": "single",
+ "title": { "th": "AI เรียนรู้จากตัวอย่าง", "en": "AI learns from examples" },
+ "topicA": { "th": "🐱\nแมว", "en": "🐱\nCat" },
+ "single": { "min": 3 },
+ "add": { "min": 0, "max": 3, "ph": { "th": "พิมพ์ลักษณะของแมวเพิ่มเอง...", "en": "Type another thing about cats..." } },
+ "noReason": true,
+ "steps": {
+  "th": ["1 เติม Bubble Map", "2 AI ของเราทาย", "3 คิดย้อนกลับ"],
+  "en": ["1 Fill the Bubble Map", "2 Our AI guesses", "3 Look back"]
+ },
+ "task1": {
+  "th": "<b>ขั้นที่ 1</b> ดูภาพแมว 6 ภาพ (แตะภาพเพื่อขยาย) · แตะฟองที่บอกลักษณะของ <b>แมว</b> แล้วแตะวงกลางเพื่อต่อเส้น · ฟองไหนไม่ใช่ ปล่อยลอยไว้ · ต่ออย่างน้อย 3 ฟอง",
+  "en": "<b>Step 1</b> Look at the 6 cat pictures (tap to zoom). Tap a bubble that describes a <b>cat</b>, then tap the middle circle to link it. Leave the others floating. Link at least 3."
+ },
+ "task2": {
+  "th": "<b>ขั้นที่ 2</b> Bubble Map ของเราคือสมองของ AI · ดูว่า AI ทายภาพใหม่ 4 ภาพว่าอะไร แล้วกดว่า <b>AI ทายถูก</b> หรือ <b>ทายผิด</b>",
+  "en": "<b>Step 2</b> Our Bubble Map is the AI's brain. See what the AI guesses for 4 new pictures, then tap <b>AI is right</b> or <b>AI is wrong</b>."
+ },
+ "think": {
+  "th": "🤔 ถ้าอยากให้ AI ทายถูกขึ้น เราต้องสอนด้วยภาพตัวอย่างแบบไหนเพิ่ม?",
+  "en": "🤔 To help the AI guess better, what other example pictures should we teach it with?"
+ },
+ "gallery": {
+  "title": { "th": "📸 ภาพตัวอย่าง “แมว”", "en": "📸 Example “cat” pictures" },
+  "items": [
+   { "pics": ["cat1"] }, { "pics": ["cat2"] }, { "pics": ["cat3"] },
+   { "pics": ["cat4"] }, { "pics": ["cat5"] }, { "pics": ["cat6"] }
+  ]
+ },
+ "aitest": {
+  "pass": 70,
+  "yes": { "th": "แมว", "en": "Cat" },
+  "no": { "th": "ไม่ใช่แมว", "en": "Not a cat" },
+  "bot": { "th": "AI ของเรา", "en": "Our AI" },
+  "unseen": { "th": "มองไม่เห็นในภาพ", "en": "Can't see it" },
+  "unknown": { "th": "AI ไม่รู้จักคำนี้", "en": "AI doesn't know this" },
+  "whyQ": { "th": "AI ของเราทายผิดภาพไหน เพราะอะไร?", "en": "Which picture did our AI get wrong, and why?" },
+  "whyPh": { "th": "AI ทายผิดภาพ... เพราะ...", "en": "The AI got ... wrong because..." },
+  "tests": [
+   { "id": "t1", "pic": "toycat", "cat": false, "has": ["c1", "c2", "c3", "c4", "c5", "c6", "c7"],
+     "name": { "th": "ตุ๊กตาแมว ไม่ใช่แมวจริง", "en": "A toy cat, not a real cat" } },
+   { "id": "t2", "pic": "shiba", "cat": false, "has": ["c1", "c3", "c4", "c5", "c7"],
+     "name": { "th": "หมาชิบะ ไม่ใช่แมว", "en": "A Shiba dog, not a cat" } },
+   { "id": "t3", "pic": "sphynx", "cat": true, "has": ["c1", "c2", "c3", "c5", "c6"],
+     "name": { "th": "แมวพันธุ์ไม่มีขน เป็นแมวจริง", "en": "A hairless cat, a real cat" } },
+   { "id": "t4", "pic": "boxcat", "cat": true, "has": ["c1", "c3", "c6"],
+     "name": { "th": "แมวมุดกล่อง เป็นแมวจริง", "en": "A cat in a box, a real cat" } }
+  ]
+ },
+ "cards": [
+  { "id": "c1", "icon": "🔺", "text": { "th": "หูแหลม", "en": "Pointy ears" } },
+  { "id": "c2", "icon": "〰️", "text": { "th": "มีหนวด", "en": "Whiskers" } },
+  { "id": "c3", "icon": "➰", "text": { "th": "มีหาง", "en": "A tail" } },
+  { "id": "c4", "icon": "🧶", "text": { "th": "มีขนทั้งตัว", "en": "Fur all over" } },
+  { "id": "c5", "icon": "🐾", "text": { "th": "มี 4 ขา", "en": "4 legs" } },
+  { "id": "c6", "icon": "👀", "text": { "th": "ตาโต", "en": "Big eyes" } },
+  { "id": "c7", "icon": "🟧", "text": { "th": "สีส้ม", "en": "Orange" } },
+  { "id": "c8", "icon": "🦓", "text": { "th": "มีลายทาง", "en": "Stripes" } },
+  { "id": "c9", "icon": "🔔", "text": { "th": "ใส่ปลอกคอ", "en": "A collar" } },
+  { "id": "c10", "icon": "🔊", "text": { "th": "ร้องเหมียว", "en": "Says meow" } },
+  { "id": "c11", "icon": "🐟", "text": { "th": "ชอบกินปลา", "en": "Likes fish" } },
+  { "id": "c12", "icon": "📏", "text": { "th": "ตัวเล็กกว่าหมา", "en": "Smaller than a dog" } }
+ ]
+}

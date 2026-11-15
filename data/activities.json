@@ -30,6 +30,16 @@
       "path": "worksheet/?act=y4w3", "afterGame": "upstander",
       "frq": { "th": "อะไรทำให้คนอยากแกล้งกันในโลกออนไลน์ และอะไรจะช่วยหยุดได้?", "en": "What makes people want to bully online, and what could help stop it?" },
       "frPh": { "th": "เพราะ...", "en": "Because..." } },
+    { "id": "y3w4", "level": "Y3", "week": 4, "kind": "sheet",
+      "title": { "th": "AI เรียนรู้จากตัวอย่าง", "en": "AI learns from examples" },
+      "path": "worksheet/?act=y3w4", "afterGame": "teachbot",
+      "frq": { "th": "ทำไมเราไม่ควรเชื่อทุกอย่างที่ AI บอก?", "en": "Why shouldn't we believe everything AI tells us?" },
+      "frPh": { "th": "เพราะ...", "en": "Because..." } },
+    { "id": "y4w4", "level": "Y4", "week": 4, "kind": "sheet",
+      "title": { "th": "ภาพจริง หรือ AI สร้าง?", "en": "Real photo or AI-made?" },
+      "path": "worksheet/?act=y4w4", "afterGame": "photocheck",
+      "frq": { "th": "ทำไมต้องตรวจภาพก่อนเชื่อหรือแชร์ต่อ?", "en": "Why should we check a picture before we believe or share it?" },
+      "frPh": { "th": "เพราะ...", "en": "Because..." } },
     { "id": "adventure", "level": "Y3", "kind": "game",
       "tag": { "th": "ป๊อปอัปหลอก", "en": "Trick pop-ups" },
       "title": { "th": "ผจญภัยป่ามหัศจรรย์", "en": "Magic Forest Adventure" },
@@ -53,6 +63,14 @@
     { "id": "upstander", "level": "Y4", "kind": "game",
       "tag": { "th": "เป็นคนที่ช่วยได้", "en": "Be an upstander" },
       "title": { "th": "ฮีโร่กลุ่มแชท", "en": "Group Chat Hero" },
-      "path": "games/upstander.html", "ownBack": true }
+      "path": "games/upstander.html", "ownBack": true },
+    { "id": "teachbot", "level": "Y3", "kind": "game",
+      "tag": { "th": "AI เรียนจากตัวอย่าง", "en": "AI learns from examples" },
+      "title": { "th": "สอนหุ่นยนต์ AI", "en": "Teach the Robot" },
+      "path": "games/teachbot.html", "ownBack": true, "requires": "y3w4" },
+    { "id": "photocheck", "level": "Y4", "kind": "game",
+      "tag": { "th": "ภาพจริงหรือ AI", "en": "Real or AI pictures" },
+      "title": { "th": "นักสืบภาพ", "en": "Photo Detective" },
+      "path": "games/photocheck.html", "ownBack": true, "requires": "y4w4" }
   ]
 }

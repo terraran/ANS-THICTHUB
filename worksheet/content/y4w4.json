@@ -1,0 +1,89 @@
+{
+ "act": "y4w4",
+ "level": "Y4",
+ "week": 4,
+ "map": "bubble",
+ "title": { "th": "ภาพจริง หรือ AI สร้าง?", "en": "Real photo or AI-made?" },
+ "topicA": { "th": "📷\nภาพถ่ายจริง", "en": "📷\nReal photo" },
+ "topicB": { "th": "🤖\nภาพที่ AI สร้าง", "en": "🤖\nAI-made picture" },
+ "bins": [
+  { "id": "a", "label": { "th": "📷 ภาพจริง เท่านั้น", "en": "📷 Only real photos" } },
+  { "id": "m", "label": { "th": "🤝 เหมือนกัน", "en": "🤝 Same for both" } },
+  { "id": "b", "label": { "th": "🤖 ภาพ AI เท่านั้น", "en": "🤖 Only AI pictures" } }
+ ],
+ "add": { "min": 0, "max": 3, "ph": { "th": "พิมพ์สิ่งที่เราสังเกตเห็นเพิ่มเอง...", "en": "Type something else you noticed..." } },
+ "noReason": true,
+ "steps": {
+  "th": ["1 เปรียบเทียบ", "2 ภาพปริศนา", "3 คิดย้อนกลับ"],
+  "en": ["1 Compare", "2 Mystery pictures", "3 Look back"]
+ },
+ "task1": {
+  "th": "<b>ขั้นที่ 1</b> ดูภาพคู่ 4 ชุด (แตะภาพเพื่อซูม) · แตะฟอง แล้วแตะหัวข้อ (หรือลากเส้น) · <b>ต่างกัน</b> ต่อหัวข้อเดียว · <b>เหมือนกัน</b> ต่อทั้งสองหัวข้อ · ต่อให้ครบ 12 ฟอง",
+  "en": "<b>Step 1</b> Look at the 4 picture pairs (tap to zoom). Tap a bubble, then a topic (or drag a line). <b>Different</b>: one topic. <b>Same</b>: both topics. Link all 12 bubbles."
+ },
+ "task2": {
+  "th": "<b>ขั้นที่ 2</b> ภาพปริศนา 3 ภาพ: ภาพไหนจริง ภาพไหน AI สร้าง หรือดูไม่ออก? · แตะฟอง <b>เบาะแส</b> ที่เราใช้ตัดสิน",
+  "en": "<b>Step 2</b> 3 mystery pictures: real, AI-made, or can't tell? Tap the <b>clue</b> bubbles you used to decide."
+ },
+ "think": {
+  "th": "🤔 ถ้าดูภาพแล้วดูไม่ออกเลยว่าจริงหรือ AI เราควรทำอย่างไรก่อนเชื่อหรือแชร์?",
+  "en": "🤔 If we can't tell whether a picture is real or AI, what should we do before believing or sharing it?"
+ },
+ "gallery": {
+  "title": { "th": "🔍 ภาพคู่ 4 ชุด", "en": "🔍 4 picture pairs" },
+  "tags": [
+   { "th": "📷 จริง", "en": "📷 Real" },
+   { "th": "🤖 AI", "en": "🤖 AI" }
+  ],
+  "items": [
+   { "pics": ["wave_real", "wave_ai"], "label": { "th": "โบกมือทักทาย", "en": "Waving hello" } },
+   { "pics": ["shop_real", "shop_ai"], "label": { "th": "ร้านขนม", "en": "Sweet shop" } },
+   { "pics": ["win_real", "win_ai"], "label": { "th": "แมวริมหน้าต่าง", "en": "Cat by a window" } },
+   { "pics": ["sun_real", "sun_ai"], "label": { "th": "ยืนกลางแดด", "en": "Standing in the sun" } }
+  ]
+ },
+ "mystery": {
+  "votes": [
+   { "id": "real", "text": { "th": "📷 ภาพจริง", "en": "📷 Real" } },
+   { "id": "ai", "text": { "th": "🤖 AI สร้าง", "en": "🤖 AI-made" } },
+   { "id": "unsure", "text": { "th": "🤔 ดูไม่ออก", "en": "🤔 Can't tell" } }
+  ],
+  "clueHd": { "th": "เบาะแสที่เราใช้:", "en": "Clues we used:" },
+  "noClue": { "th": "ยังไม่ได้ต่อฟองไหนเลย กลับไปขั้น 1 ก่อน", "en": "No linked bubbles yet. Go back to step 1." },
+  "truthHd": { "th": "เฉลย:", "en": "Answer:" },
+  "items": [
+   { "id": "q1", "pic": "q_poster", "truth": "ai",
+     "why": { "th": "AI สร้าง · ตัวหนังสือบนโปสเตอร์อ่านไม่ออกเลย ทั้งหัวโปสเตอร์และข้อความด้านล่าง", "en": "AI-made. The words on the poster can't be read, at the top and at the bottom." } },
+   { "id": "q2", "pic": "q_field", "truth": "real",
+     "why": { "th": "ภาพจริง · ป้าย \"สนาม 1\" อ่านออก ตาข่ายประตูเป็นช่องเท่า ๆ กัน ไม่มีอะไรบิดเบี้ยว", "en": "Real. The \"Field 1\" sign can be read and the goal net is even. Nothing is bent." } },
+   { "id": "q3", "pic": "q_dog", "truth": "ai", "best": "unsure",
+     "why": { "th": "AI สร้าง แต่ไม่มีเบาะแสให้เห็นเลย · ตอบ \"ดูไม่ออก\" ก็เก่งแล้ว! ภาพแบบนี้ต้องดูว่ามาจากไหน หรือถามผู้ใหญ่ก่อนเชื่อ", "en": "AI-made, but there are no clues at all. \"Can't tell\" is a great answer! For pictures like this, check where it came from or ask an adult." } }
+  ]
+ },
+ "cards": [
+  { "id": "a1", "icon": "🖐️", "bin": "a", "text": { "th": "นิ้วมือครบ 5 นิ้ว", "en": "Five fingers on each hand" },
+    "why": { "th": "มือในภาพถ่ายจริงมีนิ้วครบ 5 นิ้วเสมอ (ดูภาพโบกมือ)", "en": "Hands in real photos have five fingers (see the waving pair)." } },
+  { "id": "a2", "icon": "🔤", "bin": "a", "text": { "th": "ตัวหนังสือในภาพอ่านออก", "en": "The words can be read" },
+    "why": { "th": "ป้ายในภาพจริงอ่านออก เช่น \"ร้านขนมบ้านแดง\"", "en": "Signs in real photos can be read, like the sweet shop sign." } },
+  { "id": "a3", "icon": "☀️", "bin": "a", "text": { "th": "เงาไปทางเดียวกับแสง", "en": "Shadows match the light" },
+    "why": { "th": "แดดอยู่ทางซ้าย เงาของคนและต้นไม้จึงไปทางขวาเหมือนกัน", "en": "The sun is on the left, so the person and the tree both have shadows on the right." } },
+  { "id": "a4", "icon": "📍", "bin": "a", "text": { "th": "มีคนถ่ายจากสถานที่จริง", "en": "Someone took it at a real place" },
+    "why": { "th": "ภาพถ่ายจริงต้องมีคนไปถ่ายที่นั่นจริง ๆ ส่วนภาพ AI ไม่ต้องไปที่ไหนเลย", "en": "A real photo needs someone at that place. An AI picture does not." } },
+  { "id": "a5", "icon": "🪟", "bin": "a", "text": { "th": "กรอบหน้าต่างตรง ไม่บิด", "en": "Window lines stay straight" },
+    "why": { "th": "กรอบหน้าต่างในภาพจริงตรง ส่วนภาพ AI กรอบบิดโค้ง", "en": "The real window frame is straight. In the AI picture it bends." } },
+  { "id": "b1", "icon": "🤚", "bin": "b", "text": { "th": "นิ้วเกินหรือนิ้วติดกัน", "en": "Extra or joined fingers" },
+    "why": { "th": "ภาพโบกมือแบบ AI มี 6 นิ้ว AI มักวาดนิ้วผิด", "en": "The AI waving picture has 6 fingers. AI often gets fingers wrong." } },
+  { "id": "b2", "icon": "〰️", "bin": "b", "text": { "th": "ตัวหนังสือขยุกขยิก อ่านไม่ออก", "en": "Squiggly words you can't read" },
+    "why": { "th": "ป้ายร้านแบบ AI ดูเหมือนตัวหนังสือ แต่อ่านไม่ออกสักคำ", "en": "The AI shop sign looks like writing, but not one word can be read." } },
+  { "id": "b3", "icon": "🌀", "bin": "b", "text": { "th": "พื้นหลังบิดเบี้ยว", "en": "A bent background" },
+    "why": { "th": "หน้าต่างแบบ AI เส้นโค้งทั้งที่ควรตรง", "en": "The AI window has curved lines that should be straight." } },
+  { "id": "b4", "icon": "🌗", "bin": "b", "text": { "th": "เงาชี้ผิดทาง", "en": "A shadow points the wrong way" },
+    "why": { "th": "ภาพ AI เงาของคนชี้เข้าหาดวงอาทิตย์ แต่เงาต้นไม้ชี้อีกทาง", "en": "In the AI picture the person's shadow points at the sun, but the tree's shadow points the other way." } },
+  { "id": "b5", "icon": "⌨️", "bin": "b", "text": { "th": "สร้างจากคำสั่งที่พิมพ์ลงไป", "en": "Made from words someone typed" },
+    "why": { "th": "ภาพ AI เกิดจากการพิมพ์บอก AI ว่าอยากได้ภาพอะไร ไม่ได้ถ่ายจากของจริง", "en": "AI pictures come from typing what you want. Nothing real was photographed." } },
+  { "id": "m1", "icon": "😮", "bin": "m", "text": { "th": "ดูเหมือนจริงมาก", "en": "Can look very real" },
+    "why": { "th": "ทั้งภาพจริงและภาพ AI ดูเหมือนจริงได้ เราจึงต้องหาเบาะแส", "en": "Both real and AI pictures can look real, so we must look for clues." } },
+  { "id": "m2", "icon": "📲", "bin": "m", "text": { "th": "ส่งต่อในแชทได้ทันที", "en": "Can be shared in a chat right away" },
+    "why": { "th": "ภาพไหนก็ส่งต่อได้ในไม่กี่วินาที จึงต้องคิดก่อนแชร์", "en": "Any picture can be shared in seconds, so we think before sharing." } }
+ ]
+}
