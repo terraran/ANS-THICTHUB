@@ -415,3 +415,24 @@ test('เกม Y4 นักสืบภาพ: แชร์/เช็กที�
   }
   expect(errs).toEqual([]);
 });
+
+test('ต่อฟองหนึ่งฟอง ฟองลอยที่เหลือไม่ย้ายที่ (ไม่ดูเหมือนหน้ารีโหลด) · ทุกใบงานแบบฟอง', async ({ page }) => {
+  for (const [act, topic, cards] of [['y3w4', '#topA', ['c1', 'c2', 'c3']], ['y4w4', '#topB', ['b1', 'b2', 'b3']], ['y3w2', '#topA', null]]) {
+    mockApi(page, { [act]: true });
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    let loads = 0; const onLoad = () => loads++; page.on('load', onLoad);
+    await page.goto(`/worksheet/?act=${act}#room=Y3.2&name=` + encodeURIComponent('ขิม') + '&lang=th');
+    await expect(page.locator('#web .cardx')).toHaveCount(12);
+    const ids = cards || (await page.locator('#web .cardx').evaluateAll(xs => xs.slice(0, 3).map(x => x.dataset.id)));
+    const pos = () => page.locator('#web .cardx.free').evaluateAll(xs => Object.fromEntries(xs.map(x => [x.dataset.id, x.style.left + ' ' + x.style.top])));
+    for (const id of ids) {
+      const before = await pos();
+      await link(page, id, topic);
+      await expect(page.locator(`#web .cardx[data-id="${id}"]`)).not.toHaveClass(/free/);
+      const after = await pos();
+      for (const k of Object.keys(after)) expect(after[k], `${act} ${k}`).toBe(before[k]);
+    }
+    expect(loads).toBe(1);
+    page.off('load', onLoad);
+  }
+});

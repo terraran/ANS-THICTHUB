@@ -315,6 +315,11 @@ function layout(){
   const right = el => { const c = C.cards.find(x => x.id === el.dataset.id); return !c || !c.bin || placed[c.id] === c.bin; };
   let lines = '', hits = ''; lineEls = [];
   if (SINGLE()) TOPIC = { a: [50, 50] };
+  // ฟองลอยแต่ละฟองมีที่ประจำของตัวเอง (จองไว้ตลอด แม้ต่อเส้นแล้ว) · ต่อฟองหนึ่ง ฟองอื่นไม่ย้ายตาม ไม่ดูเหมือนหน้ารีโหลด
+  const all = [...$('#web').querySelectorAll('.cardx')], used = new Set();
+  all.forEach(el => { if (el.dataset.slot != null) { if (used.has(+el.dataset.slot)) delete el.dataset.slot; else used.add(+el.dataset.slot); } });
+  all.forEach(el => { if (el.dataset.slot == null) { let k = 0; while (used.has(k)) k++; el.dataset.slot = k; used.add(k); } });
+  const slot = el => +el.dataset.slot;
   const put = (el, x, y) => {
     el.style.left = x + '%'; el.style.top = y + '%';
     if (!el.style.animationDelay) el.style.animationDelay = (-Math.random() * 3).toFixed(2) + 's';
@@ -327,9 +332,9 @@ function layout(){
   if (SINGLE()) {   // ฟองที่ต่อแล้ววนเป็นวงรอบวงกลาง · ฟองลอยเรียงสองข้างซ้าย/ขวา
     const xs = g.a;
     xs.forEach((el, i) => { const r = (-90 + 360 * i / xs.length) * Math.PI / 180; put(el, 50 + 24 * Math.cos(r), 50 + 37 * Math.sin(r)); });
-    const fr = g[''], half = Math.ceil(fr.length / 2);
-    fr.forEach((el, i) => { const left = i < half, k = left ? i : i - half, n = left ? half : fr.length - half;
-      put(el, left ? 9 : 91, sp(n, k, 11, 89)); });
+    const half = Math.ceil(C.cards.length / 2);
+    g[''].forEach(el => { const s = slot(el), k = s % C.cards.length, left = k < half, row = left ? k : k - half;
+      put(el, left ? 9 : 91, sp(left ? half : C.cards.length - half, row, 11, 89) + 5 * Math.floor(s / C.cards.length)); });
     $('#links').innerHTML = lines + hits;
     $('#web').classList.add('tight');
     return;
@@ -347,7 +352,7 @@ function layout(){
   const FREE = many
     ? [[41, 9], [59, 9], [41, 91], [59, 91], [25, 9], [75, 9], [25, 91], [75, 91], [9, 9], [91, 9], [9, 91], [91, 91]]
     : [[50, 11], [35, 13], [65, 13], [50, 89], [35, 87], [65, 87], [20, 11], [80, 11], [20, 89], [80, 89]];
-  g[''].forEach((el, i) => { const [x, y] = FREE[i % FREE.length]; put(el, x, y + 4 * Math.floor(i / FREE.length)); });
+  g[''].forEach(el => { const s = slot(el), [x, y] = FREE[s % FREE.length]; put(el, x, y + 4 * Math.floor(s / FREE.length)); });
   $('#links').innerHTML = lines + hits;
   $('#web').classList.toggle('tight', Math.max(g.a.length, g.m.length, g.b.length) > 5 || many);
 }
