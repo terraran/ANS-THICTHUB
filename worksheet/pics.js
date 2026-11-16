@@ -168,5 +168,49 @@ P.p_giant = S('0 0 240 180', SKY + `<rect width="240" height="180" fill="url(#sk
   `<rect x="60" y="128" width="70" height="22" fill="#cbd5e1"/><rect x="66" y="132" width="12" height="10" fill="#bae6fd"/><rect x="84" y="132" width="12" height="10" fill="#bae6fd"/>` +
   `<rect x="164" y="6" width="70" height="18" rx="9" fill="#7c3aed"/><text x="199" y="19" font-size="10" font-weight="800" font-family="Tahoma,sans-serif" fill="#fff" text-anchor="middle">#AI art</text>`);
 
+// เกมนักสืบภาพ (เพิ่ม): น้ำท่วมหน้าโรงเรียน (ภาพจริงแต่เก่า) · เค้กวันเกิด (จริง) · ช้างชมพู 5 ขา (AI)
+//                      ทีมได้ถ้วยรางวัล (จริง) · ดาราชวนโอนเงิน 3 แขน (AI) · ก๋วยเตี๋ยวฟรี ตะเกียบ 3 อัน (AI)
+const TX = (x, y, size, fill, str) => `<text x="${x}" y="${y}" font-size="${size}" font-weight="800" font-family="Sarabun,Tahoma,sans-serif" fill="${fill}" text-anchor="middle">${str}</text>`;
+P.p_flood = S('0 0 240 180', `<rect width="240" height="180" fill="#cbd5e1"/><ellipse cx="60" cy="26" rx="40" ry="12" fill="#94a3b8"/><ellipse cx="180" cy="20" rx="46" ry="12" fill="#94a3b8"/>` +
+  school + `<rect x="66" y="58" width="108" height="18" fill="#fef3c7"/>` + TX(120, 72, 13, '#7c2d12', 'โรงเรียนบ้านสวน') +
+  `<rect x="164" y="122" width="56" height="18" rx="6" fill="#dc2626"/><rect x="172" y="114" width="36" height="12" rx="4" fill="#dc2626"/><rect x="176" y="116" width="12" height="8" fill="#bae6fd"/><rect x="192" y="116" width="12" height="8" fill="#bae6fd"/>` +
+  `<rect y="128" width="240" height="52" fill="#3b82f6" opacity=".8"/>` +
+  [[20, 142], [70, 152], [120, 140], [170, 156], [210, 146], [40, 166], [150, 170]].map(([x, y]) => `<path d="M${x},${y} q6,-4 12,0 t12,0" stroke="#dbeafe" stroke-width="2" fill="none"/>`).join(''));
+P.cake_real = S('0 0 240 180', `<rect width="240" height="180" fill="#fdf2f8"/>` +
+  [0, 1, 2, 3, 4, 5, 6, 7].map(i => `<polygon points="${8 + i * 30},6 ${30 + i * 30},6 ${19 + i * 30},20" fill="${['#f472b6', '#facc15', '#38bdf8', '#4ade80'][i % 4]}"/>`).join('') +
+  `<rect x="38" y="26" width="164" height="26" rx="6" fill="#db2777"/>` + TX(120, 44, 15, '#fff', 'สุขสันต์วันเกิด ใบบัว') +
+  `<rect y="138" width="240" height="42" fill="#d97706"/><rect y="132" width="240" height="10" fill="#fff"/><ellipse cx="120" cy="134" rx="70" ry="8" fill="#e5e7eb"/>` +
+  `<rect x="62" y="98" width="116" height="36" rx="6" fill="#fbcfe8"/><path d="M62,104 q10,8 19,0 t19,0 t19,0 t20,0 t19,0 t20,0" stroke="#fff" stroke-width="5" fill="none"/>` +
+  `<rect x="84" y="74" width="72" height="26" rx="6" fill="#f9a8d4"/><path d="M84,80 q9,7 18,0 t18,0 t18,0 t18,0" stroke="#fff" stroke-width="4" fill="none"/>` +
+  [96, 110, 124, 138].map((x, i) => `<rect x="${x}" y="58" width="5" height="16" rx="1.5" fill="${i % 2 ? '#38bdf8' : '#facc15'}"/><ellipse cx="${x + 2.5}" cy="53" rx="3" ry="5" fill="#f97316"/><ellipse cx="${x + 2.5}" cy="54" rx="1.4" ry="2.6" fill="#fde047"/>`).join('') +
+  [[74, 116], [96, 122], [124, 114], [150, 124], [166, 112], [100, 88], [140, 86]].map(([x, y], i) => `<circle cx="${x}" cy="${y}" r="2.2" fill="${['#facc15', '#38bdf8', '#4ade80'][i % 3]}"/>`).join(''));
+P.p_pinkel = S('0 0 240 180', SKY + `<rect width="240" height="180" fill="url(#sky)"/><rect y="138" width="240" height="42" fill="#bef264"/>` +
+  `<circle cx="214" cy="100" r="22" fill="#22c55e"/><rect x="210" y="110" width="8" height="30" fill="#92400e"/>` +
+  `<rect x="176" y="40" width="50" height="22" rx="4" fill="#166534"/>` + TX(201, 56, 13, '#fff', 'ช้าง') + `<rect x="199" y="62" width="4" height="20" fill="#475569"/>` +
+  `<path d="M168,88 q12,6 6,20" stroke="#f9a8d4" stroke-width="4" fill="none"/>` +
+  [84, 102, 120, 138, 156].map(x => `<rect x="${x}" y="108" width="13" height="34" rx="5" fill="#f9a8d4"/><rect x="${x}" y="137" width="13" height="5" rx="2" fill="#f472b6"/>`).join('') +
+  `<ellipse cx="124" cy="94" rx="50" ry="28" fill="#f9a8d4"/><circle cx="72" cy="80" r="24" fill="#f9a8d4"/><ellipse cx="86" cy="80" rx="15" ry="20" fill="#f472b6"/>` +
+  `<path d="M54,88 q-12,26 4,42" stroke="#f9a8d4" stroke-width="11" fill="none" stroke-linecap="round"/><circle cx="64" cy="74" r="2.8" fill="#1f2937"/>` +
+  `<path d="M0,122 H70 M180,122 H240 M0,134 H70 M180,134 H240" stroke="#a16207" stroke-width="3"/>${[10, 40, 66, 186, 230].map(x => `<rect x="${x}" y="114" width="5" height="28" fill="#a16207"/>`).join('')}`);
+P.trophy_real = S('0 0 240 180', `<rect width="240" height="180" fill="#e0f2fe"/><rect y="150" width="240" height="30" fill="#94a3b8"/>` +
+  `<rect x="60" y="4" width="120" height="22" rx="5" fill="#1d4ed8"/>` + TX(120, 20, 14, '#fff', 'แชมป์ฟุตซอล') +
+  `<path d="M90,96 L106,92 M150,96 L134,92" stroke="${SKIN}" stroke-width="10" stroke-linecap="round"/><path d="M50,96 L44,128 M190,96 L196,128" stroke="${SKIN}" stroke-width="10" stroke-linecap="round"/>` +
+  kid(70, 58, '#16a34a') + kid(170, 58, '#16a34a') +
+  `<path d="M104,58 h32 v14 q0,22 -16,24 q-16,-2 -16,-24z" fill="#facc15" stroke="#ca8a04" stroke-width="2"/><path d="M104,64 q-12,0 -10,10 q2,8 12,8 M136,64 q12,0 10,10 q-2,8 -12,8" stroke="#ca8a04" stroke-width="3" fill="none"/>` +
+  `<rect x="116" y="96" width="8" height="12" fill="#ca8a04"/><rect x="106" y="106" width="28" height="9" rx="2" fill="#92400e"/>` + TX(120, 80, 12, '#92400e', '1'));
+P.p_star = S('0 0 240 180', `<rect width="240" height="180" fill="#fef3c7"/>` +
+  [[24, 30], [214, 24], [40, 150], [210, 150], [36, 84]].map(([x, y]) => `<path d="M${x},${y - 8} L${x + 2.5},${y - 2.5} L${x + 8},${y} L${x + 2.5},${y + 2.5} L${x},${y + 8} L${x - 2.5},${y + 2.5} L${x - 8},${y} L${x - 2.5},${y - 2.5}z" fill="#facc15"/>`).join('') +
+  `<path d="M140,92 L178,60" stroke="${SKIN}" stroke-width="10" stroke-linecap="round"/>` + hand(182, 54, 4) +
+  kid(120, 50, '#0ea5e9') + `<rect x="100" y="45" width="16" height="10" rx="3" fill="#0f172a"/><rect x="124" y="45" width="16" height="10" rx="3" fill="#0f172a"/><rect x="116" y="48" width="8" height="2.5" fill="#0f172a"/>` +
+  `<rect x="62" y="98" width="116" height="40" rx="5" fill="#fff" stroke="#dc2626" stroke-width="3"/>` + TX(120, 117, 13, '#dc2626', 'โอน 100 รับ 200') + TX(120, 132, 11, '#0f172a', 'วันนี้วันเดียว!') +
+  `<path d="M98,84 L72,96 M142,84 L168,96" stroke="${SKIN}" stroke-width="10" stroke-linecap="round"/><circle cx="70" cy="97" r="8" fill="${SKIN}"/><circle cx="170" cy="97" r="8" fill="${SKIN}"/>`);
+P.p_noodle = S('0 0 240 180', `<rect width="240" height="180" fill="#fef3c7"/><rect x="40" y="10" width="160" height="26" rx="5" fill="#dc2626"/>` + TX(120, 28, 14, '#fff', 'ก๋วยเตี๋ยวฟรีทุกชาม') +
+  `<rect y="132" width="240" height="48" fill="#92400e"/>` +
+  [[150, 100, 202, 46], [162, 100, 216, 54], [138, 100, 188, 40]].map(([a, b, c, d]) => `<line x1="${a}" y1="${b}" x2="${c}" y2="${d}" stroke="#a16207" stroke-width="4.5" stroke-linecap="round"/>`).join('') +
+  `<path d="M58,98 h124 q-6,42 -62,42 q-56,0 -62,-42z" fill="#f8fafc" stroke="#e11d48" stroke-width="3"/><ellipse cx="120" cy="98" rx="62" ry="10" fill="#fb923c"/>` +
+  `<path d="M74,98 q8,-6 16,0 t16,0 t16,0 t16,0 t16,0" stroke="#fde047" stroke-width="3" fill="none"/><circle cx="96" cy="96" r="5" fill="#16a34a"/><circle cx="140" cy="97" r="4" fill="#be123c"/>` +
+  `<path d="M90,80 q-6,-10 0,-20 q6,-10 0,-18 M120,80 q-6,-10 0,-20 q6,-10 0,-18" stroke="#ffffffcc" stroke-width="3" fill="none" stroke-linecap="round"/>` +
+  `<path d="M80,118 h80" stroke="#e11d48" stroke-width="2" stroke-dasharray="6 4"/>`);
+
 window.WSPics = { get: id => P[id] || '', ids: Object.keys(P) };
 })();

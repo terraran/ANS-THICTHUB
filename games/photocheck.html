@@ -17,6 +17,8 @@ button:disabled{background:#94a3b8;color:#1e293b;box-shadow:none;cursor:not-allo
 .trail{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:17px}
 .trail .lbl{background:var(--navy2);border-radius:20px;padding:4px 14px}
 .trail i{font-style:normal;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;background:#ffffff1a;border:2px dashed #ffffff44}
+.trail.many i{width:28px;height:28px;font-size:14px}
+.trail i.c{box-shadow:0 0 0 3px var(--sel)}
 .trail i.g{background:#dcfce7;border:2px solid #16a34a}.trail i.r{background:#fee2e2;border:2px solid #dc2626}.trail i.n{background:#e2e8f0;border:2px solid #94a3b8}
 main{flex:1;min-height:0;display:flex;justify-content:center;padding:0 16px 14px}
 .title{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center}
@@ -64,6 +66,15 @@ main{flex:1;min-height:0;display:flex;justify-content:center;padding:0 16px 14px
 #zoom .zb{background:#fff;border-radius:18px;padding:10px;width:min(900px,100%);max-height:80vh;display:flex}
 #zoom svg{width:100%;height:auto;max-height:calc(80vh - 20px)}
 #zoom span{font-size:20px}
+#zoom.pick{cursor:crosshair}#zoom.pick svg{cursor:crosshair}
+.mk{fill:none;stroke:#e11d48;stroke-width:3.5}.mkd{fill:#e11d48}
+.tru{fill:#facc1533;stroke:#facc15;stroke-width:3;stroke-dasharray:7 4}
+.step{font-size:16px;font-weight:800;color:var(--sel);letter-spacing:.5px}
+.hint{font-size:20px;line-height:1.45;color:#e0f2fe}
+.mine{background:var(--navy2);border-radius:14px;padding:8px 14px;font-size:17px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.mine button{min-height:36px;font-size:16px;padding:2px 12px;background:transparent;border:2px solid #ffffff66;box-shadow:none}
+#aZoom{background:#0891b2}#aNone{background:#475569}
+.fb .found{margin-top:6px;font-weight:600}
 .end{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;min-height:0}
 .end h2{margin:0;font-size:36px}
 .end .sum{font-size:21px;color:#bfdbfe}
@@ -108,7 +119,8 @@ main{flex:1;min-height:0;display:flex;justify-content:center;padding:0 16px 14px
 <div id="zoom" class="hide"></div>
 <script src="../worksheet/pics.js"></script>
 <script>
-// นักสืบภาพ (Y4 สัปดาห์ 4): โพสต์เลื่อนมาทีละโพสต์ · ซูมหาเบาะแส · เลือก แชร์ต่อ / เช็กที่มาก่อน / ไม่แชร์
+// นักสืบภาพ (Y4 สัปดาห์ 4): โพสต์เลื่อนมาทีละโพสต์ · ขั้น 1 ซูมแล้วแตะจุดแปลก (หรือ "ไม่เจอ") · ขั้น 2 เลือก แชร์ต่อ / เช็กที่มาก่อน / ไม่แชร์
+// spot = กรอบเบาะแสในภาพ (viewBox 240x180) · ไม่มี spot หรือ none = "ไม่เจอจุดแปลก" ก็ถูก · ไม่บอกว่าแตะถูกจนกว่าจะตัดสินใจ
 // ok = แชร์ได้ (ภาพจริง หรือภาพ AI ที่บอกตรง ๆ) · ai = ภาพนี้ AI สร้าง · ภาพจาก ../worksheet/pics.js
 // เล่นเฉย ๆ ไม่เก็บคะแนน · เปิดใน iframe ได้ (รับ postMessage({lang}) · ปุ่มกลับส่ง 'closeGame')
 const $ = s => document.querySelector(s);
@@ -118,11 +130,11 @@ const POSTS = [
     cap: ['ร้านขนมเปิดใหม่หน้าโรงเรียนแล้วจ้า 🍰 แวะมาชิมได้นะ', 'Our new sweet shop by the school is open 🍰 Come and try!'],
     src: ['เพจร้านจริง มีรีวิวจากลูกค้าหลายคน และบอกที่อยู่ร้านชัดเจน', 'A real shop page with many customer reviews and a clear address.'],
     clue: ['ป้ายร้านอ่านออกชัดเจน ไม่มีอะไรผิดรูป', 'The shop sign is easy to read. Nothing looks bent.'] },
-  { pic: 'wave_ai', av: '🙂', c: '#e0e7ff', ai: 1, who: ['น้องใหม่_2015', 'newkid_2015'], tm: ['1 ชม.', '1 h'],
+  { pic: 'wave_ai', spot: [[140, 14, 62, 52]], av: '🙂', c: '#e0e7ff', ai: 1, who: ['น้องใหม่_2015', 'newkid_2015'], tm: ['1 ชม.', '1 h'],
     cap: ['สวัสดี! เราเป็นนักเรียนใหม่ ทักมาเป็นเพื่อนกันนะ 👋 ส่งรูปมาแลกกันได้', 'Hi! I am a new student. Message me and let\'s be friends 👋 Send me your photo!'],
     src: ['บัญชีนี้เพิ่งสร้างเมื่อวาน ไม่มีเพื่อนร่วมกันเลย และรูปนี้อยู่ในเว็บรวมภาพ AI', 'This account was made yesterday, has no friends in common, and the photo is on an AI picture website.'],
     clue: ['มือที่โบกอยู่มี 6 นิ้ว', 'The waving hand has 6 fingers.'] },
-  { pic: 'p_ufo', av: '📢', c: '#e0f2fe', ai: 1, who: ['ข่าวด่วนทันใจ', 'Hot News Now'], tm: ['5 นาที', '5 min'],
+  { pic: 'p_ufo', spot: [[66, 56, 108, 24]], av: '📢', c: '#e0f2fe', ai: 1, who: ['ข่าวด่วนทันใจ', 'Hot News Now'], tm: ['5 นาที', '5 min'],
     cap: ['ด่วน!!! UFO ลงจอดที่โรงเรียนเมื่อคืน แชร์ให้ทุกคนรู้เร็ว!!! 👽', 'BREAKING!!! A UFO landed at a school last night. Share fast!!! 👽'],
     src: ['เพจนี้โพสต์ข่าวตื่นเต้นทุกวัน และไม่มีสำนักข่าวไหนรายงานเรื่องนี้เลย', 'This page posts shocking news every day, and no news company reported this.'],
     clue: ['ป้ายโรงเรียนอ่านไม่ออก', 'The school sign can\'t be read.'] },
@@ -130,7 +142,7 @@ const POSTS = [
     cap: ['แข่งฟุตบอลวันนี้สนุกมาก เก่งกันทุกคนเลย ⚽👏', 'Today\'s football match was so much fun. Well done, everyone ⚽👏'],
     src: ['บัญชีของครูที่โรงเรียน มีรูปกิจกรรมอื่น ๆ ของโรงเรียนอีกหลายรูป', 'The teacher\'s school account, with many other school activity photos.'],
     clue: ['ป้าย "สนาม 1" อ่านออก ตาข่ายประตูเป็นช่องเท่า ๆ กัน', 'The "Field 1" sign can be read and the goal net is even.'] },
-  { pic: 'win_ai', av: '🐱', c: '#fef3c7', ai: 1, who: ['มิ้นท์ (เพื่อนห้อง)', 'Mint (classmate)'], tm: ['30 นาที', '30 min'],
+  { pic: 'win_ai', spot: [[40, 10, 160, 128]], av: '🐱', c: '#fef3c7', ai: 1, who: ['มิ้นท์ (เพื่อนห้อง)', 'Mint (classmate)'], tm: ['30 นาที', '30 min'],
     cap: ['แมวบ้านเราเองนะ น่ารักไหม 😻 ช่วยแชร์หน่อย', 'This is my cat. Isn\'t it cute? 😻 Please share!'],
     src: ['มิ้นท์ตอบในแชทว่า "จริง ๆ ให้ AI วาดให้ เพราะบ้านไม่มีแมว 😅"', 'Mint replied in chat: "Actually AI drew it. We don\'t have a cat 😅"'],
     clue: ['กรอบหน้าต่างบิดโค้ง ทั้งที่ควรตรง', 'The window frame bends when it should be straight.'] },
@@ -142,7 +154,7 @@ const POSTS = [
     cap: ['แดดดีมาก ไปปิกนิกที่สวนกัน ☀️🌳', 'Lovely sunny day. Picnic in the park ☀️🌳'],
     src: ['พี่ต้นเป็นพี่ชายของเพื่อนในห้อง โพสต์รูปไปเที่ยวบ่อย ๆ', 'Ton is a classmate\'s big brother. He often posts trip photos.'],
     clue: ['เงาคนกับเงาต้นไม้ไปทางเดียวกัน', 'The person\'s and the tree\'s shadows point the same way.'] },
-  { pic: 'q_poster', av: '🏫', c: '#dcfce7', ai: 1, who: ['ข่าวโรงเรียน_ไม่เป็นทางการ', 'school_news_unofficial'], tm: ['20 นาที', '20 min'],
+  { pic: 'q_poster', spot: [[52, 20, 136, 34], [56, 134, 74, 14]], av: '🏫', c: '#dcfce7', ai: 1, who: ['ข่าวโรงเรียน_ไม่เป็นทางการ', 'school_news_unofficial'], tm: ['20 นาที', '20 min'],
     cap: ['ประกาศ!! งานกีฬาสีเลื่อนเป็นพรุ่งนี้ ไม่ต้องมาเรียน!! 🎉', 'NOTICE!! Sports day moves to tomorrow, no school!! 🎉'],
     src: ['ไม่ใช่เพจของโรงเรียน และเพจจริงของโรงเรียนไม่มีประกาศนี้', 'This is not the school\'s page, and the real school page has no such notice.'],
     clue: ['ตัวหนังสือบนโปสเตอร์อ่านไม่ออกสักคำ', 'Not one word on the poster can be read.'] },
@@ -150,14 +162,41 @@ const POSTS = [
     cap: ['น้องแมวที่บ้าน ชื่อเทาเทา 🐾', 'Meet our cat, Grey-Grey 🐾'],
     src: ['ใบเตยเป็นเพื่อนห้องเดียวกัน เคยพาเทาเทามาโชว์ที่โรงเรียน', 'Baitoey is in our class and once brought Grey-Grey to school.'],
     clue: ['ไม่มีอะไรผิดรูป และเรารู้จักคนโพสต์', 'Nothing looks wrong, and we know who posted it.'] },
-  { pic: 'p_giant', av: '🎨', c: '#ede9fe', ai: 1, ok: 1, who: ['ชมรมศิลปะ AI', 'AI Art Club'], tm: ['4 ชม.', '4 h'],
+  { pic: 'p_giant', spot: [[162, 4, 74, 22], [36, 4, 180, 140]], none: 1, av: '🎨', c: '#ede9fe', ai: 1, ok: 1, who: ['ชมรมศิลปะ AI', 'AI Art Club'], tm: ['4 ชม.', '4 h'],
     cap: ['ภาพนี้ทำด้วย AI นะ: แมวยักษ์มาเที่ยวเมือง 😆 #AIart', 'Made with AI: a giant cat visits the city 😆 #AIart'],
     src: ['ชมรมบอกชัดเจนว่าเป็นภาพ AI ไม่ได้หลอกว่าเป็นเรื่องจริง', 'The club clearly says it is an AI picture. It does not pretend to be real.'],
-    clue: ['มีป้าย #AI art บอกไว้แล้ว', 'It has an #AI art label.'] }
+    clue: ['มีป้าย #AI art บอกไว้แล้ว', 'It has an #AI art label.'] },
+  { pic: 'cake_real', av: '🎂', c: '#fce7f3', ok: 1, who: ['ใบบัว (เพื่อนห้อง)', 'Baibua (classmate)'], tm: ['5 ชม.', '5 h'],
+    cap: ['วันเกิดเรา! ขอบคุณทุกคนที่มาร่วมงานนะ 🎂🎉', 'My birthday! Thank you everyone for coming 🎂🎉'],
+    src: ['ใบบัวเป็นเพื่อนห้องเดียวกัน เพื่อน ๆ ในห้องหลายคนก็ไปงานนี้จริง', 'Baibua is in our class, and many classmates really went to the party.'],
+    clue: ['ป้ายอ่านออก เทียนตั้งตรง ไม่มีอะไรผิดรูป', 'The banner can be read and the candles stand straight. Nothing looks wrong.'] },
+  { pic: 'p_pinkel', spot: [[80, 104, 94, 42]], av: '🌍', c: '#fce7f3', ai: 1, who: ['โลกน่าทึ่ง', 'Amazing World'], tm: ['40 นาที', '40 min'],
+    cap: ['ช้างสีชมพูตัวแรกของโลก! เกิดที่สวนสัตว์เมื่อวาน 🐘💗 แชร์เลย!', 'The world\'s first pink elephant, born at the zoo yesterday! 🐘💗 Share now!'],
+    src: ['สวนสัตว์ไม่เคยประกาศเรื่องนี้ และเพจนี้โพสต์ภาพแปลก ๆ ทุกวัน', 'The zoo never announced this, and this page posts strange pictures every day.'],
+    clue: ['ช้างตัวนี้มี 5 ขา', 'This elephant has 5 legs.'] },
+  { pic: 'p_flood', av: '🏘️', c: '#e0f2fe', who: ['ข่าวชุมชนเรา', 'Our Local News'], tm: ['12 นาที', '12 min'],
+    cap: ['ตอนนี้น้ำท่วมหน้าโรงเรียนแล้ว!! พรุ่งนี้หยุดเรียนแน่นอน แชร์ด่วน 🌊', 'The school is flooded right now!! No school tomorrow for sure. Share fast 🌊'],
+    src: ['ภาพนี้เป็นภาพจริง แต่ถ่ายไว้เมื่อ 5 ปีก่อน วันนี้ฝนไม่ตกเลย', 'This is a real photo, but it was taken 5 years ago. It did not rain today.'],
+    clue: ['ภาพจริงไม่มีจุดแปลก แต่เป็นภาพเก่าที่เอามาโพสต์ใหม่ ภาพจริงก็หลอกได้', 'A real photo has nothing odd, but this is an old photo posted again. Real photos can trick us too.'] },
+  { pic: 'trophy_real', av: '🏫', c: '#dbeafe', ok: 1, who: ['โรงเรียนของเรา', 'Our School'], tm: ['1 วัน', '1 d'],
+    cap: ['ยินดีกับทีมฟุตซอลของโรงเรียนที่ได้แชมป์! 🏆👏', 'Well done to our school futsal team, the champions! 🏆👏'],
+    src: ['เพจทางการของโรงเรียน และครูก็ประกาศเรื่องนี้หน้าเสาธงด้วย', 'The school\'s official page. The teachers also announced it at morning assembly.'],
+    clue: ['ป้ายอ่านออก มือจับถ้วยรางวัลดูเป็นธรรมชาติ', 'The banner can be read and the hands hold the trophy naturally.'] },
+  { pic: 'p_star', spot: [[140, 24, 66, 76]], av: '⭐', c: '#fef9c3', ai: 1, who: ['ดาราดัง ✔', 'Famous Star ✔'], tm: ['25 นาที', '25 min'],
+    cap: ['แจกเงินให้แฟนคลับ! โอนมา 100 บาท รับคืน 200 บาท 💸 วันนี้วันเดียว', 'Money for fans! Send 100 baht, get 200 back 💸 Today only'],
+    src: ['ไม่ใช่บัญชีจริงของดารา บัญชีจริงเตือนแฟนคลับว่ามีคนแอบอ้าง', 'This is not the star\'s real account. The real account warned fans about fakes.'],
+    clue: ['คนในภาพมี 3 แขน', 'The person in the picture has 3 arms.'] },
+  { pic: 'p_noodle', spot: [[132, 34, 90, 70]], av: '🍜', c: '#ffedd5', ai: 1, who: ['ก๋วยเตี๋ยวเปิดใหม่', 'New Noodle Shop'], tm: ['50 นาที', '50 min'],
+    cap: ['เปิดร้านใหม่ กินฟรีทุกชาม! แค่แชร์และแท็กเพื่อน 10 คน 🍜', 'New shop: every bowl is free! Just share and tag 10 friends 🍜'],
+    src: ['เพจสร้างเมื่อวาน ไม่มีที่อยู่ร้าน และคนที่ไปตามแผนที่ก็ไม่เจอร้านนี้', 'The page was made yesterday, has no address, and people who went to the map could not find the shop.'],
+    clue: ['ชามนี้มีตะเกียบ 3 อัน', 'This bowl has 3 chopsticks.'] }
 ];
 const UI = {
-  th: { title: 'นักสืบภาพ', sub: 'โพสต์ในฟีดเลื่อนมาทีละโพสต์ ภาพไหนจริง ภาพไหน AI สร้าง? ซูมหาเบาะแส แล้วเลือกให้ดีว่าจะแชร์ไหม',
-        goE: 'ปกติ<small>6 โพสต์</small>', goH: 'ท้าทาย<small>10 โพสต์</small>', gback: '↩ กลับ', trail: 'นักสืบ', app: 'ฟีดของเรา', zoom: '🔍 แตะเพื่อซูม', zclose: 'แตะที่ไหนก็ได้เพื่อปิด',
+  th: { title: 'นักสืบภาพ', sub: 'โพสต์ในฟีดเลื่อนมาทีละโพสต์ ซูมแล้วแตะจุดที่ดูแปลกในภาพ แล้วเลือกให้ดีว่าจะแชร์ไหม',
+        st1: 'ขั้นที่ 1 · หาเบาะแส', st2: 'ขั้นที่ 2 · ตัดสินใจ', spotHint: 'ซูมภาพ แล้วแตะจุดที่ดูแปลก ถ้าดูแล้วไม่เจออะไรแปลก กด "ไม่เจอจุดแปลก"',
+        zoomBtn: '🔍 ซูมหาเบาะแส', none: '🤷 ไม่เจอจุดแปลก', zpick: '👆 แตะจุดที่ดูแปลกในภาพ · แตะนอกภาพเพื่อปิด', mineSpot: '📍 เราเลือกจุดในภาพไว้แล้ว', mineNone: '🤷 เราไม่เจอจุดแปลก', change: 'เปลี่ยน',
+        found: '⭐ หาเบาะแสถูก!', missSpot: '🔎 เบาะแสอยู่ในกรอบสีเหลือง', missNone: '🔎 ภาพนี้ไม่มีจุดแปลกให้เห็น', sum2: (c, n) => `หาเบาะแสถูก ${c} จาก ${n} ภาพ`,
+        goE: 'ปกติ<small>8 โพสต์</small>', goH: 'ท้าทาย<small>16 โพสต์</small>', gback: '↩ กลับ', trail: 'นักสืบ', app: 'ฟีดของเรา', zoom: '🔍 แตะเพื่อซูม', zclose: 'แตะที่ไหนก็ได้เพื่อปิด',
         q: 'จะทำอย่างไรกับโพสต์นี้?', share: '📤 แชร์ต่อ', check: '🔎 เช็กที่มาก่อน', skip: '🙈 ไม่แชร์', srcHd: 'ที่มาของโพสต์:', q2: 'รู้ที่มาแล้ว จะแชร์ไหม?',
         like: n => `❤️ ${n}`, cm: n => `💬 ${n}`, clue: 'เบาะแส: ', aiNote: ['🤖 ภาพนี้ AI สร้าง', '📷 ภาพนี้เป็นภาพจริง'],
         fb: { gShare: ['👍 แชร์ได้เลย!', 'โพสต์นี้ไม่ได้หลอกใคร เพื่อน ๆ ชอบกันใหญ่'], gCheck: ['🕵️ นักสืบตัวจริง!', 'เราเช็กที่มาก่อน เลยไม่ถูกหลอก และไม่ส่งต่อเรื่องไม่จริง'],
@@ -166,8 +205,11 @@ const UI = {
         chatG: [['ต้นข้าว', 'สวยมาก 👍'], ['ภูมิ', 'ไปด้วย ๆ']], chatR: [['ต้นข้าว', 'จริงเหรอ 😱 แชร์ต่อแล้ว!'], ['ภูมิ', 'เดี๋ยวบอกแม่ด้วย'], ['ครูประจำชั้น', 'นักเรียน เรื่องนี้ไม่จริงนะ ลองตรวจก่อนแชร์']],
         chatS: [['ต้นข้าว', 'ดีนะที่ไม่แชร์ ภาพนี้ปลอม']], next: 'โพสต์ต่อไป ➜', last: 'ดูผล ➜',
         ranks: ['🐣 นักสืบฝึกหัด', '🔎 นักสืบตาไว', '🏅 ยอดนักสืบภาพ'], sum: (g, n) => `ตัดสินใจได้ดี ${g} จาก ${n} โพสต์`, again: '↺ เล่นอีกครั้ง', toTitle: 'หน้าแรก' },
-  en: { title: 'Photo Detective', sub: 'Posts scroll into the feed one by one. Which pictures are real and which did AI make? Zoom in for clues, then decide whether to share.',
-        goE: 'Normal<small>6 posts</small>', goH: 'Challenge<small>10 posts</small>', gback: '↩ Back', trail: 'Detective', app: 'Our feed', zoom: '🔍 Tap to zoom', zclose: 'Tap anywhere to close',
+  en: { title: 'Photo Detective', sub: 'Posts scroll into the feed one by one. Zoom in and tap the odd spot in each picture, then decide whether to share.',
+        st1: 'STEP 1 · FIND A CLUE', st2: 'STEP 2 · DECIDE', spotHint: 'Zoom in and tap the spot that looks odd. If nothing looks odd, tap "Nothing odd".',
+        zoomBtn: '🔍 Zoom for clues', none: '🤷 Nothing odd', zpick: '👆 Tap the odd spot in the picture · tap outside to close', mineSpot: '📍 You picked a spot', mineNone: '🤷 You found nothing odd', change: 'Change',
+        found: '⭐ You found the clue!', missSpot: '🔎 The clue is in the yellow box', missNone: '🔎 This picture has nothing odd to see', sum2: (c, n) => `Clues found: ${c} of ${n} pictures`,
+        goE: 'Normal<small>8 posts</small>', goH: 'Challenge<small>16 posts</small>', gback: '↩ Back', trail: 'Detective', app: 'Our feed', zoom: '🔍 Tap to zoom', zclose: 'Tap anywhere to close',
         q: 'What will you do with this post?', share: '📤 Share', check: '🔎 Check the source first', skip: '🙈 Don\'t share', srcHd: 'Where the post comes from:', q2: 'Now you know the source. Share it?',
         like: n => `❤️ ${n}`, cm: n => `💬 ${n}`, clue: 'Clue: ', aiNote: ['🤖 AI made this picture', '📷 This is a real photo'],
         fb: { gShare: ['👍 Fine to share!', 'This post does not trick anyone. Your friends love it.'], gCheck: ['🕵️ A real detective!', 'You checked the source first, so you were not tricked and did not spread something untrue.'],
@@ -177,33 +219,45 @@ const UI = {
         chatS: [['Tonkhao', 'Good thing you didn\'t share. It\'s fake.']], next: 'Next post ➜', last: 'See results ➜',
         ranks: ['🐣 Trainee detective', '🔎 Sharp-eyed detective', '🏅 Super photo detective'], sum: (g, n) => `Good choices: ${g} of ${n} posts`, again: '↺ Play again', toTitle: 'Home' }
 };
-let L = 'th', deck = [], cur = 0, marks = [], stage = 'title', checked = false, last = null, seq = 0;
+let L = 'th', deck = [], cur = 0, marks = [], clues = [], stage = 'title', checked = false, last = null, seq = 0, pt = null;   // pt = จุดที่เด็กแตะ {x,y} | 'none'
 const U = () => UI[L], T = a => a[L === 'th' ? 0 : 1], pic = id => (window.WSPics && WSPics.get(id)) || '';
 const show = id => ['sTitle', 'sPlay', 'sEnd'].forEach(s => $('#' + s).classList.toggle('hide', s !== id));
 function shuffle(a){ a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; }
 function start(n){
   // ผสมโพสต์ที่แชร์ได้กับโพสต์หลอกให้พอ ๆ กัน
   const ok = shuffle(POSTS.filter(p => p.ok)), bad = shuffle(POSTS.filter(p => !p.ok)), h = Math.floor(n / 2);
-  deck = shuffle(ok.slice(0, h).concat(bad.slice(0, n - h))); cur = 0; marks = []; seq++;
+  deck = n >= POSTS.length ? shuffle(POSTS) : shuffle(ok.slice(0, h).concat(bad.slice(0, n - h))); cur = 0; marks = []; clues = []; seq++;
   show('sPlay'); $('#trail').classList.remove('hide'); deal();
 }
-function paintTrail(){
-  $('#trail').innerHTML = `<span class="lbl">🕵️ ${U().trail}</span>` + deck.map((p, i) => `<i class="${marks[i] || ''}">${marks[i] === 'g' ? '✓' : marks[i] === 'r' ? '!' : marks[i] === 'n' ? '–' : ''}</i>`).join('');
+// ภาพ + เครื่องหมาย: จุดที่เด็กแตะ (วงแดง) · หลังตัดสินใจ = กรอบเหลืองตรงเบาะแสจริง
+function marked(p){
+  let x = '';
+  if (stage === 'fb') (p.spot || []).forEach(([a, b, w, h]) => { x += `<rect class="tru" x="${a}" y="${b}" width="${w}" height="${h}" rx="6"/>`; });
+  if (pt && pt !== 'none') x += `<circle class="mk" cx="${pt.x}" cy="${pt.y}" r="10"/><circle class="mkd" cx="${pt.x}" cy="${pt.y}" r="2.5"/>`;
+  return pic(p.pic).replace('</svg>', x + '</svg>');
 }
-function deal(){ stage = 'decide'; checked = false; last = null; paint(); }
+const hit = (p, q) => q === 'none' ? !p.spot || !!p.none : !!q && (p.spot || []).some(([a, b, w, h]) => q.x >= a - 6 && q.x <= a + w + 6 && q.y >= b - 6 && q.y <= b + h + 6);
+function paintTrail(){
+  $('#trail').classList.toggle('many', deck.length > 10);
+  $('#trail').innerHTML = `<span class="lbl">🕵️ ${U().trail}</span>` + deck.map((p, i) => `<i class="${marks[i] || ''}${clues[i] ? ' c' : ''}">${marks[i] === 'g' ? '✓' : marks[i] === 'r' ? '!' : marks[i] === 'n' ? '–' : ''}</i>`).join('');
+}
+function deal(){ stage = 'spot'; checked = false; last = null; pt = null; paint(); }
 function paint(){
   const p = deck[cur], u = U();
   $('#appName').textContent = u.app;
   $('#feed').innerHTML = `<div class="post"><div class="phd"><span class="pav" style="background:${p.c}">${p.av}</span><span><b>${esc(T(p.who))}</b><small>${esc(T(p.tm))}</small></span></div>` +
-    `<div class="cap">${esc(T(p.cap))}</div><button type="button" class="pic" id="pic">${pic(p.pic)}<span class="zm">${u.zoom}</span></button>` +
+    `<div class="cap">${esc(T(p.cap))}</div><button type="button" class="pic" id="pic">${marked(p)}<span class="zm">${u.zoom}</span></button>` +
     `<div class="pft"><span>${u.like(12 + p.cap[0].length % 40)}</span><span>${u.cm(2 + p.cap[0].length % 9)}</span></div></div>`;
   const src = checked ? `<div class="src"><b>${u.srcHd}</b><br>${esc(T(p.src))}</div>` : '';
-  if (stage === 'decide') $('#side').innerHTML = src + `<div class="q">${checked ? u.q2 : u.q}</div><div class="acts">` +
+  if (stage === 'spot') $('#side').innerHTML = `<div class="step">${u.st1}</div><div class="hint">${esc(u.spotHint)}</div>` +
+    `<div class="acts"><button id="aZoom">${u.zoomBtn}</button><button id="aNone">${u.none}</button></div>`;
+  else if (stage === 'decide') $('#side').innerHTML = `<div class="mine">${pt === 'none' ? u.mineNone : u.mineSpot}<button id="reSpot">${u.change}</button></div>` +
+    `<div class="step">${u.st2}</div>` + src + `<div class="q">${checked ? u.q2 : u.q}</div><div class="acts">` +
     (checked ? `<button id="aShare2" data-a="share">${u.share}</button><button id="aSkip2" data-a="skip">${u.skip}</button>`
              : `<button id="aShare" data-a="share">${u.share}</button><button id="aCheck" data-a="check">${u.check}</button><button id="aSkip" data-a="skip">${u.skip}</button>`) + '</div>';
   else {
     const k = last, f = u.fb[k], chat = k === 'r' ? u.chatR : k === 'n' ? [] : p.ok ? u.chatG : u.chatS;
-    $('#side').innerHTML = src + `<div class="fb ${k[0]}"><h3>${f[0]}</h3><p>${f[1]}</p><p class="clue">${u.aiNote[p.ai ? 0 : 1]} · ${u.clue}${esc(T(p.clue))}</p></div>` +
+    $('#side').innerHTML = src + `<div class="fb ${k[0]}"><h3>${f[0]}</h3><p>${f[1]}</p><p class="clue">${u.aiNote[p.ai ? 0 : 1]} · ${u.clue}${esc(T(p.clue))}</p><p class="found">${clues[cur] ? u.found : p.spot ? u.missSpot : u.missNone}</p></div>` +
       `<div class="chat">${chat.map((m, i) => `<div class="msg" style="animation-delay:${.3 + i * .5}s"><b>${esc(m[0])}</b>${esc(m[1])}</div>`).join('')}</div>` +
       `<button id="nextP">${cur < deck.length - 1 ? u.next : u.last}</button>`;
   }
@@ -211,24 +265,40 @@ function paint(){
 }
 $('#side').addEventListener('click', e => {
   if (e.target.id === 'nextP') { if (cur < deck.length - 1) { cur++; deal(); } else end(); return; }
+  if (e.target.id === 'aZoom' || e.target.id === 'reSpot') return openZoom(true);
+  if (e.target.id === 'aNone') { pt = 'none'; stage = 'decide'; paint(); return; }
   const b = e.target.closest('[data-a]'); if (!b || stage !== 'decide') return;
   const p = deck[cur], a = b.dataset.a;
   if (a === 'check') { checked = true; paint(); return; }
   // ผล: แชร์โพสต์หลอก = r · ไม่แชร์โพสต์ดี = n · ที่เหลือ = g (แยกข้อความตามที่ทำ)
   last = a === 'share' ? (p.ok ? 'gShare' : 'r') : p.ok ? 'n' : checked ? 'gCheck' : 'gSkip';
-  marks[cur] = last[0]; stage = 'fb'; paint();
+  marks[cur] = last[0]; clues[cur] = hit(p, pt); stage = 'fb'; paint();
 });
-$('#feed').addEventListener('click', e => { if (e.target.closest('#pic')) { $('#zoom').innerHTML = `<div class="zb">${pic(deck[cur].pic)}</div><span>${U().zclose}</span>`; $('#zoom').classList.remove('hide'); } });
-$('#zoom').onclick = () => $('#zoom').classList.add('hide');
+// ซูม: ขั้นหาเบาะแส/ตัดสินใจ = แตะในภาพเพื่อเลือกจุด (ยังไม่บอกว่าถูกไหม) · หลังตัดสินใจ = ดูกรอบเฉลย
+function openZoom(pick){
+  const z = $('#zoom'); z.classList.toggle('pick', pick);
+  z.innerHTML = `<div class="zb">${marked(deck[cur])}</div><span>${pick ? U().zpick : U().zclose}</span>`; z.classList.remove('hide');
+}
+$('#feed').addEventListener('click', e => { if (e.target.closest('#pic')) openZoom(stage !== 'fb'); });
+$('#zoom').onclick = e => {
+  const z = $('#zoom'), svg = e.target.closest && e.target.closest('#zoom svg');
+  if (z.classList.contains('pick') && svg) {
+    const q = svg.createSVGPoint(); q.x = e.clientX; q.y = e.clientY;
+    const v = q.matrixTransform(svg.getScreenCTM().inverse());
+    pt = { x: Math.round(v.x), y: Math.round(v.y) }; if (stage === 'spot') stage = 'decide'; paint();
+  }
+  z.classList.add('hide');
+};
 function end(){
   stage = 'end'; show('sEnd');
-  const g = marks.filter(m => m === 'g').length, n = deck.length, r = g === n ? 2 : g >= n * .6 ? 1 : 0;
-  $('#eBadge').textContent = ['🐣', '🔎', '🏅'][r]; $('#eRank').textContent = U().ranks[r]; $('#eSum').textContent = U().sum(g, n);
-  $('#ePath').innerHTML = deck.map((p, i) => `<div><i>${marks[i] === 'g' ? '✅' : marks[i] === 'r' ? '⚠️' : '➖'}</i><span>${p.ai ? '🤖' : '📷'} ${esc(T(p.cap)).slice(0, 60)}</span></div>`).join('');
+  const g = marks.filter(m => m === 'g').length, n = deck.length, k = g + clues.filter(Boolean).length, r = k === 2 * n ? 2 : k >= n * 1.2 ? 1 : 0;
+  $('#eBadge').textContent = ['🐣', '🔎', '🏅'][r]; $('#eRank').textContent = U().ranks[r];
+  const c = clues.filter(Boolean).length; $('#eSum').innerHTML = esc(U().sum(g, n)) + '<br>' + esc(U().sum2(c, n));
+  $('#ePath').innerHTML = deck.map((p, i) => `<div><i>${marks[i] === 'g' ? '✅' : marks[i] === 'r' ? '⚠️' : '➖'}${clues[i] ? '⭐' : ''}</i><span>${p.ai ? '🤖' : '📷'} ${esc(T(p.cap)).slice(0, 60)}</span></div>`).join('');
   $('#eAgain').textContent = U().again; $('#eTitle').textContent = U().toTitle; paintTrail();
 }
-let mode = 6;
-$('#goE').onclick = () => start(mode = 6); $('#goH').onclick = () => start(mode = 10);
+let mode = 8;
+$('#goE').onclick = () => start(mode = 8); $('#goH').onclick = () => start(mode = 16);
 $('#eAgain').onclick = () => start(mode);
 function toTitle(){ seq++; stage = 'title'; show('sTitle'); $('#trail').classList.add('hide'); $('#zoom').classList.add('hide'); }
 $('#eTitle').onclick = toTitle;
@@ -236,7 +306,7 @@ function applyLang(){
   document.documentElement.lang = L; document.title = U().title;
   $('#lth').classList.toggle('on', L === 'th'); $('#len').classList.toggle('on', L === 'en');
   $('#tTitle').textContent = U().title; $('#tSub').textContent = U().sub; $('#goE').innerHTML = U().goE; $('#goH').innerHTML = U().goH; $('#gback').textContent = U().gback;
-  if (stage === 'decide' || stage === 'fb') paint(); else if (stage === 'end') end();
+  if (stage === 'spot' || stage === 'decide' || stage === 'fb') paint(); else if (stage === 'end') end();
 }
 $('#lth').onclick = () => { L = 'th'; applyLang(); }; $('#len').onclick = () => { L = 'en'; applyLang(); };
 // เปิดใน iframe (Hub/ใบงาน): ปุ่มกลับส่ง 'closeGame' · รับภาษาจาก postMessage({lang})

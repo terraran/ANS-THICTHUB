@@ -377,42 +377,68 @@ test('เกม Y3 สอนหุ่นยนต์ AI: ติดป้าย �
   expect(errs).toEqual([]);
 });
 
-test('เกม Y4 นักสืบภาพ: แชร์/เช็กที่มา/ไม่แชร์ ได้ผลตามโพสต์ · ซูมภาพ · จบเกม · ไม่ล้นจอ', async ({ page }) => {
+test('เกม Y4 นักสืบภาพ: ขั้น 1 แตะจุดแปลก (ไม่บอกถูกผิดก่อน) → ขั้น 2 แชร์/เช็กที่มา/ไม่แชร์ · 16 โพสต์ · จบเกม · ไม่ล้นจอ', async ({ page }) => {
   const errs = []; page.on('pageerror', e => errs.push(e.message));
   page.route('**/fonts.googleapis.com/**', r => r.abort());
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/games/photocheck.html');
   await expect(page.locator('#tTitle')).toHaveText('นักสืบภาพ');
   await page.click('#goH');
-  await expect(page.locator('#trail i')).toHaveCount(10);
-  const seen = [];
-  for (let i = 0; i < 10; i++) {
+  await expect(page.locator('#trail i')).toHaveCount(16);
+  const seen = []; let found = 0;
+  for (let i = 0; i < 16; i++) {
     await expect(page.locator('.post .pic svg')).toHaveCount(1);
     const cap = await page.locator('.cap').textContent(); seen.push(cap);
-    if (i === 0) { await page.click('#pic'); await expect(page.locator('#zoom svg')).toHaveCount(1); await page.click('#zoom'); await expect(page.locator('#zoom')).toBeHidden(); }
-    const trick = /UFO|นักเรียนใหม่|แมวบ้านเราเอง|หมาหลง|กีฬาสี/.test(cap);
-    if (i % 2) { await page.click('#aCheck'); await expect(page.locator('.src')).toBeVisible(); await page.click(trick ? '#aSkip2' : '#aShare2'); }
-    else await page.click(trick ? '#aShare' : '#aSkip');
-    await expect(page.locator('.fb')).toHaveClass(i % 2 ? /fb g/ : trick ? /fb r/ : /fb n/);
+    const p = await page.evaluate(() => ({ ok: !!deck[cur].ok, spot: deck[cur].spot || null, none: !!deck[cur].none }));
+    // ขั้น 1: ยังตัดสินใจไม่ได้ · กรอบเฉลยยังไม่โผล่
+    await expect(page.locator('.step')).toHaveText('ขั้นที่ 1 · หาเบาะแส');
+    await expect(page.locator('#aShare')).toHaveCount(0);
+    await expect(page.locator('.post .tru')).toHaveCount(0);
+    let want;
+    if (i % 2 === 0) { await page.click('#aNone'); want = !p.spot || p.none; }
+    else {
+      await page.click('#aZoom');
+      await expect(page.locator('#zoom')).toHaveClass(/pick/);
+      const box = await page.locator('#zoom svg').boundingBox();
+      const [x, y] = p.spot ? [p.spot[0][0] + p.spot[0][2] / 2, p.spot[0][1] + p.spot[0][3] / 2] : [4, 4];
+      await page.mouse.click(box.x + x / 240 * box.width, box.y + y / 180 * box.height);
+      await expect(page.locator('#zoom')).toBeHidden();
+      await expect(page.locator('.post .mk')).toHaveCount(1);              // วงแดงตรงที่แตะ
+      await expect(page.locator('.mine')).toContainText('เลือกจุด');
+      await expect(page.locator('.post .tru')).toHaveCount(0);             // ยังไม่เฉลย
+      want = !!p.spot;
+    }
+    if (want) found++;
+    await expect(page.locator('.step')).toHaveText('ขั้นที่ 2 · ตัดสินใจ');
+    if (i % 2) { await page.click('#aCheck'); await expect(page.locator('.src')).toBeVisible(); await page.click(p.ok ? '#aShare2' : '#aSkip2'); }
+    else await page.click(p.ok ? '#aSkip' : '#aShare');
+    await expect(page.locator('.fb')).toHaveClass(i % 2 ? /fb g/ : p.ok ? /fb n/ : /fb r/);
     await expect(page.locator('.fb .clue')).toContainText(/ภาพนี้/);
+    await expect(page.locator('.fb .found')).toContainText(want ? '⭐' : '🔎');
+    await expect(page.locator('.post .tru')).toHaveCount(p.spot ? p.spot.length : 0);   // กรอบเหลืองตรงเบาะแสจริง
     if (i === 1) await shot(page, 'photocheck-1');
     await page.click('#nextP');
   }
-  expect(new Set(seen).size).toBe(10);
-  await expect(page.locator('#eSum')).toHaveText('ตัดสินใจได้ดี 5 จาก 10 โพสต์');
-  await expect(page.locator('#ePath div')).toHaveCount(10);
+  expect(new Set(seen).size).toBe(16);
+  await expect(page.locator('#eSum')).toContainText('ตัดสินใจได้ดี 8 จาก 16 โพสต์');
+  await expect(page.locator('#eSum')).toContainText(`หาเบาะแสถูก ${found} จาก 16 ภาพ`);
+  await expect(page.locator('#ePath div')).toHaveCount(16);
+  await shot(page, 'photocheck-end');
   await page.click('#len');
   await expect(page.locator('#eRank')).toHaveText(/detective/);
   await page.click('#eTitle');
   for (const vp of [{ width: 1366, height: 768 }, { width: 1024, height: 640 }]) {
     await page.setViewportSize(vp);
     await page.click('#goE');
-    await expect(page.locator('#trail i')).toHaveCount(6);
+    await expect(page.locator('#trail i')).toHaveCount(8);
     expect(await page.evaluate(() => document.documentElement.scrollHeight <= innerHeight + 1)).toBe(true);
-    await page.click('#aCheck');
+    await page.click('#aNone'); await page.click('#aCheck');
     expect(await page.evaluate(() => document.documentElement.scrollHeight <= innerHeight + 1)).toBe(true);
     await page.goto('/games/photocheck.html');
   }
+  await page.setViewportSize({ width: 1024, height: 640 });
+  await page.click('#goH');
+  expect(await page.evaluate(() => document.documentElement.scrollHeight <= innerHeight + 1 && document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);   // 16 วงบนแถบไม่ล้น
   expect(errs).toEqual([]);
 });
 
