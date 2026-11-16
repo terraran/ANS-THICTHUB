@@ -462,3 +462,20 @@ test('ต่อฟองหนึ่งฟอง ฟองลอยที่เ�
     page.off('load', onLoad);
   }
 });
+
+test('เกมสัปดาห์ 4 มีปุ่ม 🏠 หน้าแรก ระหว่างเล่น (เปิดไฟล์ตรงก็กลับได้) · หน้าแรกไม่มีปุ่มนี้', async ({ page }) => {
+  page.route('**/fonts.googleapis.com/**', r => r.abort());
+  for (const [g, go, inPlay] of [['teachbot', '#go', '.it'], ['photocheck', '#goE', '.post']]) {
+    await page.goto(`/games/${g}.html`);
+    await expect(page.locator('#home')).toBeHidden();
+    await page.click(go);
+    await expect(page.locator(inPlay).first()).toBeVisible();
+    await expect(page.locator('#home')).toHaveText('🏠 หน้าแรก');
+    await page.click('#home');
+    await expect(page.locator('#sTitle')).toBeVisible();
+    await expect(page.locator('#sPlay')).toBeHidden();
+    await expect(page.locator('#home')).toBeHidden();
+    await page.click('#len'); await page.click(go);
+    await expect(page.locator('#home')).toHaveText('🏠 Home');
+  }
+});

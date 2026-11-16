@@ -91,7 +91,7 @@ main{flex:1;min-height:0;display:flex;justify-content:center;padding:0 16px 14px
 </head><body>
 <div class="top">
  <div class="trail hide" id="trail"></div>
- <div class="ctls"><button class="ctl hide" id="gback"></button><button class="ctl on" id="lth">TH</button><button class="ctl" id="len">EN</button></div>
+ <div class="ctls"><button class="ctl hide" id="home"></button><button class="ctl hide" id="gback"></button><button class="ctl on" id="lth">TH</button><button class="ctl" id="len">EN</button></div>
 </div>
 <main>
  <section id="sTitle" class="title">
@@ -196,7 +196,7 @@ const UI = {
         st1: 'ขั้นที่ 1 · หาเบาะแส', st2: 'ขั้นที่ 2 · ตัดสินใจ', spotHint: 'ซูมภาพ แล้วแตะจุดที่ดูแปลก ถ้าดูแล้วไม่เจออะไรแปลก กด "ไม่เจอจุดแปลก"',
         zoomBtn: '🔍 ซูมหาเบาะแส', none: '🤷 ไม่เจอจุดแปลก', zpick: '👆 แตะจุดที่ดูแปลกในภาพ · แตะนอกภาพเพื่อปิด', mineSpot: '📍 เราเลือกจุดในภาพไว้แล้ว', mineNone: '🤷 เราไม่เจอจุดแปลก', change: 'เปลี่ยน',
         found: '⭐ หาเบาะแสถูก!', missSpot: '🔎 เบาะแสอยู่ในกรอบสีเหลือง', missNone: '🔎 ภาพนี้ไม่มีจุดแปลกให้เห็น', sum2: (c, n) => `หาเบาะแสถูก ${c} จาก ${n} ภาพ`,
-        goE: 'ปกติ<small>8 โพสต์</small>', goH: 'ท้าทาย<small>16 โพสต์</small>', gback: '↩ กลับ', trail: 'นักสืบ', app: 'ฟีดของเรา', zoom: '🔍 แตะเพื่อซูม', zclose: 'แตะที่ไหนก็ได้เพื่อปิด',
+        goE: 'ปกติ<small>8 โพสต์</small>', goH: 'ท้าทาย<small>16 โพสต์</small>', gback: '↩ กลับ', home: '🏠 หน้าแรก', trail: 'นักสืบ', app: 'ฟีดของเรา', zoom: '🔍 แตะเพื่อซูม', zclose: 'แตะที่ไหนก็ได้เพื่อปิด',
         q: 'จะทำอย่างไรกับโพสต์นี้?', share: '📤 แชร์ต่อ', check: '🔎 เช็กที่มาก่อน', skip: '🙈 ไม่แชร์', srcHd: 'ที่มาของโพสต์:', q2: 'รู้ที่มาแล้ว จะแชร์ไหม?',
         like: n => `❤️ ${n}`, cm: n => `💬 ${n}`, clue: 'เบาะแส: ', aiNote: ['🤖 ภาพนี้ AI สร้าง', '📷 ภาพนี้เป็นภาพจริง'],
         fb: { gShare: ['👍 แชร์ได้เลย!', 'โพสต์นี้ไม่ได้หลอกใคร เพื่อน ๆ ชอบกันใหญ่'], gCheck: ['🕵️ นักสืบตัวจริง!', 'เราเช็กที่มาก่อน เลยไม่ถูกหลอก และไม่ส่งต่อเรื่องไม่จริง'],
@@ -209,7 +209,7 @@ const UI = {
         st1: 'STEP 1 · FIND A CLUE', st2: 'STEP 2 · DECIDE', spotHint: 'Zoom in and tap the spot that looks odd. If nothing looks odd, tap "Nothing odd".',
         zoomBtn: '🔍 Zoom for clues', none: '🤷 Nothing odd', zpick: '👆 Tap the odd spot in the picture · tap outside to close', mineSpot: '📍 You picked a spot', mineNone: '🤷 You found nothing odd', change: 'Change',
         found: '⭐ You found the clue!', missSpot: '🔎 The clue is in the yellow box', missNone: '🔎 This picture has nothing odd to see', sum2: (c, n) => `Clues found: ${c} of ${n} pictures`,
-        goE: 'Normal<small>8 posts</small>', goH: 'Challenge<small>16 posts</small>', gback: '↩ Back', trail: 'Detective', app: 'Our feed', zoom: '🔍 Tap to zoom', zclose: 'Tap anywhere to close',
+        goE: 'Normal<small>8 posts</small>', goH: 'Challenge<small>16 posts</small>', gback: '↩ Back', home: '🏠 Home', trail: 'Detective', app: 'Our feed', zoom: '🔍 Tap to zoom', zclose: 'Tap anywhere to close',
         q: 'What will you do with this post?', share: '📤 Share', check: '🔎 Check the source first', skip: '🙈 Don\'t share', srcHd: 'Where the post comes from:', q2: 'Now you know the source. Share it?',
         like: n => `❤️ ${n}`, cm: n => `💬 ${n}`, clue: 'Clue: ', aiNote: ['🤖 AI made this picture', '📷 This is a real photo'],
         fb: { gShare: ['👍 Fine to share!', 'This post does not trick anyone. Your friends love it.'], gCheck: ['🕵️ A real detective!', 'You checked the source first, so you were not tricked and did not spread something untrue.'],
@@ -221,7 +221,8 @@ const UI = {
 };
 let L = 'th', deck = [], cur = 0, marks = [], clues = [], stage = 'title', checked = false, last = null, seq = 0, pt = null;   // pt = จุดที่เด็กแตะ {x,y} | 'none'
 const U = () => UI[L], T = a => a[L === 'th' ? 0 : 1], pic = id => (window.WSPics && WSPics.get(id)) || '';
-const show = id => ['sTitle', 'sPlay', 'sEnd'].forEach(s => $('#' + s).classList.toggle('hide', s !== id));
+const show = id => { ['sTitle', 'sPlay', 'sEnd'].forEach(s => $('#' + s).classList.toggle('hide', s !== id)); showHome(id); };
+const showHome = id => $('#home').classList.toggle('hide', id === 'sTitle');
 function shuffle(a){ a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; }
 function start(n){
   // ผสมโพสต์ที่แชร์ได้กับโพสต์หลอกให้พอ ๆ กัน
@@ -305,9 +306,10 @@ $('#eTitle').onclick = toTitle;
 function applyLang(){
   document.documentElement.lang = L; document.title = U().title;
   $('#lth').classList.toggle('on', L === 'th'); $('#len').classList.toggle('on', L === 'en');
-  $('#tTitle').textContent = U().title; $('#tSub').textContent = U().sub; $('#goE').innerHTML = U().goE; $('#goH').innerHTML = U().goH; $('#gback').textContent = U().gback;
+  $('#tTitle').textContent = U().title; $('#tSub').textContent = U().sub; $('#goE').innerHTML = U().goE; $('#goH').innerHTML = U().goH; $('#gback').textContent = U().gback; $('#home').textContent = U().home;
   if (stage === 'spot' || stage === 'decide' || stage === 'fb') paint(); else if (stage === 'end') end();
 }
+$('#home').onclick = () => toTitle();
 $('#lth').onclick = () => { L = 'th'; applyLang(); }; $('#len').onclick = () => { L = 'en'; applyLang(); };
 // เปิดใน iframe (Hub/ใบงาน): ปุ่มกลับส่ง 'closeGame' · รับภาษาจาก postMessage({lang})
 if (window.parent !== window) { $('#gback').classList.remove('hide'); $('#gback').onclick = () => { toTitle(); parent.postMessage('closeGame', '*'); }; }

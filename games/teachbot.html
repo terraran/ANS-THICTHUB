@@ -77,7 +77,7 @@ main{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;p
 </head><body>
 <div class="top">
  <div class="lvl hide" id="lvl"></div>
- <div class="ctls"><button class="ctl hide" id="gback"></button><button class="ctl on" id="lth">TH</button><button class="ctl" id="len">EN</button></div>
+ <div class="ctls"><button class="ctl hide" id="home"></button><button class="ctl hide" id="gback"></button><button class="ctl on" id="lth">TH</button><button class="ctl" id="len">EN</button></div>
 </div>
 <main>
  <section id="sTitle" class="title">
@@ -156,7 +156,7 @@ const LV = [
 ];
 const UI = {
   th: { title: 'สอนหุ่นยนต์ AI', sub: 'หุ่นยนต์ของเราเรียนรู้จากภาพตัวอย่างที่เราสอน สอนให้ดี แล้วดูว่าหุ่นทายถูกไหม!',
-        how: ['1️⃣ แตะภาพเพื่อติดป้าย ✅ใช่ / ❌ไม่ใช่', '2️⃣ กดทดสอบหุ่น', '3️⃣ ดูว่าหุ่นทายถูกกี่ข้อ'], go: '▶ เริ่มเล่น', gback: '↩ กลับ',
+        how: ['1️⃣ แตะภาพเพื่อติดป้าย ✅ใช่ / ❌ไม่ใช่', '2️⃣ กดทดสอบหุ่น', '3️⃣ ดูว่าหุ่นทายถูกกี่ข้อ'], go: '▶ เริ่มเล่น', gback: '↩ กลับ', home: '🏠 หน้าแรก',
         hd: g => `สอนหุ่นให้รู้จัก <b>${g}</b> · แตะภาพ 1 ครั้ง = ✅ ใช่ · 2 ครั้ง = ❌ ไม่ใช่ · 3 ครั้ง = ไม่ใช้`, yes: '✅ ใช่', no: '❌ ไม่ใช่',
         tip: 'ต้องมี ✅ อย่างน้อย 2 ภาพ และ ❌ อย่างน้อย 1 ภาพ', ready: 'พร้อมแล้ว! กดทดสอบได้เลย', test: '🧪 ทดสอบหุ่น', count: (y, n) => `✅ ${y} ภาพ · ❌ ${n} ภาพ`,
         hi: g => `สวัสดี! ฉันยังไม่รู้จัก${g} เลย ช่วยสอนฉันด้วยภาพตัวอย่างหน่อยนะ`, learn: 'จำแล้ว! 👀', think: 'กำลังคิด...',
@@ -170,7 +170,7 @@ const UI = {
         again: '✏️ สอนเพิ่มแล้วทดสอบใหม่', next: 'ด่านต่อไป ➜', last: 'ดูผล ➜', isReal: v => v ? 'ใช่จริง' : 'ไม่ใช่จริง',
         endT: 'หุ่นยนต์ของเราเรียนจบแล้ว!', lvl: n => `ด่าน ${n}`, best: 'ทายถูกดีที่สุด', lesson: '🤖 AI เรียนรู้จากตัวอย่างที่เราให้ ถ้าตัวอย่างน้อย ไม่หลากหลาย หรือติดป้ายผิด AI ก็ทายผิดได้ เราจึงไม่ควรเชื่อทุกอย่างที่ AI บอก', play: '↺ เล่นอีกครั้ง' },
   en: { title: 'Teach the Robot', sub: 'Our robot learns from the example pictures we teach it. Teach it well, then see if it guesses right!',
-        how: ['1️⃣ Tap pictures to label ✅ Yes / ❌ No', '2️⃣ Test the robot', '3️⃣ See how many it gets right'], go: '▶ Start', gback: '↩ Back',
+        how: ['1️⃣ Tap pictures to label ✅ Yes / ❌ No', '2️⃣ Test the robot', '3️⃣ See how many it gets right'], go: '▶ Start', gback: '↩ Back', home: '🏠 Home',
         hd: g => `Teach the robot what a <b>${g}</b> is. Tap once = ✅ yes, twice = ❌ no, three times = not used.`, yes: '✅ Yes', no: '❌ No',
         tip: 'You need at least 2 ✅ and 1 ❌', ready: 'Ready! Tap Test.', test: '🧪 Test the robot', count: (y, n) => `✅ ${y} · ❌ ${n}`,
         hi: g => `Hello! I don't know what a ${g} is yet. Please teach me with example pictures.`, learn: 'Got it! 👀', think: 'Thinking...',
@@ -188,7 +188,8 @@ let L = 'th', lv = 0, lab = {}, best = [], phase = 'title', seq = 0;
 const U = () => UI[L], T = a => a[L === 'th' ? 0 : 1];
 const goalName = () => T(LV[lv].goal).replace(/^\S+\s/, '');
 const item = a => ({ e: a[0], n: [a[1], a[2]], tags: a[3].split(' '), is: a[4] });
-const show = id => ['sTitle', 'sPlay', 'sEnd'].forEach(s => $('#' + s).classList.toggle('hide', s !== id));
+const show = id => { ['sTitle', 'sPlay', 'sEnd'].forEach(s => $('#' + s).classList.toggle('hide', s !== id)); showHome(id); };
+const showHome = id => $('#home').classList.toggle('hide', id === 'sTitle');
 const counts = () => { const v = Object.values(lab); return [v.filter(x => x === 'y').length, v.filter(x => x === 'n').length]; };
 
 // หุ่นทาย: ตัวอย่างที่ลักษณะต่างกันน้อยที่สุด
@@ -267,13 +268,14 @@ function toTitle(){ seq++; phase = 'title'; show('sTitle'); paintLvl(); }
 function applyLang(){
   document.documentElement.lang = L; document.title = U().title;
   $('#lth').classList.toggle('on', L === 'th'); $('#len').classList.toggle('on', L === 'en');
-  $('#tTitle').textContent = U().title; $('#tSub').textContent = U().sub; $('#go').textContent = U().go; $('#gback').textContent = U().gback;
+  $('#tTitle').textContent = U().title; $('#tSub').textContent = U().sub; $('#go').textContent = U().go; $('#gback').textContent = U().gback; $('#home').textContent = U().home;
   $('#how').innerHTML = U().how.map(h => `<span>${esc(h)}</span>`).join('');
   if (phase === 'teach') { hello(); paint(); }
   else if (phase === 'test') { seq++; phase = 'teach'; $('#face').textContent = '🤖'; $('#face').classList.remove('think'); hello(); paint(); }
   else if (phase === 'end') end();
   else paintLvl();
 }
+$('#home').onclick = () => toTitle();
 $('#lth').onclick = () => { L = 'th'; applyLang(); }; $('#len').onclick = () => { L = 'en'; applyLang(); };
 // เปิดใน iframe (Hub/ใบงาน): ปุ่มกลับส่ง 'closeGame' · รับภาษาจาก postMessage({lang})
 if (window.parent !== window) { $('#gback').classList.remove('hide'); $('#gback').onclick = () => { toTitle(); parent.postMessage('closeGame', '*'); }; }
