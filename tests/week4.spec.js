@@ -104,17 +104,23 @@ test('Y3 สัปดาห์ 4: Bubble Map วงเดียว → AI ขอ
   await expect(page.locator('#zoom svg')).toHaveCount(1);
   await page.click('#zoom');
   await expect(page.locator('#zoom')).toBeHidden();
-  await expect(page.locator('#addN')).toHaveText('เพิ่มเองได้อีก 3 ฟอง (ไม่บังคับ)');
+  await expect(page.locator('#addN')).toHaveText('พิมพ์เองแล้ว 0 ฟอง · ต้องพิมพ์อีก 2 ฟอง');
   await shot(page, 'y3w4-1');
   await link(page, 'c1', '#topA'); await link(page, 'c2', '#topA');
   await expect(page.locator('#next')).toBeDisabled();                     // อย่างน้อย 3 ฟอง
   await link(page, 'c3', '#topA');
-  await expect(page.locator('#next')).toBeEnabled();
+  await expect(page.locator('#next')).toBeDisabled();                     // ต่อครบ 3 แล้ว แต่ยังไม่ได้พิมพ์ฟองเอง 2 ฟอง
   await link(page, 'c2', '#topA');                                        // แตะซ้ำ = ตัดเส้น
   await expect(page.locator('#links line')).toHaveCount(2);
   for (const id of ['c4', 'c5', 'c6', 'c2']) await link(page, id, '#topA');
   await page.fill('#addTx', 'ขนนุ่มนิ่ม'); await page.click('.ab');        // ฟองที่พิมพ์เองต่อเส้นเข้ากลางทันที
   await expect(page.locator('#links line')).toHaveCount(7);
+  await expect(page.locator('#addN')).toHaveText('พิมพ์เองแล้ว 1 ฟอง · ต้องพิมพ์อีก 1 ฟอง');
+  await expect(page.locator('#next')).toBeDisabled();
+  await page.fill('#addTx', 'ชอบนอนบนตัก'); await page.click('.ab');
+  await expect(page.locator('#addN')).toHaveText('พิมพ์เองแล้ว 2 ฟอง ✓');
+  await expect(page.locator('#next')).toBeEnabled();
+  await expect(page.locator('#links line')).toHaveCount(8);
   await expect(page.locator('#web .cardx.free')).toHaveCount(6);
   await shot(page, 'y3w4-1b');
   await page.click('#next');
@@ -123,7 +129,7 @@ test('Y3 สัปดาห์ 4: Bubble Map วงเดียว → AI ขอ
   await expect(page.locator('#map')).toBeHidden(); await expect(page.locator('#gal')).toBeHidden();
   await expect(page.locator('.tcard')).toHaveCount(4);
   await expect(page.locator('.tsay')).toHaveText([/แมว 100%/, /ไม่ใช่แมว 67%/, /แมว 83%/, /ไม่ใช่แมว 50%/]);
-  await expect(page.locator('.tcard').first().locator('.tk.u')).toHaveText('🤷 ขนนุ่มนิ่ม');
+  await expect(page.locator('.tcard').first().locator('.tk.u')).toHaveText(['🤷 ขนนุ่มนิ่ม', '🤷 ชอบนอนบนตัก']);
   await expect(page.locator('.tcard').nth(3).locator('.tk.n')).toHaveCount(3);
   await expect(page.locator('#next')).toBeDisabled();
   for (const [i, j] of [[0, 'no'], [1, 'ok'], [2, 'ok'], [3, 'ok']]) await page.locator('.tcard').nth(i).locator(`[data-j="${j}"]`).click();
@@ -142,7 +148,7 @@ test('Y3 สัปดาห์ 4: Bubble Map วงเดียว → AI ขอ
   expect(row[9]).toContain('ต่อเส้น: หูแหลม, มีหนวด'); expect(row[9]).toContain('ขนนุ่มนิ่ม'); expect(row[9]).toContain('AI ว่าแมว 100%');
   expect(d).toMatchObject({ v: 3, act: 'y3w4', map: 'single', fr: 'เพราะ AI ทายผิดได้', s2: { j: { t1: 'no', t2: 'ok', t3: 'ok', t4: 'ok' }, why: 'ตุ๊กตามีหูมีหนวดเหมือนแมว' } });
   expect(Object.keys(d.place).sort()).toEqual(['c1', 'c2', 'c3', 'c4', 'c5', 'c6']);
-  expect(d.own).toHaveLength(1);
+  expect(d.own).toHaveLength(2);
   // หลังส่ง: แท็บขั้น 2 พร้อมเฉลย (t4 AI ทายผิดแต่เรากดว่าถูก) · สลับไปดู Map ได้
   await expect(page.locator('#vtabs')).toBeVisible();
   await expect(page.locator('#result')).toHaveText('🤖');
@@ -162,14 +168,14 @@ test('Y3 สัปดาห์ 4: Bubble Map วงเดียว → AI ขอ
   await expect(p2.locator('.tsay').first()).toContainText('Cat 100%');
   await expect(p2.locator('#s2why')).toHaveValue('ตุ๊กตามีหูมีหนวดเหมือนแมว');
   await p2.click('#vtabs [data-vt="map"]');
-  await expect(p2.locator('#links line')).toHaveCount(7);
+  await expect(p2.locator('#links line')).toHaveCount(8);
   await p2.close();
   // มุมครู (หน้าแชร์ผลงานเปิดใบงานแบบดูอย่างเดียว)
   const f = await teacherView(page, 'y3w4', d);
   await expect(f.locator('.tcard')).toHaveCount(4);
   await expect(f.locator('.truth')).toHaveCount(4);
   await f.locator('#vtabs [data-vt="map"]').click();
-  await expect(f.locator('#links line')).toHaveCount(7);
+  await expect(f.locator('#links line')).toHaveCount(8);
   expect(errs).toEqual([]);
 });
 
@@ -178,6 +184,7 @@ test('Y3 สัปดาห์ 4: งานค้างทำต่อได้ 
   await page.emulateMedia({ reducedMotion: 'reduce' });   // ฟองไม่ลอย ให้คลิกได้แม่น
   await page.goto('/worksheet/?act=y3w4#room=Y3.2&name=' + encodeURIComponent('ขิม') + '&lang=th');
   for (const id of ['c1', 'c3', 'c7']) await link(page, id, '#topA');
+  for (const tx of ['ขนนุ่ม', 'ร้องเหมียว']) { await page.fill('#addTx', tx); await page.click('.ab'); }
   await page.click('#next');
   await page.locator('.tcard').first().locator('[data-j="no"]').click();
   await page.fill('#s2why', 'ยังคิดอยู่');
@@ -192,7 +199,8 @@ test('Y3 สัปดาห์ 4: งานค้างทำต่อได้ 
   await expect(p2.locator('#s2why')).toHaveValue('ยังคิดอยู่');
   await expect(p2.locator('.tsay').nth(1)).toContainText('100%');         // ชิบะ: หูแหลม หาง สีส้ม ครบ
   await p2.click('#back');
-  await expect(p2.locator('#links line')).toHaveCount(3);
+  await expect(p2.locator('#links line')).toHaveCount(5);
+  await expect(p2.locator('#web .cardx.own')).toHaveCount(2);
   await p2.close();
 });
 
@@ -215,15 +223,17 @@ test('Y4 สัปดาห์ 4: Double Bubble ภาพจริง/AI + ฟ�
     if (bin !== 'b') await link(page, c.id, '#topA');
     if (bin !== 'a') await link(page, c.id, '#topB');
   }
-  await expect(page.locator('#next')).toBeEnabled();
+  await expect(page.locator('#next')).toBeDisabled();                     // ต่อครบ 12 แล้ว แต่ยังไม่ได้พิมพ์ฟองเอง
   await page.fill('#addTx', 'ผมยุ่งนิดหน่อย'); await page.click('.ab');
   await expect(page.locator('#next')).toBeDisabled();                     // ฟองที่เพิ่มต้องต่อเส้นก่อน
   await page.click('#topA');
+  await expect(page.locator('#next')).toBeDisabled();                     // ต้องพิมพ์เองอย่างน้อย 2 ฟอง
+  await page.fill('#addTx', 'แสงสวยเกินจริง'); await page.click('.ab'); await page.click('#topB');
   await expect(page.locator('#next')).toBeEnabled();
   await shot(page, 'y4w4-1');
   await page.click('#next');
   await expect(page.locator('.qcard')).toHaveCount(3);
-  await expect(page.locator('.qcard').first().locator('.cl')).toHaveCount(13);
+  await expect(page.locator('.qcard').first().locator('.cl')).toHaveCount(14);
   await expect(page.locator('#next')).toBeDisabled();
   const q = i => page.locator('.qcard').nth(i);
   await q(0).locator('[data-v="ai"]').click(); await q(0).locator('[data-c="b2"]').click();

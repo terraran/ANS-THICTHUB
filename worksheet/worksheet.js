@@ -33,6 +33,7 @@ const UI = {
         addPh: 'พิมพ์เพิ่ม 1 ข้อ...', addTo: 'ใส่ใน', addN: (n, m) => n >= m ? `เพิ่มแล้ว ${n} ใบ ✓ เพิ่มอีกได้` : `เพิ่มแล้ว ${n} ใบ · อีก ${m - n} ใบ`, del: 'ลบ', myOwn: 'การ์ดที่เราเพิ่ม:', addBubble: '➕ เพิ่มฟอง',
         doneAi: 'ส่งให้ครูแล้ว ดูเฉลยของขั้น 2 ได้ที่แท็บด้านบน', tabMap: '🗺️ Bubble Map', tabS2: n => `🔎 ${n}`, zoomClose: 'แตะที่ไหนก็ได้เพื่อปิด',
         addOpt: (n, m) => n >= m ? `เพิ่มครบ ${m} ฟองแล้ว` : `เพิ่มเองได้อีก ${m - n} ฟอง (ไม่บังคับ)`,
+        addNB: (n, m) => n >= m ? `พิมพ์เองแล้ว ${n} ฟอง ✓` : `พิมพ์เองแล้ว ${n} ฟอง · ต้องพิมพ์อีก ${m - n} ฟอง`,
         aiOk: '✅ AI ทายถูก', aiNo: '❌ AI ทายผิด', youRight: 'เราตัดสินถูก ✓', youWrong: 'ลองดูอีกที ✗', isReally: 'ภาพนี้คือ', aiThinking: 'กำลังคิด...',
         replay: '↺ ดูอีกครั้ง', addMf: '➕ เพิ่มกล่อง', doneMulti: 'ส่ง Multi-Flow Map ให้ครูแล้ว ครูจะอ่านที่เราเขียน', addHere: 'เพิ่มกล่องตรงนี้ไหม?', addBox: 'เพิ่มกล่องไหม?', add: 'เพิ่ม', watchAgain: '▶ ดูการ์ตูนอีกครั้ง', chooseTtl: '🎬 เลือกเรื่องที่อยากดู', watchThis: '▶ ดูเรื่องนี้', change: '⇄ เปลี่ยนเรื่อง', doneWrite: 'ส่ง Flow Map ให้ครูแล้ว ครูจะอ่านที่เราเขียน' },
   en: { steps: ['1 Sort', '2 Find signs', '3 Explain', '4 Look back'], stepTag: (n, m) => `Step ${n} / ${m}`, lib: 'Activities', week: n => `Week ${n}`,
@@ -49,6 +50,7 @@ const UI = {
         addPh: 'Type 1 more...', addTo: 'Put in', addN: (n, m) => n >= m ? `${n} added ✓ you can add more` : `${n} added · ${m - n} to go`, del: 'Delete', myOwn: 'Cards we added:', addBubble: '➕ Add bubble',
         doneAi: 'Sent to your teacher. See the step 2 answers in the tab above.', tabMap: '🗺️ Bubble Map', tabS2: n => `🔎 ${n}`, zoomClose: 'Tap anywhere to close',
         addOpt: (n, m) => n >= m ? `All ${m} added` : `You can add ${m - n} more (optional)`,
+        addNB: (n, m) => n >= m ? `${n} of your own ✓` : `${n} of your own · ${m - n} more to type`,
         aiOk: '✅ AI is right', aiNo: '❌ AI is wrong', youRight: 'You judged right ✓', youWrong: 'Look again ✗', isReally: 'This is', aiThinking: 'Thinking...',
         replay: '↺ Watch again', addMf: '➕ Add a box', doneMulti: 'Your Multi-Flow Map was sent. Your teacher will read it.', addHere: 'Add a box here?', addBox: 'Add a box?', add: 'Add', watchAgain: '▶ Watch the cartoon again', chooseTtl: '🎬 Pick a story to watch', watchThis: '▶ Watch this', change: '⇄ Change story', doneWrite: 'Your Flow Map was sent. Your teacher will read it.' }
 };
@@ -95,7 +97,7 @@ const step2Done = () => S2() ? s2Done() : MULTI() ? multiDone() : isWrite() ? wr
 const isAdd = () => !!C.add;
 const SINGLE = () => C.map === 'single';
 // add.min = 0 = เพิ่มเองไม่บังคับ: บอกว่าเพิ่มได้อีกกี่ฟอง
-const addNTxt = () => C.add.min === 0 ? UI[L].addOpt(own.length, C.add.max || 9) : UI[L].addN(own.length, C.add.min || 3);
+const addNTxt = () => C.add.min === 0 ? UI[L].addOpt(own.length, C.add.max || 9) : WEB() ? UI[L].addNB(own.length, C.add.min || 3) : UI[L].addN(own.length, C.add.min || 3);
 const WEB = () => C.map === 'bubble' || SINGLE();
 const GRADED = () => C.cards.some(c => c.bin);
 const linkedN = () => Object.keys(placed).length + own.filter(o => o.bin).length;

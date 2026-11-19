@@ -6,15 +6,15 @@
  "title": { "th": "AI เรียนรู้จากตัวอย่าง", "en": "AI learns from examples" },
  "topicA": { "th": "🐱\nแมว", "en": "🐱\nCat" },
  "single": { "min": 3 },
- "add": { "min": 0, "max": 3, "ph": { "th": "พิมพ์ลักษณะของแมวเพิ่มเอง...", "en": "Type another thing about cats..." } },
+ "add": { "min": 2, "max": 3, "ph": { "th": "พิมพ์ลักษณะของแมวเพิ่มเอง...", "en": "Type another thing about cats..." } },
  "noReason": true,
  "steps": {
   "th": ["1 เติม Bubble Map", "2 AI ของเราทาย", "3 คิดย้อนกลับ"],
   "en": ["1 Fill the Bubble Map", "2 Our AI guesses", "3 Look back"]
  },
  "task1": {
-  "th": "<b>ขั้นที่ 1</b> ดูภาพแมว 6 ภาพ (แตะภาพเพื่อขยาย) · แตะฟองที่บอกลักษณะของ <b>แมว</b> แล้วแตะวงกลางเพื่อต่อเส้น · ฟองไหนไม่ใช่ ปล่อยลอยไว้ · ต่ออย่างน้อย 3 ฟอง",
-  "en": "<b>Step 1</b> Look at the 6 cat pictures (tap to zoom). Tap a bubble that describes a <b>cat</b>, then tap the middle circle to link it. Leave the others floating. Link at least 3."
+  "th": "<b>ขั้นที่ 1</b> ดูภาพแมว 6 ภาพ (แตะภาพเพื่อขยาย) · แตะฟองที่บอกลักษณะของ <b>แมว</b> แล้วแตะวงกลางเพื่อต่อเส้น · ฟองไหนไม่ใช่ ปล่อยลอยไว้ · ต่ออย่างน้อย 3 ฟอง · <b>พิมพ์ฟองเองอย่างน้อย 2 ฟอง</b>",
+  "en": "<b>Step 1</b> Look at the 6 cat pictures (tap to zoom). Tap a bubble that describes a <b>cat</b>, then tap the middle circle to link it. Leave the others floating. Link at least 3. <b>Type at least 2 bubbles of your own.</b>"
  },
  "task2": {
   "th": "<b>ขั้นที่ 2</b> Bubble Map ของเราคือสมองของ AI · ดูว่า AI ทายภาพใหม่ 4 ภาพว่าอะไร แล้วกดว่า <b>AI ทายถูก</b> หรือ <b>ทายผิด</b>",
