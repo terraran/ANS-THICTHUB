@@ -28,7 +28,11 @@ main{flex:1;min-height:0;display:flex;justify-content:center;padding:0 16px 14px
 .modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr));gap:14px;width:100%;max-width:560px}
 .modes button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:14px;font-size:26px}
 .modes small{font-size:16px;font-weight:400;opacity:.9}
-#goE{background:var(--ok)}#goH{background:#c2410c}
+#goE{background:var(--ok)}#goH{background:#c2410c}#goX{background:#7c3aed;grid-column:1/-1}
+.trail .hud{background:#fff;color:var(--ink);border-radius:20px;padding:4px 12px;font-weight:600;display:flex;gap:8px;align-items:center}
+.trail .hud .low{color:var(--bad)}
+.trail i.t{background:#fef3c7;border:2px solid #d97706}
+.fb.t{background:#fef3c7}
 /* เล่น: มือถือซ้าย · กล่องตัดสินใจขวา */
 .play{flex:1;min-height:0;width:100%;max-width:1100px;display:grid;grid-template-columns:minmax(300px,400px) 1fr;gap:22px}
 .phone{background:#020617;border-radius:40px;padding:12px;box-shadow:0 10px 0 #020617aa;min-height:0;display:flex}
@@ -98,7 +102,7 @@ main{flex:1;min-height:0;display:flex;justify-content:center;padding:0 16px 14px
   <div class="badge">📱🔍</div>
   <h1 id="tTitle"></h1>
   <p id="tSub"></p>
-  <div class="modes"><button id="goE"></button><button id="goH"></button></div>
+  <div class="modes"><button id="goE"></button><button id="goH"></button><button id="goX"></button></div>
  </section>
  <section id="sPlay" class="play hide">
   <div class="phone"><div class="screen">
@@ -201,10 +205,12 @@ const UI = {
         like: n => `❤️ ${n}`, cm: n => `💬 ${n}`, clue: 'เบาะแส: ', aiNote: ['🤖 ภาพนี้ AI สร้าง', '📷 ภาพนี้เป็นภาพจริง'],
         fb: { gShare: ['👍 แชร์ได้เลย!', 'โพสต์นี้ไม่ได้หลอกใคร เพื่อน ๆ ชอบกันใหญ่'], gCheck: ['🕵️ นักสืบตัวจริง!', 'เราเช็กที่มาก่อน เลยไม่ถูกหลอก และไม่ส่งต่อเรื่องไม่จริง'],
               gSkip: ['🛡️ ดีมากที่ไม่แชร์', 'โพสต์นี้หลอกคนอยู่ ถ้าไม่แน่ใจ ไม่แชร์ไว้ก่อนดีที่สุด'], n: ['🙂 ไม่แชร์ก็ไม่เป็นไร', 'แต่ภาพนี้ไม่ได้หลอกใครนะ ลองเช็กที่มาดู จะได้มั่นใจขึ้น'],
-              r: ['😱 แย่แล้ว! ข่าวปลอมกระจายไป', 'เพื่อน ๆ เชื่อแล้วแชร์ต่อกันหลายคน ภาพนี้ไม่จริง'] },
+              r: ['😱 แย่แล้ว! ข่าวปลอมกระจายไป', 'เพื่อน ๆ เชื่อแล้วแชร์ต่อกันหลายคน ภาพนี้ไม่จริง'], t: ['⏰ หมดเวลา!', 'นักสืบต้องคิดให้ไว แต่ถ้าไม่แน่ใจ ไม่แชร์ไว้ก่อนดีที่สุด'] },
         chatG: [['ต้นข้าว', 'สวยมาก 👍'], ['ภูมิ', 'ไปด้วย ๆ']], chatR: [['ต้นข้าว', 'จริงเหรอ 😱 แชร์ต่อแล้ว!'], ['ภูมิ', 'เดี๋ยวบอกแม่ด้วย'], ['ครูประจำชั้น', 'นักเรียน เรื่องนี้ไม่จริงนะ ลองตรวจก่อนแชร์']],
         chatS: [['ต้นข้าว', 'ดีนะที่ไม่แชร์ ภาพนี้ปลอม']], next: 'โพสต์ต่อไป ➜', last: 'ดูผล ➜',
-        ranks: ['🐣 นักสืบฝึกหัด', '🔎 นักสืบตาไว', '🏅 ยอดนักสืบภาพ'], sum: (g, n) => `ตัดสินใจได้ดี ${g} จาก ${n} โพสต์`, again: '↺ เล่นอีกครั้ง', toTitle: 'หน้าแรก' },
+        ranks: ['🐣 นักสืบฝึกหัด', '🔎 นักสืบตาไว', '🏅 ยอดนักสืบภาพ'],
+        goX: on => on ? '👑 หัวหน้านักสืบ<small>16 โพสต์ · 3 ❤️ · โพสต์ละ 30 วินาที</small>' : '🔒 หัวหน้านักสืบ<small>ได้ 🏅 ในโหมดท้าทายก่อนถึงจะเปิด</small>',
+        unlocked: '🔓 ปลดล็อกโหมด 👑 หัวหน้านักสืบแล้ว! ไปที่หน้าแรก', chief: '👑 หัวหน้านักสืบ', over: '💔 หัวใจหมดแล้ว', overSub: 'แชร์ภาพหลอกหรือหมดเวลาครบ 3 ครั้ง ลองใหม่อีกที!', hearts: 'หัวใจ', sum: (g, n) => `ตัดสินใจได้ดี ${g} จาก ${n} โพสต์`, again: '↺ เล่นอีกครั้ง', toTitle: 'หน้าแรก' },
   en: { title: 'Photo Detective', sub: 'Posts scroll into the feed one by one. Zoom in and tap the odd spot in each picture, then decide whether to share.',
         st1: 'STEP 1 · FIND A CLUE', st2: 'STEP 2 · DECIDE', spotHint: 'Zoom in and tap the spot that looks odd. If nothing looks odd, tap "Nothing odd".',
         zoomBtn: '🔍 Zoom for clues', none: '🤷 Nothing odd', zpick: '👆 Tap the odd spot in the picture · tap outside to close', mineSpot: '📍 You picked a spot', mineNone: '🤷 You found nothing odd', change: 'Change',
@@ -214,17 +220,35 @@ const UI = {
         like: n => `❤️ ${n}`, cm: n => `💬 ${n}`, clue: 'Clue: ', aiNote: ['🤖 AI made this picture', '📷 This is a real photo'],
         fb: { gShare: ['👍 Fine to share!', 'This post does not trick anyone. Your friends love it.'], gCheck: ['🕵️ A real detective!', 'You checked the source first, so you were not tricked and did not spread something untrue.'],
               gSkip: ['🛡️ Good call not sharing', 'This post is tricking people. If you are not sure, not sharing is safest.'], n: ['🙂 Not sharing is OK', 'But this picture does not trick anyone. Check the source to be more sure.'],
-              r: ['😱 Oh no! Fake news is spreading', 'Your friends believed it and shared it again. This picture is not real.'] },
+              r: ['😱 Oh no! Fake news is spreading', 'Your friends believed it and shared it again. This picture is not real.'], t: ['⏰ Time is up!', 'Detectives think fast. If you are not sure, not sharing is safest.'] },
         chatG: [['Tonkhao', 'So nice 👍'], ['Poom', 'I want to go too!']], chatR: [['Tonkhao', 'Really?! 😱 I shared it!'], ['Poom', 'I\'ll tell my mum'], ['Class teacher', 'Everyone, this is not true. Check before you share.']],
         chatS: [['Tonkhao', 'Good thing you didn\'t share. It\'s fake.']], next: 'Next post ➜', last: 'See results ➜',
-        ranks: ['🐣 Trainee detective', '🔎 Sharp-eyed detective', '🏅 Super photo detective'], sum: (g, n) => `Good choices: ${g} of ${n} posts`, again: '↺ Play again', toTitle: 'Home' }
+        ranks: ['🐣 Trainee detective', '🔎 Sharp-eyed detective', '🏅 Super photo detective'],
+        goX: on => on ? '👑 Chief detective<small>16 posts · 3 ❤️ · 30 seconds per post</small>' : '🔒 Chief detective<small>Get 🏅 in Challenge to open</small>',
+        unlocked: '🔓 Chief detective 👑 mode is now open! Go to Home.', chief: '👑 Chief detective', over: '💔 Out of hearts', overSub: 'You shared a fake or ran out of time 3 times. Try again!', hearts: 'Hearts', sum: (g, n) => `Good choices: ${g} of ${n} posts`, again: '↺ Play again', toTitle: 'Home' }
 };
 let L = 'th', deck = [], cur = 0, marks = [], clues = [], stage = 'title', checked = false, last = null, seq = 0, pt = null;   // pt = จุดที่เด็กแตะ {x,y} | 'none'
 const U = () => UI[L], T = a => a[L === 'th' ? 0 : 1], pic = id => (window.WSPics && WSPics.get(id)) || '';
 const show = id => { ['sTitle', 'sPlay', 'sEnd'].forEach(s => $('#' + s).classList.toggle('hide', s !== id)); showHome(id); };
 const showHome = id => $('#home').classList.toggle('hide', id === 'sTitle');
 function shuffle(a){ a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; }
-function start(n){
+// โหมดหัวหน้านักสืบ (ปลดล็อกเมื่อได้ 🏅 ในโหมดท้าทาย · จำไว้ในเครื่อง): 16 โพสต์ · ❤️ 3 ดวง · โพสต์ละ 30 วินาที
+// แชร์ภาพหลอก หรือหมดเวลา = เสียหัวใจ 1 ดวง · หัวใจหมด = จบเกม
+const CKEY = 'photocheck.chief.v1', SEC = 30;
+let chiefOn = (() => { try { return localStorage.getItem(CKEY) === '1'; } catch (e) { return false; } })();
+let chief = false, hearts = 3, left = SEC, tick = 0;
+function stopTimer(){ clearInterval(tick); tick = 0; }
+function startTimer(){
+  stopTimer(); if (!chief) return; left = SEC; const my = seq;
+  tick = setInterval(() => {
+    if (my !== seq || (stage !== 'spot' && stage !== 'decide')) return stopTimer();
+    left--; if (left > 0) return paintTrail();
+    stopTimer(); $('#zoom').classList.add('hide');
+    last = 't'; marks[cur] = 't'; clues[cur] = false; hearts--; stage = 'fb'; paint();
+  }, 1000);
+}
+function start(n, x){
+  chief = !!x; hearts = 3; stopTimer();
   // ผสมโพสต์ที่แชร์ได้กับโพสต์หลอกให้พอ ๆ กัน
   const ok = shuffle(POSTS.filter(p => p.ok)), bad = shuffle(POSTS.filter(p => !p.ok)), h = Math.floor(n / 2);
   deck = n >= POSTS.length ? shuffle(POSTS) : shuffle(ok.slice(0, h).concat(bad.slice(0, n - h))); cur = 0; marks = []; clues = []; seq++;
@@ -240,9 +264,11 @@ function marked(p){
 const hit = (p, q) => q === 'none' ? !p.spot || !!p.none : !!q && (p.spot || []).some(([a, b, w, h]) => q.x >= a - 6 && q.x <= a + w + 6 && q.y >= b - 6 && q.y <= b + h + 6);
 function paintTrail(){
   $('#trail').classList.toggle('many', deck.length > 10);
-  $('#trail').innerHTML = `<span class="lbl">🕵️ ${U().trail}</span>` + deck.map((p, i) => `<i class="${marks[i] || ''}${clues[i] ? ' c' : ''}">${marks[i] === 'g' ? '✓' : marks[i] === 'r' ? '!' : marks[i] === 'n' ? '–' : ''}</i>`).join('');
+  const hud = chief && stage !== 'end' ? `<span class="hud">${'❤️'.repeat(Math.max(0, hearts))}${'🤍'.repeat(3 - Math.max(0, hearts))}` +
+    (tick ? `<span class="${left <= 10 ? 'low' : ''}">⏱ ${left}</span>` : '') + '</span>' : '';
+  $('#trail').innerHTML = `<span class="lbl">🕵️ ${U().trail}</span>` + hud + deck.map((p, i) => `<i class="${marks[i] || ''}${clues[i] ? ' c' : ''}">${marks[i] === 'g' ? '✓' : marks[i] === 'r' ? '!' : marks[i] === 'n' ? '–' : marks[i] === 't' ? '⏰' : ''}</i>`).join('');
 }
-function deal(){ stage = 'spot'; checked = false; last = null; pt = null; paint(); }
+function deal(){ stage = 'spot'; checked = false; last = null; pt = null; startTimer(); paint(); }
 function paint(){
   const p = deck[cur], u = U();
   $('#appName').textContent = u.app;
@@ -257,15 +283,15 @@ function paint(){
     (checked ? `<button id="aShare2" data-a="share">${u.share}</button><button id="aSkip2" data-a="skip">${u.skip}</button>`
              : `<button id="aShare" data-a="share">${u.share}</button><button id="aCheck" data-a="check">${u.check}</button><button id="aSkip" data-a="skip">${u.skip}</button>`) + '</div>';
   else {
-    const k = last, f = u.fb[k], chat = k === 'r' ? u.chatR : k === 'n' ? [] : p.ok ? u.chatG : u.chatS;
+    const k = last, f = u.fb[k], chat = k === 'r' ? u.chatR : k === 'n' || k === 't' ? [] : p.ok ? u.chatG : u.chatS, done = cur >= deck.length - 1 || (chief && hearts <= 0);
     $('#side').innerHTML = src + `<div class="fb ${k[0]}"><h3>${f[0]}</h3><p>${f[1]}</p><p class="clue">${u.aiNote[p.ai ? 0 : 1]} · ${u.clue}${esc(T(p.clue))}</p><p class="found">${clues[cur] ? u.found : p.spot ? u.missSpot : u.missNone}</p></div>` +
       `<div class="chat">${chat.map((m, i) => `<div class="msg" style="animation-delay:${.3 + i * .5}s"><b>${esc(m[0])}</b>${esc(m[1])}</div>`).join('')}</div>` +
-      `<button id="nextP">${cur < deck.length - 1 ? u.next : u.last}</button>`;
+      `<button id="nextP">${done ? u.last : u.next}</button>`;
   }
   paintTrail();
 }
 $('#side').addEventListener('click', e => {
-  if (e.target.id === 'nextP') { if (cur < deck.length - 1) { cur++; deal(); } else end(); return; }
+  if (e.target.id === 'nextP') { if (cur < deck.length - 1 && !(chief && hearts <= 0)) { cur++; deal(); } else end(); return; }
   if (e.target.id === 'aZoom' || e.target.id === 'reSpot') return openZoom(true);
   if (e.target.id === 'aNone') { pt = 'none'; stage = 'decide'; paint(); return; }
   const b = e.target.closest('[data-a]'); if (!b || stage !== 'decide') return;
@@ -273,7 +299,7 @@ $('#side').addEventListener('click', e => {
   if (a === 'check') { checked = true; paint(); return; }
   // ผล: แชร์โพสต์หลอก = r · ไม่แชร์โพสต์ดี = n · ที่เหลือ = g (แยกข้อความตามที่ทำ)
   last = a === 'share' ? (p.ok ? 'gShare' : 'r') : p.ok ? 'n' : checked ? 'gCheck' : 'gSkip';
-  marks[cur] = last[0]; clues[cur] = hit(p, pt); stage = 'fb'; paint();
+  marks[cur] = last[0]; clues[cur] = hit(p, pt); stopTimer(); if (chief && last === 'r') hearts--; stage = 'fb'; paint();
 });
 // ซูม: ขั้นหาเบาะแส/ตัดสินใจ = แตะในภาพเพื่อเลือกจุด (ยังไม่บอกว่าถูกไหม) · หลังตัดสินใจ = ดูกรอบเฉลย
 function openZoom(pick){
@@ -292,21 +318,30 @@ $('#zoom').onclick = e => {
 };
 function end(){
   stage = 'end'; show('sEnd');
+  stopTimer();
   const g = marks.filter(m => m === 'g').length, n = deck.length, k = g + clues.filter(Boolean).length, r = k === 2 * n ? 2 : k >= n * 1.2 ? 1 : 0;
-  $('#eBadge').textContent = ['🐣', '🔎', '🏅'][r]; $('#eRank').textContent = U().ranks[r];
-  const c = clues.filter(Boolean).length; $('#eSum').innerHTML = esc(U().sum(g, n)) + '<br>' + esc(U().sum2(c, n));
-  $('#ePath').innerHTML = deck.map((p, i) => `<div><i>${marks[i] === 'g' ? '✅' : marks[i] === 'r' ? '⚠️' : '➖'}${clues[i] ? '⭐' : ''}</i><span>${p.ai ? '🤖' : '📷'} ${esc(T(p.cap)).slice(0, 60)}</span></div>`).join('');
+  const c = clues.filter(Boolean).length, out = chief && hearts <= 0;
+  $('#eBadge').textContent = out ? '💔' : chief && r === 2 ? '👑' : ['🐣', '🔎', '🏅'][r];
+  $('#eRank').textContent = out ? U().over : chief && r === 2 ? U().chief : U().ranks[r];
+  // ปลดล็อกโหมดหัวหน้านักสืบ: 🏅 ในโหมดท้าทาย (ครบ 16 โพสต์)
+  const unlock = !chief && !chiefOn && r === 2 && n >= POSTS.length;
+  if (unlock) { chiefOn = true; try { localStorage.setItem(CKEY, '1'); } catch (e) {} }
+  $('#eSum').innerHTML = (out ? esc(U().overSub) + '<br>' : '') + esc(U().sum(g, marks.filter(Boolean).length)) + '<br>' + esc(U().sum2(c, marks.filter(Boolean).length)) +
+    (chief && !out ? '<br>' + esc(U().hearts) + ' ' + '❤️'.repeat(hearts) : '') + (unlock ? `<br><b>${esc(U().unlocked)}</b>` : '');
+  $('#ePath').innerHTML = deck.filter((p, i) => marks[i]).map((p, i) => `<div><i>${marks[i] === 'g' ? '✅' : marks[i] === 'r' ? '⚠️' : marks[i] === 't' ? '⏰' : '➖'}${clues[i] ? '⭐' : ''}</i><span>${p.ai ? '🤖' : '📷'} ${esc(T(p.cap)).slice(0, 60)}</span></div>`).join('');
   $('#eAgain').textContent = U().again; $('#eTitle').textContent = U().toTitle; paintTrail();
 }
 let mode = 8;
 $('#goE').onclick = () => start(mode = 8); $('#goH').onclick = () => start(mode = 16);
-$('#eAgain').onclick = () => start(mode);
-function toTitle(){ seq++; stage = 'title'; show('sTitle'); $('#trail').classList.add('hide'); $('#zoom').classList.add('hide'); }
+$('#goX').onclick = () => { if (chiefOn) { mode = 'X'; start(16, true); } };
+$('#eAgain').onclick = () => mode === 'X' ? start(16, true) : start(mode);
+function toTitle(){ seq++; stopTimer(); stage = 'title'; paintX(); show('sTitle'); $('#trail').classList.add('hide'); $('#zoom').classList.add('hide'); }
 $('#eTitle').onclick = toTitle;
+function paintX(){ $('#goX').innerHTML = U().goX(chiefOn); $('#goX').disabled = !chiefOn; }
 function applyLang(){
   document.documentElement.lang = L; document.title = U().title;
   $('#lth').classList.toggle('on', L === 'th'); $('#len').classList.toggle('on', L === 'en');
-  $('#tTitle').textContent = U().title; $('#tSub').textContent = U().sub; $('#goE').innerHTML = U().goE; $('#goH').innerHTML = U().goH; $('#gback').textContent = U().gback; $('#home').textContent = U().home;
+  $('#tTitle').textContent = U().title; $('#tSub').textContent = U().sub; $('#goE').innerHTML = U().goE; $('#goH').innerHTML = U().goH; paintX(); $('#gback').textContent = U().gback; $('#home').textContent = U().home;
   if (stage === 'spot' || stage === 'decide' || stage === 'fb') paint(); else if (stage === 'end') end();
 }
 $('#home').onclick = () => toTitle();

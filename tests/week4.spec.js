@@ -311,6 +311,8 @@ test('เกม Y3 สอนหุ่นยนต์ AI: ติดป้าย �
   await tap('ลูกบอลแดง', 2); await tap('มะเขือเทศ', 2);
   await page.click('#test');
   await expect(page.locator('#say')).toContainText('หุ่นทายถูก 4/4');
+  await expect(page.locator('#say')).toContainText('ได้ดาว ⭐☆☆');          // ถูกครบ แต่ไม่ใช่ครั้งแรก และใช้ 5 ภาพ
+  await expect(page.locator('#stars .on')).toHaveCount(1);
   await expect(page.locator('.tc .res.g')).toHaveCount(4);
   await shot(page, 'teachbot-1');
   // ด่าน 2 แมว · ด่าน 3 ปลา (ฉลามหลอกหุ่นได้แม้สอนครบ)
@@ -364,8 +366,9 @@ test('เกม Y3 สอนหุ่นยนต์ AI: ติดป้าย �
   await expect(page.locator('#say')).toContainText('แก้ป้ายถูกแล้ว');
   await shot(page, 'teachbot-6');
   await page.click('#next');
-  await expect(page.locator('#eSum div')).toHaveCount(6);
-  await expect(page.locator('#eBadge')).toHaveText('🏆');
+  await expect(page.locator('#eSum button')).toHaveCount(6);
+  await expect(page.locator('#eBadge')).not.toHaveText('🏆');              // ยังเก็บดาวไม่ครบ 18
+  await expect(page.locator('#eLesson')).toContainText('ดาวที่เก็บได้');
   await page.click('#len');
   await expect(page.locator('#eTitle')).toHaveText('Our robot finished school!');
   // จอเล็ก/จอห้องเรียน: ไม่มีแถบเลื่อน
@@ -488,4 +491,102 @@ test('เกมสัปดาห์ 4 มีปุ่ม 🏠 หน้าแ�
     await page.click('#len'); await page.click(go);
     await expect(page.locator('#home')).toHaveText('🏠 Home');
   }
+});
+
+test('เกม Y3 ล่าดาว: ติดป้ายตามจริง + ครั้งแรก + ไม่เกิน 4 ภาพ = 3 ดาว · หลอกหุ่นไม่ได้ดาว · ดาวจำไว้ในเครื่อง เลือกด่านได้', async ({ page }) => {
+  page.route('**/fonts.googleapis.com/**', r => r.abort());
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/games/teachbot.html');
+  await expect(page.locator('#pick button')).toHaveCount(0);                // ยังไม่เคยเล่น ไม่มีแถบเลือกด่าน
+  await page.click('#go');
+  const tap = async (name, n = 1) => { for (let i = 0; i < n; i++) await page.locator('.it', { hasText: name }).click(); };
+  await expect(page.locator('#stars div')).toHaveText(['⭐หุ่นทายถูกครบ', '⭐ถูกครบตั้งแต่ทดสอบครั้งแรก', '⭐ใช้ภาพสอนไม่เกิน 4 ภาพ']);
+  // หลอกหุ่น: เชอร์รี่/ลูกแพร์ = แอปเปิล → ทายถูกครบแต่ไม่ได้ดาว
+  await tap('เชอร์รี่'); await tap('ลูกแพร์'); await tap('มะเขือเทศ', 2);
+  await page.click('#test');
+  await expect(page.locator('#say')).toContainText('4/4');
+  await expect(page.locator('#say')).toContainText('โชคช่วย');
+  await expect(page.locator('#say')).toContainText('ได้ดาว ☆☆☆');
+  // เล่นด่านใหม่ (ครั้งแรกของรอบ) ติดป้ายตามจริง 3 ภาพ → 3 ดาว
+  await page.click('#home');
+  await expect(page.locator('#pick .tot')).toContainText('0/18');
+  await page.locator('#pick button').first().click();
+  await tap('แอปเปิลแดง'); await tap('แอปเปิลเขียว'); await tap('ลูกบอลแดง', 2);
+  await page.click('#test');
+  await expect(page.locator('#say')).toContainText('ได้ดาว ⭐⭐⭐');
+  await expect(page.locator('#stars .on')).toHaveCount(3);
+  // ด่านแก้ป้าย: แก้แค่ 2 ภาพ ครั้งแรก = 3 ดาว
+  await page.evaluate(() => startLevel(5));
+  await tap('แมว'); await tap('หมาพันธุ์ใหญ่', 2);
+  await page.click('#test');
+  await expect(page.locator('#say')).toContainText('ได้ดาว ⭐⭐⭐');
+  // ดาวจำไว้ในเครื่อง: เปิดใหม่เห็นแถบเลือกด่าน · ด่าน 3 ยังล็อก (ยังไม่เล่นด่าน 2)
+  await page.reload();
+  await expect(page.locator('#pick .tot')).toContainText('6/18');
+  await expect(page.locator('#pick button')).toHaveCount(6);
+  await expect(page.locator('#pick button').nth(0)).toContainText('⭐⭐⭐');
+  await expect(page.locator('#pick button').nth(1)).toBeEnabled();
+  await expect(page.locator('#pick button').nth(2)).toBeDisabled();
+  await page.locator('#pick button').nth(1).click();
+  await expect(page.locator('#goal')).toHaveText('🐱 แมว');
+});
+
+test('เกม Y4 โหมดหัวหน้านักสืบ: ล็อกจนได้ 🏅 ในโหมดท้าทาย · ❤️ 3 ดวง แชร์ภาพหลอก/หมดเวลา = เสียหัวใจ · หัวใจหมด = จบ', async ({ page }) => {
+  page.route('**/fonts.googleapis.com/**', r => r.abort());
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.clock.install();
+  await page.goto('/games/photocheck.html');
+  await expect(page.locator('#goX')).toBeDisabled();
+  await expect(page.locator('#goX')).toContainText('🔒');
+  // เล่นโหมดท้าทายแบบไม่พลาดเลย (เลือกจุดถูก + ตัดสินใจถูก) → 🏅 → ปลดล็อก
+  const perfect = async () => {
+    const p = await page.evaluate(() => ({ ok: !!deck[cur].ok, spot: deck[cur].spot || null, none: !!deck[cur].none }));
+    if (!p.spot || p.none) await page.click('#aNone');
+    else {
+      await page.click('#aZoom');
+      const box = await page.locator('#zoom svg').boundingBox(), [x, y, w, h] = p.spot[0];
+      await page.mouse.click(box.x + (x + w / 2) / 240 * box.width, box.y + (y + h / 2) / 180 * box.height);
+    }
+    await page.click('#aCheck'); await page.click(p.ok ? '#aShare2' : '#aSkip2');
+    await page.click('#nextP');
+  };
+  await page.click('#goH');
+  for (let i = 0; i < 16; i++) await perfect();
+  await expect(page.locator('#eBadge')).toHaveText('🏅');
+  await expect(page.locator('#eSum')).toContainText('ปลดล็อกโหมด 👑');
+  await page.click('#eTitle');
+  await expect(page.locator('#goX')).toBeEnabled();
+  await expect(page.locator('#goX')).toContainText('3 ❤️');
+  // เข้าโหมด: หัวใจ 3 ดวง เวลา 30 วินาที
+  await page.clock.pauseAt(Date.now() + 60000);
+  await page.click('#goX');
+  await expect(page.locator('#trail i')).toHaveCount(16);
+  await expect(page.locator('.hud')).toContainText('❤️❤️❤️');
+  await expect(page.locator('.hud')).toContainText('⏱ 30');
+  await page.clock.runFor(5000);
+  await expect(page.locator('.hud')).toContainText('⏱ 25');
+  // หมดเวลา = เสียหัวใจ
+  await page.clock.runFor(26000);
+  await expect(page.locator('.fb.t')).toContainText('หมดเวลา');
+  await expect(page.locator('.hud')).toContainText('❤️❤️🤍');
+  await page.click('#nextP');
+  // แชร์ภาพหลอกจนหัวใจหมด
+  const shareFake = async () => {
+    for (;;) {
+      const ok = await page.evaluate(() => !!deck[cur].ok);
+      await page.click('#aNone');
+      if (!ok) { await page.click('#aShare'); return; }
+      await page.click('#aShare'); await page.click('#nextP');
+    }
+  };
+  await shareFake();
+  await expect(page.locator('.hud')).toContainText('❤️🤍🤍');
+  await page.click('#nextP');
+  await shareFake();
+  await expect(page.locator('#nextP')).toHaveText('ดูผล ➜');
+  await page.click('#nextP');
+  await expect(page.locator('#eRank')).toHaveText('💔 หัวใจหมดแล้ว');
+  // ปลดล็อกจำไว้ในเครื่อง
+  await page.reload();
+  await expect(page.locator('#goX')).toBeEnabled();
 });

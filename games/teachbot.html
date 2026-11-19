@@ -35,6 +35,11 @@ main{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;p
 .say{background:#e0f2fe;border-radius:18px 18px 18px 4px;padding:10px 14px;font-size:18px;line-height:1.4;width:100%;animation:pop .35s ease-out}
 .goal{background:var(--sel);color:var(--navy);border-radius:14px;padding:6px 12px;font-weight:800;font-size:20px;text-align:center;width:100%}
 .count{font-size:16px;color:var(--muted);text-align:center}
+.stars{width:100%;display:flex;flex-direction:column;gap:2px;font-size:14px;color:var(--muted);border-top:2px dashed var(--line);padding-top:6px}
+.stars b{font-size:14px;color:var(--ink)}.stars div{display:flex;gap:6px;align-items:baseline}.stars i{font-style:normal;filter:grayscale(1);opacity:.45}.stars .on{color:#92400e;font-weight:600}.stars .on i{filter:none;opacity:1}
+.pick{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;max-width:760px}
+.pick button,.sum button{background:var(--navy2);border:2px solid #ffffff44;box-shadow:none;font-size:18px;min-height:44px;padding:6px 14px;line-height:1.3}
+.pick .tot{width:100%;font-size:18px;color:var(--sel);font-weight:600}
 .right{display:flex;flex-direction:column;gap:10px;min-height:0}
 .hd{font-size:19px;line-height:1.35}
 .hd b{color:var(--sel)}
@@ -65,7 +70,7 @@ main{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;p
 .end .badge{font-size:min(90px,13vh)}
 .end h2{margin:0;font-size:36px}
 .sum{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
-.sum div{background:var(--navy2);border-radius:16px;padding:10px 18px;font-size:19px}
+.sum button{border-radius:16px;padding:8px 16px;font-size:18px}
 .sum b{font-size:26px;color:var(--sel)}
 .lesson{background:#fff;color:var(--ink);border-radius:18px;padding:12px 18px;font-size:19px;max-width:700px;line-height:1.45}
 @keyframes bob{0%,100%{transform:none}50%{transform:translateY(-8px)}}
@@ -86,9 +91,10 @@ main{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;p
   <p id="tSub"></p>
   <div class="how" id="how"></div>
   <button id="go"></button>
+  <div class="pick" id="pick"></div>
  </section>
  <section id="sPlay" class="play hide">
-  <div class="bot"><div class="goal" id="goal"></div><div class="face" id="face">🤖</div><div class="say" id="say"></div><div class="count" id="count"></div></div>
+  <div class="bot"><div class="goal" id="goal"></div><div class="face" id="face">🤖</div><div class="say" id="say"></div><div class="count" id="count"></div><div class="stars" id="stars"></div></div>
   <div class="right">
    <div class="hd" id="hd"></div>
    <div class="tray" id="tray"></div>
@@ -154,6 +160,13 @@ const LV = [
     test: [['🐕‍🦺', 'หมานำทาง', 'A guide dog', 'floppy tail fur pet bark big', 1], ['🐈', 'แมวลาย', 'A striped cat', 'pointy whisk tail fur pet meow stripes', 0], ['🐶', 'หมาจิ๋ว', 'A tiny dog', 'floppy tail fur pet bark tiny', 1], ['🐭', 'หนู', 'A mouse', 'roundear whisk tail tiny', 0]],
     note: ['🔍 ดูว่าหุ่นบอกว่า "เหมือนภาพไหน" ภาพนั้นอาจติดป้ายผิดอยู่', '🔍 Look at which picture the robot says it looks like. That picture may have the wrong label.'] }
 ];
+// ภาพที่ "ใช่จริง" ในแต่ละด่าน (ใช้ตรวจว่าเด็กติดป้ายตามความจริง ไม่ได้หลอกหุ่นเพื่อเอาดาว)
+const YES = [['แอปเปิลแดง', 'แอปเปิลเขียว'], ['แมวส้ม', 'แมวดำ'], ['ปลา', 'ปลาการ์ตูน', 'ปลาปักเป้า'], ['นกกระจอก', 'เป็ด', 'ไก่', 'นกฮูก'], ['มด', 'ผีเสื้อ', 'เต่าทอง', 'ผึ้ง'], ['หมาตัวน้อย', 'หมาพันธุ์ใหญ่', 'พุดเดิ้ล']];
+// ดาว 3 ดวงต่อด่าน (ต้องติดป้ายตามจริงทุกภาพ): ทายถูกครบ · ถูกครบตั้งแต่ทดสอบครั้งแรก · ใช้ภาพสอนไม่เกิน 4 ภาพ (ด่านแก้ป้าย = แก้ไม่เกิน 2 ภาพ)
+// เก็บในเครื่อง (localStorage) กลับมาล่าดาวต่อได้ · ทุกด่านทำครบ 3 ดาวได้จริง (ตรวจแล้วทุกแบบการติดป้าย)
+const KEY = 'teachbot.stars.v1', FEW = 4;
+const loadStars = () => { try { const v = JSON.parse(localStorage.getItem(KEY)); return Array.isArray(v) ? v : []; } catch (e) { return []; } };
+const saveStars = () => { try { localStorage.setItem(KEY, JSON.stringify(stars)); } catch (e) {} };
 const UI = {
   th: { title: 'สอนหุ่นยนต์ AI', sub: 'หุ่นยนต์ของเราเรียนรู้จากภาพตัวอย่างที่เราสอน สอนให้ดี แล้วดูว่าหุ่นทายถูกไหม!',
         how: ['1️⃣ แตะภาพเพื่อติดป้าย ✅ใช่ / ❌ไม่ใช่', '2️⃣ กดทดสอบหุ่น', '3️⃣ ดูว่าหุ่นทายถูกกี่ข้อ'], go: '▶ เริ่มเล่น', gback: '↩ กลับ', home: '🏠 หน้าแรก',
@@ -166,7 +179,10 @@ const UI = {
         hiFix: g => `สวัสดี! มีคนสอนฉันเรื่อง${g}ไว้แล้ว แต่ฉันทายผิดบ่อยจัง ช่วยหาภาพที่ติดป้ายผิดหน่อยนะ`,
         fixGood: 'แก้ป้ายถูกแล้ว! ข้อมูลที่สอนผิด ทำให้ AI ทายผิด ข้อมูลถูก AI ก็ทายถูก',
         right: 'ทายถูก 🎉', wrong: 'ทายผิด 😵', score: (a, n) => `หุ่นทายถูก ${a}/${n}`,
-        good: 'เยี่ยม! หุ่นเรียนรู้ได้ดีเพราะตัวอย่างหลากหลาย', meh: 'หุ่นยังสับสน ลองสอนเพิ่มด้วยภาพที่หลากหลายขึ้น เช่น ของที่หน้าตาคล้ายแต่ไม่ใช่',
+        good: 'เยี่ยม! หุ่นเรียนรู้ได้ดีเพราะตัวอย่างหลากหลาย',
+        stHd: 'ภารกิจดาว', starTx: fix => ['หุ่นทายถูกครบ', 'ถูกครบตั้งแต่ทดสอบครั้งแรก', fix ? 'แก้ป้ายแค่ 2 ภาพ' : `ใช้ภาพสอนไม่เกิน ${FEW} ภาพ`],
+        got: n => `ได้ดาว ${'⭐'.repeat(n)}${'☆'.repeat(3 - n)}`, lucky: 'แต่บางภาพติดป้ายไม่ตรงความจริง หุ่นทายถูกเพราะโชคช่วย ดาวไม่นับนะ',
+        tot: (n, m) => `⭐ ดาวที่เก็บได้ ${n}/${m} · แตะด่านเพื่อล่าดาวต่อ`, hunt: 'แตะด่านเพื่อเล่นอีกครั้ง ล่าดาวให้ครบ', meh: 'หุ่นยังสับสน ลองสอนเพิ่มด้วยภาพที่หลากหลายขึ้น เช่น ของที่หน้าตาคล้ายแต่ไม่ใช่',
         again: '✏️ สอนเพิ่มแล้วทดสอบใหม่', next: 'ด่านต่อไป ➜', last: 'ดูผล ➜', isReal: v => v ? 'ใช่จริง' : 'ไม่ใช่จริง',
         endT: 'หุ่นยนต์ของเราเรียนจบแล้ว!', lvl: n => `ด่าน ${n}`, best: 'ทายถูกดีที่สุด', lesson: '🤖 AI เรียนรู้จากตัวอย่างที่เราให้ ถ้าตัวอย่างน้อย ไม่หลากหลาย หรือติดป้ายผิด AI ก็ทายผิดได้ เราจึงไม่ควรเชื่อทุกอย่างที่ AI บอก', play: '↺ เล่นอีกครั้ง' },
   en: { title: 'Teach the Robot', sub: 'Our robot learns from the example pictures we teach it. Teach it well, then see if it guesses right!',
@@ -180,11 +196,14 @@ const UI = {
         hiFix: g => `Hello! Someone taught me what a ${g} is, but I keep getting it wrong. Please find the pictures with the wrong label.`,
         fixGood: 'You fixed the labels! Wrong examples make AI wrong. Right examples make AI right.',
         right: 'Right 🎉', wrong: 'Wrong 😵', score: (a, n) => `The robot got ${a}/${n}`,
-        good: 'Great! The robot learned well because the examples were varied.', meh: 'The robot is still confused. Teach more varied pictures, like things that look similar but are not the same.',
+        good: 'Great! The robot learned well because the examples were varied.',
+        stHd: 'Star goals', starTx: fix => ['All guesses right', 'All right on the first test', fix ? 'Fix only 2 labels' : `Use ${FEW} pictures or fewer`],
+        got: n => `Stars: ${'⭐'.repeat(n)}${'☆'.repeat(3 - n)}`, lucky: 'But some labels are not true. The robot was lucky, so no stars.',
+        tot: (n, m) => `⭐ Stars collected ${n}/${m} · tap a level to hunt for more`, hunt: 'Tap a level to play again and collect every star', meh: 'The robot is still confused. Teach more varied pictures, like things that look similar but are not the same.',
         again: '✏️ Teach more and test again', next: 'Next level ➜', last: 'See results ➜', isReal: v => v ? 'really is' : 'really is not',
         endT: 'Our robot finished school!', lvl: n => `Level ${n}`, best: 'best score', lesson: '🤖 AI learns from the examples we give it. With too few, too similar or wrongly labelled examples it can be wrong, so we should not believe everything AI says.', play: '↺ Play again' }
 };
-let L = 'th', lv = 0, lab = {}, best = [], phase = 'title', seq = 0;
+let L = 'th', lv = 0, lab = {}, stars = loadStars(), tries = 0, phase = 'title', seq = 0;   // stars[i] = [bool,bool,bool] · tries = ครั้งที่ทดสอบในรอบนี้
 const U = () => UI[L], T = a => a[L === 'th' ? 0 : 1];
 const goalName = () => T(LV[lv].goal).replace(/^\S+\s/, '');
 const item = a => ({ e: a[0], n: [a[1], a[2]], tags: a[3].split(' '), is: a[4] });
@@ -204,18 +223,20 @@ function guess(t){
 }
 const hello = () => { $('#say').textContent = (LV[lv].fix ? U().hiFix : U().hi)(goalName()); };
 function startLevel(i){
-  lv = i; lab = Object.assign({}, LV[i].pre || {}); phase = 'teach'; show('sPlay');
+  lv = i; lab = Object.assign({}, LV[i].pre || {}); tries = 0; phase = 'teach'; show('sPlay');
   hello(); paint();
 }
 function paintLvl(){
   $('#lvl').classList.toggle('hide', phase === 'title');
-  $('#lvl').innerHTML = LV.map((x, i) => `<i class="${i === lv && phase !== 'end' ? 'on' : best[i] != null ? 'done' : ''}" title="${esc(U().lvl(i + 1))}">${x.goal[0].split(' ')[0]}</i>`).join('');
+  $('#lvl').innerHTML = LV.map((x, i) => `<i class="${i === lv && phase !== 'end' ? 'on' : stars[i] ? 'done' : ''}" title="${esc(U().lvl(i + 1))}">${x.goal[0].split(' ')[0]}</i>`).join('');
 }
 function paint(){
   const [y, n] = counts(), ok = y >= 2 && n >= 1;
   $('#goal').textContent = T(LV[lv].goal);
   $('#hd').innerHTML = (LV[lv].fix ? U().hdFix : U().hd)(esc(goalName()));
   $('#count').textContent = U().count(y, n);
+  const st = stars[lv] || [];
+  $('#stars').innerHTML = `<b>${U().stHd}</b>` + U().starTx(LV[lv].fix).map((x, i) => `<div class="${st[i] ? 'on' : ''}"><i>⭐</i>${esc(x)}</div>`).join('');
   const teach = phase === 'teach';
   $('#tray').classList.toggle('hide', !teach); $('#tests').classList.toggle('hide', teach);
   $('#test').classList.toggle('hide', !teach); $('#again').classList.toggle('hide', teach); $('#next').classList.toggle('hide', teach);
@@ -246,8 +267,15 @@ async function runTest(){
     $('#face').classList.remove('think'); cards[i].classList.remove('wait'); await wait(500); if (my !== seq) return;
   }
   const a = res.filter((g, i) => g.ans === !!tests[i].is).length;
-  best[lv] = Math.max(best[lv] || 0, a);
-  $('#say').textContent = U().score(a, tests.length) + ' · ' + (a === tests.length ? (LV[lv].fix ? U().fixGood : U().good) : U().meh) + (LV[lv].note && a < tests.length ? ' ' + T(LV[lv].note) : '');
+  const full = a === tests.length, L0 = LV[lv], keys = Object.keys(lab);
+  const honest = keys.every(k => (lab[k] === 'y') === YES[lv].includes(k));
+  const changed = L0.train.filter(x => (lab[x[1]] || '') !== ((L0.pre || {})[x[1]] || '')).length;
+  tries++;
+  const ok = full && honest, got = [ok, ok && tries === 1, ok && (L0.fix ? changed <= 2 : keys.length <= FEW)];
+  stars[lv] = got.map((v, i) => v || !!(stars[lv] || [])[i]); saveStars();
+  $('#say').textContent = U().score(a, tests.length) + ' · ' + (full ? (L0.fix ? U().fixGood : U().good) : U().meh) + (L0.note && !full ? ' ' + T(L0.note) : '') +
+    (full && !honest ? ' ' + U().lucky : '') + ' · ' + U().got(got.filter(Boolean).length);
+  paint(); phase = 'test';
   $('#face').textContent = a === tests.length ? '🤩' : a >= 2 ? '🤖' : '😵‍💫';
   paintLvl();
 }
@@ -256,15 +284,24 @@ $('#again').onclick = () => { seq++; phase = 'teach'; $('#face').textContent = '
 $('#next').onclick = () => { seq++; $('#face').textContent = '🤖'; $('#face').classList.remove('think'); if (lv < LV.length - 1) startLevel(lv + 1); else end(); };
 function end(){
   phase = 'end'; show('sEnd'); paintLvl();
-  const tot = best.reduce((s, x) => s + (x || 0), 0);
-  $('#eBadge').textContent = tot >= 22 ? '🏆' : tot >= 16 ? '🥈' : '🤖';
+  const tot = starCount();
+  $('#eBadge').textContent = tot >= LV.length * 3 ? '🏆' : tot >= LV.length * 2 ? '🥈' : '🤖';
   $('#eTitle').textContent = U().endT;
-  $('#eSum').innerHTML = LV.map((x, i) => `<div>${x.goal[0].split(' ')[0]} ${esc(U().lvl(i + 1))}<br><b>${best[i] || 0}/4</b></div>`).join('');
-  $('#eLesson').textContent = U().lesson; $('#eAgain').textContent = U().play;
+  $('#eSum').innerHTML = LV.map((x, i) => `<button type="button" data-l="${i}">${x.goal[0].split(' ')[0]} ${esc(U().lvl(i + 1))}<br><b>${'⭐'.repeat(nStar(i))}${'☆'.repeat(3 - nStar(i))}</b></button>`).join('');
+  $('#eLesson').textContent = U().lesson + ' · ' + U().tot(tot, LV.length * 3); $('#eAgain').textContent = U().play;
 }
-$('#go').onclick = () => { best = []; startLevel(0); };
-$('#eAgain').onclick = () => { best = []; startLevel(0); };
-function toTitle(){ seq++; phase = 'title'; show('sTitle'); paintLvl(); }
+const nStar = i => (stars[i] || []).filter(Boolean).length, starCount = () => LV.reduce((s, x, i) => s + nStar(i), 0);
+// หน้าแรก: ด่านที่เคยเล่นแล้ว (และด่านถัดไป) แตะเพื่อล่าดาวได้
+function paintPick(){
+  const open = i => i === 0 || !!stars[i] || !!stars[i - 1];
+  $('#pick').innerHTML = !stars.some(Boolean) ? '' : `<div class="tot">${esc(U().tot(starCount(), LV.length * 3))}</div>` +
+    LV.map((x, i) => `<button type="button" data-l="${i}"${open(i) ? '' : ' disabled'}>${x.goal[0].split(' ')[0]} ${'⭐'.repeat(nStar(i))}${'☆'.repeat(3 - nStar(i))}</button>`).join('');
+}
+const pickLv = e => { const b = e.target.closest('[data-l]'); if (b && !b.disabled) startLevel(+b.dataset.l); };
+$('#pick').addEventListener('click', pickLv); $('#eSum').addEventListener('click', pickLv);
+$('#go').onclick = () => startLevel(0);
+$('#eAgain').onclick = () => startLevel(0);
+function toTitle(){ seq++; phase = 'title'; show('sTitle'); paintLvl(); paintPick(); }
 function applyLang(){
   document.documentElement.lang = L; document.title = U().title;
   $('#lth').classList.toggle('on', L === 'th'); $('#len').classList.toggle('on', L === 'en');
@@ -273,7 +310,7 @@ function applyLang(){
   if (phase === 'teach') { hello(); paint(); }
   else if (phase === 'test') { seq++; phase = 'teach'; $('#face').textContent = '🤖'; $('#face').classList.remove('think'); hello(); paint(); }
   else if (phase === 'end') end();
-  else paintLvl();
+  else { paintLvl(); paintPick(); }
 }
 $('#home').onclick = () => toTitle();
 $('#lth').onclick = () => { L = 'th'; applyLang(); }; $('#len').onclick = () => { L = 'en'; applyLang(); };
