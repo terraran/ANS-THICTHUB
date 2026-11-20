@@ -212,5 +212,49 @@ P.p_noodle = S('0 0 240 180', `<rect width="240" height="180" fill="#fef3c7"/><r
   `<path d="M90,80 q-6,-10 0,-20 q6,-10 0,-18 M120,80 q-6,-10 0,-20 q6,-10 0,-18" stroke="#ffffffcc" stroke-width="3" fill="none" stroke-linecap="round"/>` +
   `<path d="M80,118 h80" stroke="#e11d48" stroke-width="2" stroke-dasharray="6 4"/>`);
 
+// เกมนักสืบภาพ โหมดท้าทาย (ภาพชุดใหม่ เบาะแสเนียนกว่า): AI = นาฬิกามีเลข 7 สองตัว · เงาในน้ำเสื้อคนละสี · รองเท้าคนละข้าง · ประตูลอยกลางผนัง
+//                                                     จริง = รุ้งเหนือสนาม · แปลงผัก · ห้องสมุด · ที่จอดจักรยาน
+const KID = (x, feet, sc, shirt) => `<g transform="translate(${x},${feet - 118 * sc}) scale(${sc})">${kid(0, 0, shirt)}</g>`;
+P.ch_clock = S('0 0 240 180', `<rect width="240" height="180" fill="#fef9c3"/><rect y="156" width="240" height="24" fill="#d6d3d1"/>` +
+  `<circle cx="120" cy="82" r="66" fill="#78350f"/><circle cx="120" cy="82" r="60" fill="#fff"/>` +
+  [12, 1, 2, 3, 4, 5, 6, 7, 7, 9, 10, 11].map((n, i) => { const a = i * 30 * Math.PI / 180; return TX((120 + 47 * Math.sin(a)).toFixed(1), (82 - 47 * Math.cos(a) + 5).toFixed(1), 14, '#1f2937', n); }).join('') +
+  `<path d="M120,82 L120,46" stroke="#1f2937" stroke-width="4" stroke-linecap="round"/><path d="M120,82 L146,82" stroke="#1f2937" stroke-width="5" stroke-linecap="round"/><circle cx="120" cy="82" r="4" fill="#dc2626"/>` +
+  `<rect x="78" y="154" width="84" height="20" rx="4" fill="#1d4ed8"/>` + TX(120, 168, 12, '#fff', 'ห้องโถงกลาง'));
+P.ch_reflect = S('0 0 240 180', SKY + `<rect width="240" height="180" fill="url(#sky)"/><rect y="70" width="240" height="26" fill="#86efac"/>` +
+  `<circle cx="40" cy="62" r="18" fill="#22c55e"/><rect x="37" y="70" width="6" height="22" fill="#92400e"/><circle cx="204" cy="58" r="22" fill="#22c55e"/><rect x="200" y="70" width="8" height="24" fill="#92400e"/>` +
+  `<rect y="96" width="240" height="84" fill="#38bdf8"/>` +
+  `<g opacity=".45">` + `<g transform="translate(120,${96 + 118 * .55}) scale(.55,-.55)">${kid(0, 0, '#2563eb')}</g>` + `</g>` +
+  KID(120, 96, .55, '#ef4444') +
+  [[30, 120], [190, 132], [60, 160], [170, 166]].map(([x, y]) => `<path d="M${x},${y} q8,-4 16,0 t16,0" stroke="#e0f2fe" stroke-width="2" fill="none"/>`).join(''));
+P.ch_shoes = S('0 0 240 180', `<rect width="240" height="180" fill="#ecfccb"/><rect y="150" width="240" height="30" fill="#f97316"/><path d="M0,162 H240" stroke="#fff" stroke-width="2"/>` +
+  `<rect x="150" y="14" width="80" height="34" rx="6" fill="#dc2626"/>` + TX(190, 37, 18, '#fff', 'ลด 90%') +
+  `<path d="M96,90 L80,120 M144,90 L160,120" stroke="${SKIN}" stroke-width="10" stroke-linecap="round"/>` + kid(120, 36, '#16a34a') +
+  `<path d="M98,152 h18 q4,0 4,6 h-26 q0,-6 4,-6z" fill="#dc2626"/><path d="M91,158 h29" stroke="#fff" stroke-width="2"/>` +
+  `<path d="M124,150 h14 q10,2 12,8 h-28 z" fill="#2563eb"/><circle cx="130" cy="153" r="1.6" fill="#fff"/><circle cx="135" cy="153" r="1.6" fill="#fff"/>`);
+P.ch_door = S('0 0 240 180', `<rect width="240" height="180" fill="#475569"/><circle cx="196" cy="30" r="16" fill="#fef9c3"/><circle cx="202" cy="26" r="14" fill="#475569"/>` +
+  `<rect y="150" width="240" height="30" fill="#365314"/><polygon points="40,64 120,22 200,64" fill="#7f1d1d"/><rect x="50" y="62" width="140" height="90" fill="#a8a29e"/>` +
+  `<rect x="64" y="76" width="26" height="22" fill="#fde68a" stroke="#57534e" stroke-width="3"/><rect x="150" y="76" width="26" height="22" fill="#fde68a" stroke="#57534e" stroke-width="3"/>` +
+  `<rect x="106" y="80" width="28" height="40" fill="#57534e"/><circle cx="129" cy="101" r="2.4" fill="#facc15"/>` +
+  `<rect x="64" y="116" width="26" height="22" fill="#1c1917" stroke="#57534e" stroke-width="3"/><rect x="150" y="116" width="26" height="22" fill="#1c1917" stroke="#57534e" stroke-width="3"/>` +
+  `<path d="M18,150 q4,-24 10,0 M222,150 q4,-20 8,0" stroke="#4d7c0f" stroke-width="5" fill="none"/>`);
+P.ch_rainbow = S('0 0 240 180', `<rect width="240" height="180" fill="#bfdbfe"/>` +
+  ['#ef4444', '#f97316', '#facc15', '#22c55e', '#3b82f6', '#8b5cf6'].map((c, i) => `<path d="M${20 + i * 8},120 A${100 - i * 8},${86 - i * 8} 0 0 1 ${220 - i * 8},120" stroke="${c}" stroke-width="7" fill="none" opacity=".75"/>`).join('') +
+  `<rect y="112" width="240" height="68" fill="#4ade80"/><ellipse cx="70" cy="150" rx="26" ry="6" fill="#93c5fd"/><ellipse cx="170" cy="160" rx="20" ry="5" fill="#93c5fd"/>` +
+  `<rect x="150" y="84" width="72" height="24" rx="4" fill="#1e293b"/>` + TX(186, 101, 13, '#facc15', 'สนามกีฬา') + `<rect x="184" y="108" width="4" height="12" fill="#475569"/>`);
+P.ch_garden = S('0 0 240 180', SKY + `<rect width="240" height="180" fill="url(#sky)"/><rect y="80" width="240" height="100" fill="#a16207"/>` +
+  [0, 1, 2].map(r => `<rect x="14" y="${92 + r * 30}" width="212" height="22" rx="6" fill="#713f12"/>` +
+    [0, 1, 2, 3, 4, 5, 6].map(i => `<ellipse cx="${32 + i * 30}" cy="${100 + r * 30}" rx="11" ry="9" fill="${r === 1 ? '#4ade80' : '#22c55e'}"/><ellipse cx="${32 + i * 30}" cy="${98 + r * 30}" rx="6" ry="5" fill="#bbf7d0"/>`).join('')).join('') +
+  `<rect x="58" y="34" width="124" height="30" rx="4" fill="#fff" stroke="#16a34a" stroke-width="3"/>` + TX(120, 55, 15, '#166534', 'แปลงผัก ป.4/1') + `<rect x="118" y="64" width="4" height="22" fill="#78350f"/>`);
+P.ch_library = S('0 0 240 180', `<rect width="240" height="180" fill="#fef3c7"/><rect y="160" width="240" height="20" fill="#b45309"/>` +
+  `<rect x="70" y="8" width="100" height="24" rx="4" fill="#7c3aed"/>` + TX(120, 25, 15, '#fff', 'ห้องสมุด') +
+  [0, 1, 2].map(r => `<rect x="20" y="${44 + r * 38}" width="200" height="6" fill="#92400e"/>` +
+    [...Array(17)].map((_, i) => `<rect x="${24 + i * 11.4}" y="${50 + r * 38}" width="9" height="${26 + (i * 7 + r * 3) % 8}" fill="${['#ef4444', '#3b82f6', '#22c55e', '#f59e0b', '#a855f7', '#14b8a6'][(i + r) % 6]}" transform="translate(0,${8 - (i * 7 + r * 3) % 8})"/>`).join('')).join('') +
+  `<rect x="20" y="158" width="200" height="6" fill="#92400e"/>`);
+const bike = (x, c) => `<circle cx="${x}" cy="140" r="14" fill="none" stroke="#1f2937" stroke-width="3.5"/><circle cx="${x + 40}" cy="140" r="14" fill="none" stroke="#1f2937" stroke-width="3.5"/>` +
+  `<path d="M${x},140 L${x + 16},116 L${x + 34},116 L${x + 40},140 M${x + 16},116 L${x + 22},140 L${x + 34},116 M${x + 14},110 h8 M${x + 34},116 l-2,-10 h8" stroke="${c}" stroke-width="4" fill="none" stroke-linecap="round"/>`;
+P.ch_bike = S('0 0 240 180', SKY + `<rect width="240" height="180" fill="url(#sky)"/><rect y="150" width="240" height="30" fill="#cbd5e1"/><rect y="100" width="240" height="50" fill="#e2e8f0"/>` +
+  `<rect x="60" y="14" width="120" height="26" rx="4" fill="#0f766e"/>` + TX(120, 32, 14, '#fff', 'ที่จอดจักรยาน') + `<rect x="118" y="40" width="4" height="60" fill="#475569"/>` +
+  `<path d="M10,154 H230" stroke="#64748b" stroke-width="4"/>` + bike(24, '#dc2626') + bike(100, '#2563eb') + bike(176, '#16a34a'));
+
 window.WSPics = { get: id => P[id] || '', ids: Object.keys(P) };
 })();

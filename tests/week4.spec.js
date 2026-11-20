@@ -408,9 +408,10 @@ test('เกม Y4 นักสืบภาพ: ขั้น 1 แตะจุ�
   await page.goto('/games/photocheck.html');
   await expect(page.locator('#tTitle')).toHaveText('นักสืบภาพ');
   await page.click('#goH');
-  await expect(page.locator('#trail i')).toHaveCount(16);
+  await expect(page.locator('#trail i')).toHaveCount(8);
+  expect(await page.evaluate(() => deck.every(p => p.ch))).toBe(true);      // โหมดท้าทาย = ภาพชุดใหม่ล้วน
   const seen = []; let found = 0, goods = 0;
-  for (let i = 0; i < 16; i++) {
+  for (let i = 0; i < 8; i++) {
     await expect(page.locator('.post .pic svg')).toHaveCount(1);
     const cap = await page.locator('.cap').textContent(); seen.push(cap);
     const p = await page.evaluate(() => ({ ok: !!deck[cur].ok, either: !!deck[cur].either, spot: deck[cur].spot || null, none: !!deck[cur].none }));
@@ -444,10 +445,10 @@ test('เกม Y4 นักสืบภาพ: ขั้น 1 แตะจุ�
     if (i === 1) await shot(page, 'photocheck-1');
     await page.click('#nextP');
   }
-  expect(new Set(seen).size).toBe(16);
-  await expect(page.locator('#eSum')).toContainText(`ตัดสินใจได้ดี ${goods} จาก 16 โพสต์`);
-  await expect(page.locator('#eSum')).toContainText(`หาเบาะแสถูก ${found} จาก 16 ภาพ`);
-  await expect(page.locator('#ePath div')).toHaveCount(16);
+  expect(new Set(seen).size).toBe(8);
+  await expect(page.locator('#eSum')).toContainText(`ตัดสินใจได้ดี ${goods} จาก 8 โพสต์`);
+  await expect(page.locator('#eSum')).toContainText(`หาเบาะแสถูก ${found} จาก 8 ภาพ`);
+  await expect(page.locator('#ePath div')).toHaveCount(8);
   await shot(page, 'photocheck-end');
   await page.click('#len');
   await expect(page.locator('#eRank')).toHaveText(/detective/);
@@ -456,14 +457,17 @@ test('เกม Y4 นักสืบภาพ: ขั้น 1 แตะจุ�
     await page.setViewportSize(vp);
     await page.click('#goE');
     await expect(page.locator('#trail i')).toHaveCount(8);
+    expect(await page.evaluate(() => deck.some(p => p.ch))).toBe(false);     // โหมดปกติไม่มีภาพชุดท้าทาย
     expect(await page.evaluate(() => document.documentElement.scrollHeight <= innerHeight + 1)).toBe(true);
     await page.click('#aNone'); await page.click('#aCheck');
     expect(await page.evaluate(() => document.documentElement.scrollHeight <= innerHeight + 1)).toBe(true);
     await page.goto('/games/photocheck.html');
   }
   await page.setViewportSize({ width: 1024, height: 640 });
-  await page.click('#goH');
-  expect(await page.evaluate(() => document.documentElement.scrollHeight <= innerHeight + 1 && document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);   // 16 วงบนแถบไม่ล้น
+  await page.evaluate(() => { chiefOn = true; paintX(); });
+  await page.click('#goX');
+  await expect(page.locator('#trail i')).toHaveCount(16);
+  expect(await page.evaluate(() => document.documentElement.scrollHeight <= innerHeight + 1 && document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);   // 16 วง + หัวใจ/เวลา บนแถบไม่ล้น
   expect(errs).toEqual([]);
 });
 
@@ -563,7 +567,7 @@ test('เกม Y4 โหมดหัวหน้านักสืบ: ล็�
     await page.click('#nextP');
   };
   await page.click('#goH');
-  for (let i = 0; i < 16; i++) await perfect();
+  for (let i = 0; i < 8; i++) await perfect();
   await expect(page.locator('#eBadge')).toHaveText('🏅');
   await expect(page.locator('#eSum')).toContainText('ปลดล็อกโหมด 👑');
   await page.click('#eTitle');
@@ -608,11 +612,23 @@ test('เกม Y4: โพสต์แมวยักษ์ (ภาพ AI ที
   await page.emulateMedia({ reducedMotion: 'reduce' });
   for (const btn of ['#aSkip', '#aShare']) {
     await page.goto('/games/photocheck.html');
-    await page.click('#goH');
-    await page.evaluate(() => { cur = deck.findIndex(p => p.pic === 'p_giant'); deal(); });
+    await page.click('#goE');
+    await page.evaluate(() => { deck[0] = POSTS.find(p => p.pic === 'p_giant'); cur = 0; deal(); });
     await page.click('#aNone'); await page.click(btn);
     await expect(page.locator('.fb')).toHaveClass(/fb g/);
     await expect(page.locator('#trail i.g')).toHaveCount(1);
   }
   await expect(page.locator('.fb h3')).toHaveText('👍 แชร์ได้เลย!');
+});
+
+test('เกม Y4 ภาพชุดท้าทาย: ภาพมีครบ · ภาพ AI มีกรอบเบาะแส · หัวหน้านักสืบสุ่มจากทุกโพสต์ แชร์ได้/หลอก อย่างละครึ่ง', async ({ page }) => {
+  page.route('**/fonts.googleapis.com/**', r => r.abort());
+  await page.goto('/games/photocheck.html');
+  const info = await page.evaluate(() => {
+    const ch = POSTS.filter(p => p.ch);
+    start(16, true);
+    return { n: ch.length, ok: ch.filter(p => p.ok).length, pics: ch.every(p => WSPics.get(p.pic).includes('<svg')), spots: ch.filter(p => p.ai).every(p => p.spot && p.spot.length),
+      chiefOk: deck.filter(p => p.ok).length, chiefN: deck.length };
+  });
+  expect(info).toEqual({ n: 8, ok: 4, pics: true, spots: true, chiefOk: 8, chiefN: 16 });
 });

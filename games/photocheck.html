@@ -193,14 +193,47 @@ const POSTS = [
   { pic: 'p_noodle', spot: [[132, 34, 90, 70]], av: '🍜', c: '#ffedd5', ai: 1, who: ['ก๋วยเตี๋ยวเปิดใหม่', 'New Noodle Shop'], tm: ['50 นาที', '50 min'],
     cap: ['เปิดร้านใหม่ กินฟรีทุกชาม! แค่แชร์และแท็กเพื่อน 10 คน 🍜', 'New shop: every bowl is free! Just share and tag 10 friends 🍜'],
     src: ['เพจสร้างเมื่อวาน ไม่มีที่อยู่ร้าน และคนที่ไปตามแผนที่ก็ไม่เจอร้านนี้', 'The page was made yesterday, has no address, and people who went to the map could not find the shop.'],
-    clue: ['ชามนี้มีตะเกียบ 3 อัน', 'This bowl has 3 chopsticks.'] }
+    clue: ['ชามนี้มีตะเกียบ 3 อัน', 'This bowl has 3 chopsticks.'] },
+  // ---- โหมดท้าทายเท่านั้น (ch): ภาพชุดใหม่ 8 ภาพ เบาะแสเนียนกว่า ----
+  { ch: 1, pic: 'ch_clock', spot: [[84, 112, 26, 24], [66, 96, 28, 24]], av: '⏰', c: '#fef9c3', ai: 1, who: ['ข่าวโรงเรียนเรา_แฟนเพจ', 'our_school_fanpage'], tm: ['8 นาที', '8 min'],
+    cap: ['ด่วน! โรงเรียนเปลี่ยนเวลาเข้าเรียนเป็น 10 โมง ดูนาฬิกาใหม่ในห้องโถงสิ ⏰', 'News! School now starts at 10 o\'clock. Look at the new clock in the hall ⏰'],
+    src: ['ไม่ใช่เพจของโรงเรียน และครูไม่เคยประกาศเรื่องนี้', 'This is not the school\'s page, and the teachers never announced this.'],
+    clue: ['หน้าปัดนาฬิกามีเลข 7 สองตัว แต่ไม่มีเลข 8', 'The clock has two 7s and no 8.'] },
+  { ch: 1, pic: 'ch_reflect', spot: [[92, 96, 56, 82]], av: '🤩', c: '#e0f2fe', ai: 1, who: ['ซุปตาร์อัปเดต', 'Star Update'], tm: ['15 นาที', '15 min'],
+    cap: ['เจอดาราดังที่ทะเลสาบหลังโรงเรียน! 🤩 รีบมาดูเร็ว', 'A famous star is at the lake behind our school! 🤩 Come quick'],
+    src: ['วันนี้ดาราคนนี้อยู่ต่างประเทศ และไม่มีใครเห็นที่ทะเลสาบจริง', 'This star is abroad today, and nobody saw anyone at the lake.'],
+    clue: ['เงาในน้ำใส่เสื้อคนละสีกับคนจริง', 'The reflection in the water wears a different shirt colour.'] },
+  { ch: 1, pic: 'ch_shoes', spot: [[84, 144, 72, 22]], av: '👟', c: '#ecfccb', ai: 1, who: ['รองเท้าแบรนด์ดัง ลดราคา', 'Big Brand Shoes Sale'], tm: ['1 ชม.', '1 h'],
+    cap: ['นักวิ่งทีมชาติใส่รุ่นนี้! ลด 90% เหลือคู่ละ 99 บาท กดลิงก์เลย 👟', 'The national runner wears these! 90% off, only 99 baht. Tap the link 👟'],
+    src: ['เว็บนี้เพิ่งเปิดเมื่อวาน ไม่มีหน้าร้าน และนักวิ่งไม่เคยรีวิวรองเท้านี้', 'The website opened yesterday, has no shop, and the runner never reviewed these shoes.'],
+    clue: ['รองเท้าสองข้างคนละสี คนละแบบ', 'The two shoes are different colours and shapes.'] },
+  { ch: 1, pic: 'ch_door', spot: [[100, 74, 40, 52]], av: '👻', c: '#e2e8f0', ai: 1, who: ['เรื่องหลอนรอบเมือง', 'Spooky Town Stories'], tm: ['2 ชม.', '2 h'],
+    cap: ['บ้านผีสิงหลังโรงเรียน! ใครกล้าไปดูตอนกลางคืนบ้าง 👻 แชร์ด่วน', 'A haunted house behind our school! Who dares to go at night? 👻 Share now'],
+    src: ['ไม่มีบ้านแบบนี้หลังโรงเรียน และภาพนี้อยู่ในเว็บรวมภาพ AI', 'There is no house like this behind the school, and the picture is on an AI picture website.'],
+    clue: ['ประตูลอยอยู่กลางผนัง ไม่มีบันไดขึ้นไป', 'The door floats in the middle of the wall with no stairs.'] },
+  { ch: 1, pic: 'ch_rainbow', av: '🌈', c: '#dbeafe', ok: 1, who: ['ครูประจำชั้น', 'Class teacher'], tm: ['3 ชม.', '3 h'],
+    cap: ['หลังฝนตกมีรุ้งกินน้ำเหนือสนามโรงเรียน สวยมาก 🌈', 'A rainbow over the school field after the rain. So pretty 🌈'],
+    src: ['ครูถ่ายเองตอนเลิกเรียน เพื่อน ๆ หลายคนก็เห็นรุ้งนี้', 'The teacher took it after school. Many classmates saw this rainbow too.'],
+    clue: ['ป้ายอ่านออก สีรุ้งเรียงถูก ไม่มีอะไรผิดรูป', 'The sign can be read and the rainbow colours are in order. Nothing looks wrong.'] },
+  { ch: 1, pic: 'ch_garden', av: '🥬', c: '#dcfce7', ok: 1, who: ['ครูวิทยาศาสตร์', 'Science teacher'], tm: ['5 ชม.', '5 h'],
+    cap: ['ผักกาดของห้อง ป.4/1 โตแล้ว พรุ่งนี้มาเก็บกันนะ 🥬', 'Class 4/1\'s lettuce has grown. Let\'s pick it tomorrow 🥬'],
+    src: ['ครูวิทยาศาสตร์ของโรงเรียนเรา ห้อง ป.4/1 ปลูกผักนี้จริง', 'Our school\'s science teacher. Class 4/1 really grew this.'],
+    clue: ['ป้ายอ่านออก ผักเรียงเป็นแถวเท่า ๆ กัน', 'The sign can be read and the rows are even.'] },
+  { ch: 1, pic: 'ch_library', av: '📚', c: '#ede9fe', ok: 1, who: ['ครูนก (ห้องสมุด)', 'Kru Nok (library)'], tm: ['1 วัน', '1 d'],
+    cap: ['หนังสือใหม่มาแล้ว 50 เล่ม! แวะมายืมได้ที่ห้องสมุดนะ 📚', '50 new books are here! Come and borrow them at the library 📚'],
+    src: ['ครูบรรณารักษ์ของโรงเรียน ประกาศเรื่องเดียวกันที่หน้าห้องสมุด', 'The school librarian. The same notice is on the library door.'],
+    clue: ['ป้ายอ่านออก ชั้นหนังสือตรง ไม่มีอะไรผิดรูป', 'The sign can be read and the shelves are straight.'] },
+  { ch: 1, pic: 'ch_bike', av: '🚲', c: '#ccfbf1', ok: 1, who: ['สภานักเรียน', 'Student council'], tm: ['6 ชม.', '6 h'],
+    cap: ['ช่วยกันจอดจักรยานให้เป็นระเบียบนะทุกคน 🚲', 'Everyone, please park your bikes neatly 🚲'],
+    src: ['เพจสภานักเรียนของโรงเรียนเรา ประธานนักเรียนเป็นคนโพสต์', 'Our school\'s student council page, posted by the council president.'],
+    clue: ['ป้ายอ่านออก จักรยานทุกคันมี 2 ล้อ ไม่มีอะไรผิดรูป', 'The sign can be read and every bike has 2 wheels.'] }
 ];
 const UI = {
   th: { title: 'นักสืบภาพ', sub: 'โพสต์ในฟีดเลื่อนมาทีละโพสต์ ซูมแล้วแตะจุดที่ดูแปลกในภาพ แล้วเลือกให้ดีว่าจะแชร์ไหม',
         st1: 'ขั้นที่ 1 · หาเบาะแส', st2: 'ขั้นที่ 2 · ตัดสินใจ', spotHint: 'ซูมภาพ แล้วแตะจุดที่ดูแปลก ถ้าดูแล้วไม่เจออะไรแปลก กด "ไม่เจอจุดแปลก"',
         zoomBtn: '🔍 ซูมหาเบาะแส', none: '🤷 ไม่เจอจุดแปลก', zpick: '👆 แตะจุดที่ดูแปลกในภาพ · แตะนอกภาพเพื่อปิด', mineSpot: '📍 เราเลือกจุดในภาพไว้แล้ว', mineNone: '🤷 เราไม่เจอจุดแปลก', change: 'เปลี่ยน',
         found: '⭐ หาเบาะแสถูก!', missSpot: '🔎 เบาะแสอยู่ในกรอบสีเหลือง', missNone: '🔎 ภาพนี้ไม่มีจุดแปลกให้เห็น', sum2: (c, n) => `หาเบาะแสถูก ${c} จาก ${n} ภาพ`,
-        goE: 'ปกติ<small>8 โพสต์</small>', goH: 'ท้าทาย<small>16 โพสต์</small>', gback: '↩ กลับ', home: '🏠 หน้าแรก', trail: 'นักสืบ', app: 'ฟีดของเรา', zoom: '🔍 แตะเพื่อซูม', zclose: 'แตะที่ไหนก็ได้เพื่อปิด',
+        goE: 'ปกติ<small>8 โพสต์</small>', goH: 'ท้าทาย<small>8 ภาพชุดใหม่ · เบาะแสเนียนกว่า</small>', gback: '↩ กลับ', home: '🏠 หน้าแรก', trail: 'นักสืบ', app: 'ฟีดของเรา', zoom: '🔍 แตะเพื่อซูม', zclose: 'แตะที่ไหนก็ได้เพื่อปิด',
         q: 'จะทำอย่างไรกับโพสต์นี้?', share: '📤 แชร์ต่อ', check: '🔎 เช็กที่มาก่อน', skip: '🙈 ไม่แชร์', srcHd: 'ที่มาของโพสต์:', q2: 'รู้ที่มาแล้ว จะแชร์ไหม?',
         like: n => `❤️ ${n}`, cm: n => `💬 ${n}`, clue: 'เบาะแส: ', aiNote: ['🤖 ภาพนี้ AI สร้าง', '📷 ภาพนี้เป็นภาพจริง'],
         fb: { gShare: ['👍 แชร์ได้เลย!', 'โพสต์นี้ไม่ได้หลอกใคร เพื่อน ๆ ชอบกันใหญ่'], gCheck: ['🕵️ นักสืบตัวจริง!', 'เราเช็กที่มาก่อน เลยไม่ถูกหลอก และไม่ส่งต่อเรื่องไม่จริง'],
@@ -216,7 +249,7 @@ const UI = {
         st1: 'STEP 1 · FIND A CLUE', st2: 'STEP 2 · DECIDE', spotHint: 'Zoom in and tap the spot that looks odd. If nothing looks odd, tap "Nothing odd".',
         zoomBtn: '🔍 Zoom for clues', none: '🤷 Nothing odd', zpick: '👆 Tap the odd spot in the picture · tap outside to close', mineSpot: '📍 You picked a spot', mineNone: '🤷 You found nothing odd', change: 'Change',
         found: '⭐ You found the clue!', missSpot: '🔎 The clue is in the yellow box', missNone: '🔎 This picture has nothing odd to see', sum2: (c, n) => `Clues found: ${c} of ${n} pictures`,
-        goE: 'Normal<small>8 posts</small>', goH: 'Challenge<small>16 posts</small>', gback: '↩ Back', home: '🏠 Home', trail: 'Detective', app: 'Our feed', zoom: '🔍 Tap to zoom', zclose: 'Tap anywhere to close',
+        goE: 'Normal<small>8 posts</small>', goH: 'Challenge<small>8 new pictures · harder clues</small>', gback: '↩ Back', home: '🏠 Home', trail: 'Detective', app: 'Our feed', zoom: '🔍 Tap to zoom', zclose: 'Tap anywhere to close',
         q: 'What will you do with this post?', share: '📤 Share', check: '🔎 Check the source first', skip: '🙈 Don\'t share', srcHd: 'Where the post comes from:', q2: 'Now you know the source. Share it?',
         like: n => `❤️ ${n}`, cm: n => `💬 ${n}`, clue: 'Clue: ', aiNote: ['🤖 AI made this picture', '📷 This is a real photo'],
         fb: { gShare: ['👍 Fine to share!', 'This post does not trick anyone. Your friends love it.'], gCheck: ['🕵️ A real detective!', 'You checked the source first, so you were not tricked and did not spread something untrue.'],
@@ -251,9 +284,13 @@ function startTimer(){
 }
 function start(n, x){
   chief = !!x; hearts = 3; stopTimer();
-  // ผสมโพสต์ที่แชร์ได้กับโพสต์หลอกให้พอ ๆ กัน
-  const ok = shuffle(POSTS.filter(p => p.ok)), bad = shuffle(POSTS.filter(p => !p.ok)), h = Math.floor(n / 2);
-  deck = n >= POSTS.length ? shuffle(POSTS) : shuffle(ok.slice(0, h).concat(bad.slice(0, n - h))); cur = 0; marks = []; clues = []; seq++;
+  // ปกติ = โพสต์ชุดหลัก · ท้าทาย (n = 'ch') = ภาพชุดใหม่ 8 ภาพเท่านั้น · หัวหน้านักสืบ = สุ่มจากทุกโพสต์ · ผสมโพสต์ที่แชร์ได้กับโพสต์หลอกให้พอ ๆ กัน
+  if (n === 'ch') deck = shuffle(POSTS.filter(p => p.ch));
+  else {
+    const pool = x ? POSTS : POSTS.filter(p => !p.ch), ok = shuffle(pool.filter(p => p.ok)), bad = shuffle(pool.filter(p => !p.ok)), h = Math.floor(n / 2);
+    deck = shuffle(ok.slice(0, h).concat(bad.slice(0, n - h)));
+  }
+  cur = 0; marks = []; clues = []; seq++;
   show('sPlay'); $('#trail').classList.remove('hide'); deal();
 }
 // ภาพ + เครื่องหมาย: จุดที่เด็กแตะ (วงแดง) · หลังตัดสินใจ = กรอบเหลืองตรงเบาะแสจริง
@@ -325,8 +362,8 @@ function end(){
   const c = clues.filter(Boolean).length, out = chief && hearts <= 0;
   $('#eBadge').textContent = out ? '💔' : chief && r === 2 ? '👑' : ['🐣', '🔎', '🏅'][r];
   $('#eRank').textContent = out ? U().over : chief && r === 2 ? U().chief : U().ranks[r];
-  // ปลดล็อกโหมดหัวหน้านักสืบ: 🏅 ในโหมดท้าทาย (ครบ 16 โพสต์)
-  const unlock = !chief && !chiefOn && r === 2 && n >= POSTS.length;
+  // ปลดล็อกโหมดหัวหน้านักสืบ: 🏅 ในโหมดท้าทาย (ภาพชุดใหม่ 8 ภาพ)
+  const unlock = !chief && !chiefOn && r === 2 && mode === 'ch';
   if (unlock) { chiefOn = true; try { localStorage.setItem(CKEY, '1'); } catch (e) {} }
   $('#eSum').innerHTML = (out ? esc(U().overSub) + '<br>' : '') + esc(U().sum(g, marks.filter(Boolean).length)) + '<br>' + esc(U().sum2(c, marks.filter(Boolean).length)) +
     (chief && !out ? '<br>' + esc(U().hearts) + ' ' + '❤️'.repeat(hearts) : '') + (unlock ? `<br><b>${esc(U().unlocked)}</b>` : '');
@@ -334,7 +371,7 @@ function end(){
   $('#eAgain').textContent = U().again; $('#eTitle').textContent = U().toTitle; paintTrail();
 }
 let mode = 8;
-$('#goE').onclick = () => start(mode = 8); $('#goH').onclick = () => start(mode = 16);
+$('#goE').onclick = () => start(mode = 8); $('#goH').onclick = () => start(mode = 'ch');
 $('#goX').onclick = () => { if (chiefOn) { mode = 'X'; start(16, true); } };
 $('#eAgain').onclick = () => mode === 'X' ? start(16, true) : start(mode);
 function toTitle(){ seq++; stopTimer(); stage = 'title'; paintX(); show('sTitle'); $('#trail').classList.add('hide'); $('#zoom').classList.add('hide'); }
