@@ -349,14 +349,15 @@ test('เกม Y3 สอนหุ่นยนต์ AI: ติดป้าย �
   await page.click('#again'); await tap('ค้างคาว'); await tap('ผีเสื้อ', 2);  // ใช่ → ไม่ใช่
   await page.click('#test');
   await expect(page.locator('#say')).toContainText('4/4');
-  // ด่าน 5 แมลง: แมงมุม 8 ขาไม่ใช่แมลง
+  // ด่าน 5 รถยนต์: สอนแต่รถจริง → รถของเล่น 4 ล้อถูกทายว่าเป็นรถ · สอนรถเข็น (มีล้อแต่ไม่ใช่รถ) → ถูกครบ
   await page.click('#next');
-  await expect(page.locator('#goal')).toHaveText('🐞 แมลง');
-  for (const n of ['มด', 'ผึ้ง', 'แมงมุม']) await tap(n);
-  await tap('หอยทาก', 2);
+  await expect(page.locator('#goal')).toHaveText('🚗 รถยนต์');
+  await tap('รถเก๋ง'); await tap('แท็กซี่'); await tap('จักรยาน', 2);
   await page.click('#test');
-  await expect(page.locator('.tc', { hasText: 'แมงมุมขนดก' }).locator('.res')).toHaveText('ทายผิด 😵');
-  await page.click('#again'); await tap('แมงมุม'); await tap('แมงป่อง', 2);
+  await expect(page.locator('#say')).toContainText('3/4');
+  await expect(page.locator('.tc', { hasText: 'รถของเล่น' }).locator('.why')).toContainText('มี 4 ล้อ');
+  await expect(page.locator('#say')).toContainText('รถของเล่นมี 4 ล้อ');
+  await page.click('#again'); await tap('รถเข็น', 2);
   await page.click('#test');
   await expect(page.locator('#say')).toContainText('4/4');
   // ด่าน 6 ช่วยแก้หุ่น: ป้ายมาให้แล้ว ผิด 2 ภาพ → ทดสอบได้ทันที 2/4 → แก้แมว/หมาพันธุ์ใหญ่ → 4/4

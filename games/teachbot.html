@@ -124,7 +124,9 @@ const TG = {
   fins: ['มีครีบ', 'fins'], scales: ['มีเกล็ด', 'scales'], gills: ['มีเหงือก', 'gills'], water: ['อยู่ในน้ำ', 'lives in water'], smooth: ['ผิวเรียบ', 'smooth skin'], blow: ['มีรูหายใจบนหัว', 'a blowhole'],
   shell: ['มีเปลือกแข็ง', 'a hard shell'], legs: ['มีขาหลายขา', 'many legs'], spikes: ['มีหนาม', 'spikes'], colorful: ['สีสด', 'bright colours'], flipper: ['มีครีบเท้า', 'flippers'],
   wings: ['มีปีก', 'wings'], fly: ['บินได้', 'can fly'], feathers: ['มีขนนก', 'feathers'], beak: ['มีจะงอยปาก', 'a beak'], eggs: ['ออกไข่', 'lays eggs'], swim: ['ว่ายน้ำได้', 'can swim'], bigear: ['หูใหญ่', 'big ears'], machine: ['เป็นเครื่องจักร', 'a machine'],
-  legs6: ['มี 6 ขา', '6 legs'], legs8: ['มี 8 ขา', '8 legs'], antenna: ['มีหนวดยาว', 'antennae'], body3: ['ตัวแบ่ง 3 ส่วน', '3 body parts'], web: ['ชักใย', 'spins webs'], slow: ['เดินช้า', 'slow'],
+  wheels4: ['มี 4 ล้อ', '4 wheels'], wheels2: ['มี 2 ล้อ', '2 wheels'], engine: ['มีเครื่องยนต์', 'an engine'], seats: ['คนนั่งได้', 'people can ride'], road: ['วิ่งบนถนน', 'goes on roads'],
+  push: ['ใช้คนเข็น', 'pushed by hand'], rails: ['วิ่งบนราง', 'runs on rails'], roofsign: ['มีป้ายบนหลังคา', 'a roof sign'], siren: ['มีไซเรน', 'a siren'], mini: ['คันเล็ก', 'small'], large: ['คันใหญ่', 'big'], floats: ['แล่นในน้ำ', 'goes on water'],
+  antenna: ['มีหนวดยาว', 'antennae'],
   bark: ['เห่า', 'barks'], meow: ['ร้องเหมียว', 'meows'], curly: ['ขนหยิก', 'curly fur'], farm: ['สัตว์ในฟาร์ม', 'farm animal'], horns: ['มีเขา', 'horns']
 };
 // ด่าน: goal = สิ่งที่สอน · train = ภาพตัวอย่างให้ติดป้าย · test = ของใหม่ให้หุ่นทาย (is = เป็นจริงไหม)
@@ -147,11 +149,11 @@ const LV = [
             ['🐓', 'ไก่', 'Chicken', 'feathers beak wings eggs'], ['🐿️', 'กระรอก', 'Squirrel', 'fur tail tiny'], ['✈️', 'เครื่องบิน', 'Plane', 'wings fly machine'], ['🦉', 'นกฮูก', 'Owl', 'feathers beak wings fly eggs']],
     test: [['🦜', 'นกแก้ว', 'A parrot', 'feathers beak wings fly eggs tiny colorful', 1], ['🐧', 'เพนกวิน', 'A penguin', 'feathers beak wings swim eggs', 1], ['🦇', 'ค้างคาวอีกตัว', 'Another bat', 'wings fly fur bigear tiny', 0], ['🐝', 'ผึ้ง', 'A bee', 'wings fly tiny stripes antenna', 0]],
     note: ['🐧 เพนกวินบินไม่ได้แต่เป็นนก 🦇 ค้างคาวบินได้แต่ไม่ใช่นก นกทุกตัวมีขนนกและจะงอยปาก ไม่ใช่ทุกตัวที่บินได้', "🐧 A penguin can't fly but is a bird. 🦇 A bat can fly but is not a bird. Every bird has feathers and a beak; not every bird can fly."] },
-  { goal: ['🐞 แมลง', '🐞 Insect'],
-    train: [['🐜', 'มด', 'Ant', 'legs6 antenna body3 tiny'], ['🕷️', 'แมงมุม', 'Spider', 'legs8 web tiny'], ['🦋', 'ผีเสื้อ', 'Butterfly', 'legs6 antenna body3 wings tiny colorful'], ['🐌', 'หอยทาก', 'Snail', 'shell slow tiny smooth'],
-            ['🐞', 'เต่าทอง', 'Ladybird', 'legs6 antenna body3 wings tiny spots'], ['🦂', 'แมงป่อง', 'Scorpion', 'legs8 tail shell tiny'], ['🐝', 'ผึ้ง', 'Bee', 'legs6 antenna body3 wings tiny stripes'], ['🪱', 'ไส้เดือน', 'Worm', 'slow smooth tiny']],
-    test: [['🦗', 'จิ้งหรีด', 'A cricket', 'legs6 antenna body3 wings tiny', 1], ['🕷️', 'แมงมุมขนดก', 'A hairy spider', 'legs8 web tiny fur', 0], ['🦋', 'ผีเสื้อสีฟ้า', 'A blue butterfly', 'legs6 antenna body3 wings tiny colorful', 1], ['🦂', 'แมงป่องดำ', 'A black scorpion', 'legs8 tail shell', 0]],
-    note: ['🕷️ แมงมุมกับแมงป่องมี 8 ขา จึงไม่ใช่แมลง แมลงมี 6 ขา (ผีเสื้อก็มี 6 ขา จึงเป็นแมลง)', '🕷️ Spiders and scorpions have 8 legs, so they are not insects. Insects have 6 legs (a butterfly has 6, so it is an insect).'] },
+  { goal: ['🚗 รถยนต์', '🚗 Car'],
+    train: [['🚗', 'รถเก๋ง', 'Car', 'wheels4 engine seats road'], ['🚲', 'จักรยาน', 'Bicycle', 'wheels2 seats road'], ['🚕', 'แท็กซี่', 'Taxi', 'wheels4 engine seats road roofsign'], ['🛒', 'รถเข็น', 'Shopping cart', 'wheels4 push mini'],
+            ['🛻', 'รถกระบะ', 'Pickup truck', 'wheels4 engine seats road large'], ['⛵', 'เรือ', 'Boat', 'floats seats'], ['🚆', 'รถไฟ', 'Train', 'engine seats rails large'], ['🏍️', 'มอเตอร์ไซค์', 'Motorbike', 'wheels2 engine seats road']],
+    test: [['🚓', 'รถตำรวจ', 'A police car', 'wheels4 engine seats road siren', 1], ['🚙', 'รถของเล่น', 'A toy car', 'wheels4 toy mini', 0], ['🚑', 'รถพยาบาล', 'An ambulance', 'wheels4 engine seats road siren large', 1], ['🛵', 'สกู๊ตเตอร์', 'A scooter', 'wheels2 engine seats road mini', 0]],
+    note: ['🧸 รถของเล่นมี 4 ล้อเหมือนรถจริง แต่ไม่มีเครื่องยนต์และคนนั่งไม่ได้ ลองสอนหุ่นด้วยของที่มีล้อแต่ไม่ใช่รถยนต์ด้วยนะ', '🧸 A toy car has 4 wheels like a real car, but no engine and nobody can sit in it. Try teaching things with wheels that are not cars.'] },
   // ด่านพิเศษ: มีคนติดป้ายไว้แล้ว ผิด 2 ภาพ (แมว = ใช่ · หมาพันธุ์ใหญ่ = ไม่ใช่) เด็กต้องหาแล้วแก้
   { goal: ['🐶 หมา', '🐶 Dog'], fix: true,
     pre: { 'หมาตัวน้อย': 'y', 'แมว': 'y', 'หมาพันธุ์ใหญ่': 'n', 'พุดเดิ้ล': 'y', 'วัว': 'n', 'กระต่าย': 'n', 'ม้า': 'n', 'แฮมสเตอร์': 'n' },
@@ -161,7 +163,7 @@ const LV = [
     note: ['🔍 ดูว่าหุ่นบอกว่า "เหมือนภาพไหน" ภาพนั้นอาจติดป้ายผิดอยู่', '🔍 Look at which picture the robot says it looks like. That picture may have the wrong label.'] }
 ];
 // ภาพที่ "ใช่จริง" ในแต่ละด่าน (ใช้ตรวจว่าเด็กติดป้ายตามความจริง ไม่ได้หลอกหุ่นเพื่อเอาดาว)
-const YES = [['แอปเปิลแดง', 'แอปเปิลเขียว'], ['แมวส้ม', 'แมวดำ'], ['ปลา', 'ปลาการ์ตูน', 'ปลาปักเป้า'], ['นกกระจอก', 'เป็ด', 'ไก่', 'นกฮูก'], ['มด', 'ผีเสื้อ', 'เต่าทอง', 'ผึ้ง'], ['หมาตัวน้อย', 'หมาพันธุ์ใหญ่', 'พุดเดิ้ล']];
+const YES = [['แอปเปิลแดง', 'แอปเปิลเขียว'], ['แมวส้ม', 'แมวดำ'], ['ปลา', 'ปลาการ์ตูน', 'ปลาปักเป้า'], ['นกกระจอก', 'เป็ด', 'ไก่', 'นกฮูก'], ['รถเก๋ง', 'แท็กซี่', 'รถกระบะ'], ['หมาตัวน้อย', 'หมาพันธุ์ใหญ่', 'พุดเดิ้ล']];
 // ดาว 3 ดวงต่อด่าน (ต้องติดป้ายตามจริงทุกภาพ): ทายถูกครบ · ถูกครบตั้งแต่ทดสอบครั้งแรก · ใช้ภาพสอนไม่เกิน 4 ภาพ (ด่านแก้ป้าย = แก้ไม่เกิน 2 ภาพ)
 // เก็บในเครื่อง (localStorage) กลับมาล่าดาวต่อได้ · ทุกด่านทำครบ 3 ดาวได้จริง (ตรวจแล้วทุกแบบการติดป้าย)
 const KEY = 'teachbot.stars.v1', FEW = 4;
