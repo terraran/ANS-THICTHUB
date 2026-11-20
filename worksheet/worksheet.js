@@ -92,7 +92,7 @@ const AIT = () => !!C.aitest, MYS = () => !!C.mystery, S2 = () => AIT() || MYS()
 let x2 = { j: {}, why: '', v: {}, cl: {} };   // ขั้น 2 แบบ aitest/mystery: j = เด็กตัดสิน AI · why = เหตุผล · v = โหวตภาพปริศนา · cl = ฟองเบาะแส
 let vtab = 'map';                              // หลังส่ง: แท็บ Map หรือ ขั้น 2
 const s2Done = () => AIT() ? C.aitest.tests.every(x => x2.j[x.id]) && x2.why.trim().length >= 2
-  : C.mystery.items.every(q => x2.v[q.id] && (x2.v[q.id] === 'unsure' || (x2.cl[q.id] || []).length));
+  : C.mystery.items.every(q => x2.v[q.id] && (x2.v[q.id] === 'unsure' || String(x2.cl[q.id] || '').trim().length >= 3));
 const step2Done = () => S2() ? s2Done() : MULTI() ? multiDone() : isWrite() ? writeDone() : signsDone();
 const isAdd = () => !!C.add;
 const SINGLE = () => C.map === 'single';
@@ -427,12 +427,12 @@ function renderS2(){
         (checked ? `<div class="truth ${j === (aiRight ? 'ok' : 'no') ? 'good' : 'bad'}">${U.isReally}: <b>${esc(t(x.name))}</b><br>${j === (aiRight ? 'ok' : 'no') ? U.youRight : U.youWrong}</div>` : '') + '</div>'; }).join('') + '</div>' +
       `<div class="twhy"><label for="s2why">${esc(t(A2.whyQ))}</label><textarea id="s2why" maxlength="200" placeholder="${esc(t(A2.whyPh))}"${ed ? '' : ' readonly'}>${esc(x2.why)}</textarea></div>`;
   } else {
-    const M = C.mystery, ch = linkedCards();
-    p.innerHTML = '<div class="mys">' + M.items.map((q, i) => { const v = x2.v[q.id], cl = x2.cl[q.id] || [];
+    const M = C.mystery;
+    p.innerHTML = '<div class="mys">' + M.items.map((q, i) => { const v = x2.v[q.id], cl = String(x2.cl[q.id] || '');
       const good = v && (v === q.truth || v === q.best);
       return `<div class="qcard" style="--k:${i}"><button type="button" class="tpic" data-z="${q.pic}">${pic(q.pic)}<span class="qn">${i + 1}</span></button>` +
         `<div class="votes">${M.votes.map(o => `<button type="button" class="vb v-${o.id}${v === o.id ? ' on' : ''}" data-v="${o.id}" data-q="${q.id}"${ed ? '' : ' disabled'}>${esc(t(o.text))}</button>`).join('')}</div>` +
-        `<div class="clhd">${esc(t(M.clueHd))}</div><div class="clues">${ch.length ? ch.map(c => `<button type="button" class="cl${cl.includes(c.id) ? ' on' : ''}" data-c="${c.id}" data-q="${q.id}"${ed ? '' : ' disabled'}>${c.icon ? c.icon + ' ' : ''}${cardTx(c)}</button>`).join('') : `<small>${esc(t(M.noClue))}</small>`}</div>` +
+        `<label class="clhd" for="cl-${q.id}">${esc(t(M.clueHd))}</label><textarea class="cltx" id="cl-${q.id}" data-cq="${q.id}" maxlength="120" placeholder="${esc(t(v === 'unsure' ? M.unsurePh : M.cluePh))}"${ed ? '' : ' readonly'}>${esc(cl)}</textarea>` +
         (checked ? `<div class="truth ${good ? 'good' : 'bad'}"><b>${esc(t(M.truthHd))}</b> ${esc(t(q.why))}</div>` : '') + '</div>'; }).join('') + '</div>';
   }
 }
@@ -441,14 +441,18 @@ function bindS2(){
   p.addEventListener('click', e => {
     const z = e.target.closest('[data-z]'); if (z) return zoom([z.dataset.z]);
     if (step !== 2 || checked) return;
-    const j = e.target.closest('[data-j]'), v = e.target.closest('[data-v]'), c = e.target.closest('[data-c]');
+    const j = e.target.closest('[data-j]'), v = e.target.closest('[data-v]');
     if (j) x2.j[j.dataset.t] = j.dataset.j;
     else if (v) x2.v[v.dataset.q] = v.dataset.v;
-    else if (c) { const a = x2.cl[c.dataset.q] || (x2.cl[c.dataset.q] = []), k = a.indexOf(c.dataset.c); k < 0 ? a.push(c.dataset.c) : a.splice(k, 1); }
     else return;
     dirty = true; renderS2(); update();
   });
-  p.addEventListener('input', e => { if (e.target.id === 's2why') { x2.why = e.target.value; dirty = true; update(); } });
+  p.addEventListener('input', e => {
+    if (e.target.id === 's2why') x2.why = e.target.value;
+    else if (e.target.dataset.cq) x2.cl[e.target.dataset.cq] = e.target.value.slice(0, 120);
+    else return;
+    dirty = true; update();
+  });
 }
 // หลังส่ง: สลับดู Map / ขั้น 2
 function showS2(){
@@ -462,8 +466,7 @@ function showS2(){
 const s2Summary = () => {
   const th = o => (o && typeof o === 'object') ? o.th : o;
   if (AIT()) return 'AI ทาย: ' + C.aitest.tests.map(x => { const g = aiGuess(x); return `${plain(th(x.name))} = AI ว่า${th(g.yes ? C.aitest.yes : C.aitest.no)} ${g.pct}% · เราว่า${x2.j[x.id] === 'ok' ? 'ถูก' : 'ผิด'}`; }).join(' | ') + ' | เหตุผล: ' + x2.why.trim();
-  const tx = id => { const c = C.cards.find(x => x.id === id) || own.find(o => o.id === id); return c ? (c.text.th ? plain(c.text.th) : c.text) : id; };
-  return 'ภาพปริศนา: ' + C.mystery.items.map((q, i) => `${i + 1} = ${plain(th((C.mystery.votes.find(o => o.id === x2.v[q.id]) || {}).text) || '-')} (${(x2.cl[q.id] || []).map(tx).join(', ')})`).join(' | ');
+  return 'ภาพปริศนา: ' + C.mystery.items.map((q, i) => `${i + 1} = ${plain(th((C.mystery.votes.find(o => o.id === x2.v[q.id]) || {}).text) || '-')} (${String(x2.cl[q.id] || '').trim() || '-'})`).join(' | ');
 };
 const ownSummary = () => bins().map(b => { const xs = own.filter(o => o.bin === b.id).map(o => o.text);
   return xs.length ? plain(HubUtil.t(b.label, 'th')) + ': ' + xs.join(', ') : ''; }).filter(Boolean).join(' | ');
@@ -673,7 +676,6 @@ function setStep(n){
   if (n === 2 && !isWrite()) C.cards.forEach(c => { if (placed[c.id] !== 'b') delete signs[c.id]; const el = cardOf(c.id); el && el.querySelectorAll('.chip').forEach(ch => ch.classList.toggle('on', !!(signs[c.id] && signs[c.id].has(+ch.dataset.s)))); });
   if (n === 4) setTimeout(() => $('#fr').focus(), 0);
   if (WEB() && n !== 1) select(null);
-  if (n === 2 && MYS() && !checked) { const ok = new Set(linkedCards().map(c => c.id)); Object.keys(x2.cl).forEach(k => { x2.cl[k] = x2.cl[k].filter(id => ok.has(id)); }); }
   if (S2() || C.gallery) showS2();
   applyLang(); update();
   if (dirty && !checked) saveNow();
@@ -796,7 +798,8 @@ function restore(d){
   }
   if (S2() && d.s2 && typeof d.s2 === 'object') {
     const obj = o => o && typeof o === 'object' && !Array.isArray(o) ? o : {};
-    const cl = obj(d.s2.cl); Object.keys(cl).forEach(k => { cl[k] = Array.isArray(cl[k]) ? cl[k].map(String) : []; });
+    const idTx = id => { const c = C.cards.find(x => x.id === id) || own.find(o => o.id === id); return c ? (c.text.th ? plain(t(c.text)) : c.text) : ''; };
+    const cl = obj(d.s2.cl); Object.keys(cl).forEach(k => { cl[k] = Array.isArray(cl[k]) ? cl[k].map(idTx).filter(Boolean).join(', ') : String(cl[k] || '').slice(0, 120); });   // งานเก่าเก็บเป็นรหัสฟอง
     x2 = { j: obj(d.s2.j), why: String(d.s2.why || ''), v: obj(d.s2.v), cl };
   }
   if (d.hes && cardOf(d.hes)) { hes = d.hes; cardOf(hes).classList.add('hes'); }

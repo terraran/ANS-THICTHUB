@@ -125,7 +125,7 @@ main{flex:1;min-height:0;display:flex;justify-content:center;padding:0 16px 14px
 <script>
 // นักสืบภาพ (Y4 สัปดาห์ 4): โพสต์เลื่อนมาทีละโพสต์ · ขั้น 1 ซูมแล้วแตะจุดแปลก (หรือ "ไม่เจอ") · ขั้น 2 เลือก แชร์ต่อ / เช็กที่มาก่อน / ไม่แชร์
 // spot = กรอบเบาะแสในภาพ (viewBox 240x180) · ไม่มี spot หรือ none = "ไม่เจอจุดแปลก" ก็ถูก · ไม่บอกว่าแตะถูกจนกว่าจะตัดสินใจ
-// ok = แชร์ได้ (ภาพจริง หรือภาพ AI ที่บอกตรง ๆ) · ai = ภาพนี้ AI สร้าง · ภาพจาก ../worksheet/pics.js
+// ok = แชร์ได้ (ภาพจริง หรือภาพ AI ที่บอกตรง ๆ) · either = แชร์หรือไม่แชร์ก็ถูกทั้งคู่ (ภาพ AI ที่บอกตรง ๆ) · ai = ภาพนี้ AI สร้าง · ภาพจาก ../worksheet/pics.js
 // เล่นเฉย ๆ ไม่เก็บคะแนน · เปิดใน iframe ได้ (รับ postMessage({lang}) · ปุ่มกลับส่ง 'closeGame')
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -166,7 +166,7 @@ const POSTS = [
     cap: ['น้องแมวที่บ้าน ชื่อเทาเทา 🐾', 'Meet our cat, Grey-Grey 🐾'],
     src: ['ใบเตยเป็นเพื่อนห้องเดียวกัน เคยพาเทาเทามาโชว์ที่โรงเรียน', 'Baitoey is in our class and once brought Grey-Grey to school.'],
     clue: ['ไม่มีอะไรผิดรูป และเรารู้จักคนโพสต์', 'Nothing looks wrong, and we know who posted it.'] },
-  { pic: 'p_giant', spot: [[162, 4, 74, 22], [36, 4, 180, 140]], none: 1, av: '🎨', c: '#ede9fe', ai: 1, ok: 1, who: ['ชมรมศิลปะ AI', 'AI Art Club'], tm: ['4 ชม.', '4 h'],
+  { pic: 'p_giant', spot: [[162, 4, 74, 22], [36, 4, 180, 140]], none: 1, either: 1, av: '🎨', c: '#ede9fe', ai: 1, ok: 1, who: ['ชมรมศิลปะ AI', 'AI Art Club'], tm: ['4 ชม.', '4 h'],
     cap: ['ภาพนี้ทำด้วย AI นะ: แมวยักษ์มาเที่ยวเมือง 😆 #AIart', 'Made with AI: a giant cat visits the city 😆 #AIart'],
     src: ['ชมรมบอกชัดเจนว่าเป็นภาพ AI ไม่ได้หลอกว่าเป็นเรื่องจริง', 'The club clearly says it is an AI picture. It does not pretend to be real.'],
     clue: ['มีป้าย #AI art บอกไว้แล้ว', 'It has an #AI art label.'] },
@@ -204,6 +204,7 @@ const UI = {
         q: 'จะทำอย่างไรกับโพสต์นี้?', share: '📤 แชร์ต่อ', check: '🔎 เช็กที่มาก่อน', skip: '🙈 ไม่แชร์', srcHd: 'ที่มาของโพสต์:', q2: 'รู้ที่มาแล้ว จะแชร์ไหม?',
         like: n => `❤️ ${n}`, cm: n => `💬 ${n}`, clue: 'เบาะแส: ', aiNote: ['🤖 ภาพนี้ AI สร้าง', '📷 ภาพนี้เป็นภาพจริง'],
         fb: { gShare: ['👍 แชร์ได้เลย!', 'โพสต์นี้ไม่ได้หลอกใคร เพื่อน ๆ ชอบกันใหญ่'], gCheck: ['🕵️ นักสืบตัวจริง!', 'เราเช็กที่มาก่อน เลยไม่ถูกหลอก และไม่ส่งต่อเรื่องไม่จริง'],
+              gEither: ['👍 ตัดสินใจได้ดี', 'ภาพนี้บอกชัดว่าเป็นภาพ AI ไม่ได้หลอกใคร จะแชร์หรือไม่แชร์ก็ได้ทั้งคู่'],
               gSkip: ['🛡️ ดีมากที่ไม่แชร์', 'โพสต์นี้หลอกคนอยู่ ถ้าไม่แน่ใจ ไม่แชร์ไว้ก่อนดีที่สุด'], n: ['🙂 ไม่แชร์ก็ไม่เป็นไร', 'แต่ภาพนี้ไม่ได้หลอกใครนะ ลองเช็กที่มาดู จะได้มั่นใจขึ้น'],
               r: ['😱 แย่แล้ว! ข่าวปลอมกระจายไป', 'เพื่อน ๆ เชื่อแล้วแชร์ต่อกันหลายคน ภาพนี้ไม่จริง'], t: ['⏰ หมดเวลา!', 'นักสืบต้องคิดให้ไว แต่ถ้าไม่แน่ใจ ไม่แชร์ไว้ก่อนดีที่สุด'] },
         chatG: [['ต้นข้าว', 'สวยมาก 👍'], ['ภูมิ', 'ไปด้วย ๆ']], chatR: [['ต้นข้าว', 'จริงเหรอ 😱 แชร์ต่อแล้ว!'], ['ภูมิ', 'เดี๋ยวบอกแม่ด้วย'], ['ครูประจำชั้น', 'นักเรียน เรื่องนี้ไม่จริงนะ ลองตรวจก่อนแชร์']],
@@ -219,6 +220,7 @@ const UI = {
         q: 'What will you do with this post?', share: '📤 Share', check: '🔎 Check the source first', skip: '🙈 Don\'t share', srcHd: 'Where the post comes from:', q2: 'Now you know the source. Share it?',
         like: n => `❤️ ${n}`, cm: n => `💬 ${n}`, clue: 'Clue: ', aiNote: ['🤖 AI made this picture', '📷 This is a real photo'],
         fb: { gShare: ['👍 Fine to share!', 'This post does not trick anyone. Your friends love it.'], gCheck: ['🕵️ A real detective!', 'You checked the source first, so you were not tricked and did not spread something untrue.'],
+              gEither: ['👍 Good choice', 'This picture clearly says it is AI art and tricks nobody. Sharing or not sharing are both fine.'],
               gSkip: ['🛡️ Good call not sharing', 'This post is tricking people. If you are not sure, not sharing is safest.'], n: ['🙂 Not sharing is OK', 'But this picture does not trick anyone. Check the source to be more sure.'],
               r: ['😱 Oh no! Fake news is spreading', 'Your friends believed it and shared it again. This picture is not real.'], t: ['⏰ Time is up!', 'Detectives think fast. If you are not sure, not sharing is safest.'] },
         chatG: [['Tonkhao', 'So nice 👍'], ['Poom', 'I want to go too!']], chatR: [['Tonkhao', 'Really?! 😱 I shared it!'], ['Poom', 'I\'ll tell my mum'], ['Class teacher', 'Everyone, this is not true. Check before you share.']],
@@ -283,7 +285,7 @@ function paint(){
     (checked ? `<button id="aShare2" data-a="share">${u.share}</button><button id="aSkip2" data-a="skip">${u.skip}</button>`
              : `<button id="aShare" data-a="share">${u.share}</button><button id="aCheck" data-a="check">${u.check}</button><button id="aSkip" data-a="skip">${u.skip}</button>`) + '</div>';
   else {
-    const k = last, f = u.fb[k], chat = k === 'r' ? u.chatR : k === 'n' || k === 't' ? [] : p.ok ? u.chatG : u.chatS, done = cur >= deck.length - 1 || (chief && hearts <= 0);
+    const k = last, f = u.fb[k], chat = k === 'r' ? u.chatR : k === 'n' || k === 't' || k === 'gEither' ? [] : p.ok ? u.chatG : u.chatS, done = cur >= deck.length - 1 || (chief && hearts <= 0);
     $('#side').innerHTML = src + `<div class="fb ${k[0]}"><h3>${f[0]}</h3><p>${f[1]}</p><p class="clue">${u.aiNote[p.ai ? 0 : 1]} · ${u.clue}${esc(T(p.clue))}</p><p class="found">${clues[cur] ? u.found : p.spot ? u.missSpot : u.missNone}</p></div>` +
       `<div class="chat">${chat.map((m, i) => `<div class="msg" style="animation-delay:${.3 + i * .5}s"><b>${esc(m[0])}</b>${esc(m[1])}</div>`).join('')}</div>` +
       `<button id="nextP">${done ? u.last : u.next}</button>`;
@@ -298,7 +300,7 @@ $('#side').addEventListener('click', e => {
   const p = deck[cur], a = b.dataset.a;
   if (a === 'check') { checked = true; paint(); return; }
   // ผล: แชร์โพสต์หลอก = r · ไม่แชร์โพสต์ดี = n · ที่เหลือ = g (แยกข้อความตามที่ทำ)
-  last = a === 'share' ? (p.ok ? 'gShare' : 'r') : p.ok ? 'n' : checked ? 'gCheck' : 'gSkip';
+  last = a === 'share' ? (p.ok ? 'gShare' : 'r') : p.either ? 'gEither' : p.ok ? 'n' : checked ? 'gCheck' : 'gSkip';
   marks[cur] = last[0]; clues[cur] = hit(p, pt); stopTimer(); if (chief && last === 'r') hearts--; stage = 'fb'; paint();
 });
 // ซูม: ขั้นหาเบาะแส/ตัดสินใจ = แตะในภาพเพื่อเลือกจุด (ยังไม่บอกว่าถูกไหม) · หลังตัดสินใจ = ดูกรอบเฉลย

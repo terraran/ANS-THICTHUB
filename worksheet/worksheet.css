@@ -400,3 +400,5 @@ main{min-width:0}
 .twhy label{font-size:19px;font-weight:800;width:330px;flex:none}
 .twhy textarea{height:58px;font-size:20px}
 @media (prefers-reduced-motion:reduce){.tcard,.qcard,.tsay,.robo,#zoom{animation:none}}
+.cltx{flex:1;min-height:64px;font-size:17px;padding:6px 10px;border-radius:10px;line-height:1.35}
+.cltx[readonly]{background:#f8fafc}

@@ -233,14 +233,20 @@ test('Y4 สัปดาห์ 4: Double Bubble ภาพจริง/AI + ฟ�
   await shot(page, 'y4w4-1');
   await page.click('#next');
   await expect(page.locator('.qcard')).toHaveCount(3);
-  await expect(page.locator('.qcard').first().locator('.cl')).toHaveCount(14);
+  await expect(page.locator('.qcard .cl')).toHaveCount(0);                 // ไม่มีฟองให้แตะ พิมพ์เบาะแสเอง
+  await expect(page.locator('.qcard .cltx')).toHaveCount(3);
   await expect(page.locator('#next')).toBeDisabled();
   const q = i => page.locator('.qcard').nth(i);
-  await q(0).locator('[data-v="ai"]').click(); await q(0).locator('[data-c="b2"]').click();
+  await q(0).locator('[data-v="ai"]').click(); await q(0).locator('.cltx').fill('ตัวหนังสือบนโปสเตอร์อ่านไม่ออก');
+  await expect(q(0).locator('.cltx')).toHaveValue('ตัวหนังสือบนโปสเตอร์อ่านไม่ออก');   // พิมพ์แล้วไม่หาย (ไม่วาดใหม่ระหว่างพิมพ์)
   await q(1).locator('[data-v="real"]').click();
-  await expect(page.locator('#next')).toBeDisabled();                     // โหวตจริง/AI ต้องแตะเบาะแส
-  await q(1).locator('.cl', { hasText: 'ผมยุ่งนิดหน่อย' }).click(); await q(1).locator('[data-c="a2"]').click();
-  await q(2).locator('[data-v="unsure"]').click();                        // ดูไม่ออก ไม่ต้องมีเบาะแส
+  await expect(page.locator('#next')).toBeDisabled();                     // โหวตจริง/AI ต้องพิมพ์เบาะแส
+  await q(1).locator('.cltx').fill('ok');
+  await expect(page.locator('#next')).toBeDisabled();                     // สั้นไป ต้อง 3 ตัวอักษรขึ้นไป
+  await q(1).locator('.cltx').fill('ป้ายสนามอ่านออก ตาข่ายเท่ากัน');
+  await q(2).locator('[data-v="unsure"]').click();                        // ดูไม่ออก ไม่บังคับพิมพ์
+  await expect(q(2).locator('.cltx')).toHaveAttribute('placeholder', /ไม่บังคับ/);
+  await expect(q(0).locator('.cltx')).toHaveValue('ตัวหนังสือบนโปสเตอร์อ่านไม่ออก');   // โหวตข้ออื่นแล้วข้อความเดิมยังอยู่
   await expect(page.locator('#next')).toBeEnabled();
   await shot(page, 'y4w4-2');
   await page.click('#next');
@@ -249,10 +255,9 @@ test('Y4 สัปดาห์ 4: Double Bubble ภาพจริง/AI + ฟ�
   await expect(page.locator('#sent')).toHaveText('ส่งคำตอบให้ครูแล้ว ✓');
   const row = api.posts[0].row, d = JSON.parse(row[12]);
   expect(row[6]).toBe('11/12'); expect(row[7]).toContain('กรอบหน้าต่างตรง');
-  expect(row[9]).toContain('ภาพปริศนา: 1 = 🤖 AI สร้าง (ตัวหนังสือขยุกขยิก อ่านไม่ออก)');
-  expect(row[9]).toContain('ผมยุ่งนิดหน่อย');
-  expect(d).toMatchObject({ act: 'y4w4', map: 'bubble', s2: { v: { q1: 'ai', q2: 'real', q3: 'unsure' }, cl: { q1: ['b2'] } } });
-  expect(d.s2.cl.q2).toHaveLength(2);
+  expect(row[9]).toContain('ภาพปริศนา: 1 = 🤖 AI สร้าง (ตัวหนังสือบนโปสเตอร์อ่านไม่ออก)');
+  expect(row[9]).toContain('3 = 🤔 ดูไม่ออก (-)');
+  expect(d).toMatchObject({ act: 'y4w4', map: 'bubble', s2: { v: { q1: 'ai', q2: 'real', q3: 'unsure' }, cl: { q1: 'ตัวหนังสือบนโปสเตอร์อ่านไม่ออก', q2: 'ป้ายสนามอ่านออก ตาข่ายเท่ากัน' } } });
   // หลังส่ง: แท็บ Map ก่อน (มีคะแนน) · แท็บภาพปริศนามีเฉลย ดูไม่ออก = ตอบดี
   await expect(page.locator('#result')).toHaveText('ถูก 11/12 ใบ');
   await expect(page.locator('#map')).toBeVisible();
@@ -270,6 +275,11 @@ test('Y4 สัปดาห์ 4: Double Bubble ภาพจริง/AI + ฟ�
   await expect(f.locator('#result')).toHaveText('ถูก 11/12 ใบ');
   await f.locator('#vtabs [data-vt="s2"]').click();
   await expect(f.locator('.qcard .vb.on')).toHaveCount(3);
+  await expect(f.locator('.qcard .cltx').first()).toHaveValue('ตัวหนังสือบนโปสเตอร์อ่านไม่ออก');
+  // งานที่ส่งก่อนเปลี่ยน (เก็บเป็นรหัสฟอง) ยังเปิดดูได้ แสดงเป็นข้อความฟอง
+  const f2 = await teacherView(page, 'y4w4', Object.assign({}, d, { s2: Object.assign({}, d.s2, { cl: { q1: ['b2', 'a1'] } }) }));
+  await f2.locator('#vtabs [data-vt="s2"]').click();
+  await expect(f2.locator('.qcard .cltx').first()).toHaveValue('ตัวหนังสือขยุกขยิก อ่านไม่ออก, นิ้วมือครบ 5 นิ้ว');
   expect(errs).toEqual([]);
 });
 
@@ -398,11 +408,11 @@ test('เกม Y4 นักสืบภาพ: ขั้น 1 แตะจุ�
   await expect(page.locator('#tTitle')).toHaveText('นักสืบภาพ');
   await page.click('#goH');
   await expect(page.locator('#trail i')).toHaveCount(16);
-  const seen = []; let found = 0;
+  const seen = []; let found = 0, goods = 0;
   for (let i = 0; i < 16; i++) {
     await expect(page.locator('.post .pic svg')).toHaveCount(1);
     const cap = await page.locator('.cap').textContent(); seen.push(cap);
-    const p = await page.evaluate(() => ({ ok: !!deck[cur].ok, spot: deck[cur].spot || null, none: !!deck[cur].none }));
+    const p = await page.evaluate(() => ({ ok: !!deck[cur].ok, either: !!deck[cur].either, spot: deck[cur].spot || null, none: !!deck[cur].none }));
     // ขั้น 1: ยังตัดสินใจไม่ได้ · กรอบเฉลยยังไม่โผล่
     await expect(page.locator('.step')).toHaveText('ขั้นที่ 1 · หาเบาะแส');
     await expect(page.locator('#aShare')).toHaveCount(0);
@@ -425,7 +435,8 @@ test('เกม Y4 นักสืบภาพ: ขั้น 1 แตะจุ�
     await expect(page.locator('.step')).toHaveText('ขั้นที่ 2 · ตัดสินใจ');
     if (i % 2) { await page.click('#aCheck'); await expect(page.locator('.src')).toBeVisible(); await page.click(p.ok ? '#aShare2' : '#aSkip2'); }
     else await page.click(p.ok ? '#aSkip' : '#aShare');
-    await expect(page.locator('.fb')).toHaveClass(i % 2 ? /fb g/ : p.ok ? /fb n/ : /fb r/);
+    const good = i % 2 || p.either; if (good) goods++;                      // ภาพ AI ที่บอกตรง ๆ: ไม่แชร์ก็ถูก
+    await expect(page.locator('.fb')).toHaveClass(good ? /fb g/ : p.ok ? /fb n/ : /fb r/);
     await expect(page.locator('.fb .clue')).toContainText(/ภาพนี้/);
     await expect(page.locator('.fb .found')).toContainText(want ? '⭐' : '🔎');
     await expect(page.locator('.post .tru')).toHaveCount(p.spot ? p.spot.length : 0);   // กรอบเหลืองตรงเบาะแสจริง
@@ -433,7 +444,7 @@ test('เกม Y4 นักสืบภาพ: ขั้น 1 แตะจุ�
     await page.click('#nextP');
   }
   expect(new Set(seen).size).toBe(16);
-  await expect(page.locator('#eSum')).toContainText('ตัดสินใจได้ดี 8 จาก 16 โพสต์');
+  await expect(page.locator('#eSum')).toContainText(`ตัดสินใจได้ดี ${goods} จาก 16 โพสต์`);
   await expect(page.locator('#eSum')).toContainText(`หาเบาะแสถูก ${found} จาก 16 ภาพ`);
   await expect(page.locator('#ePath div')).toHaveCount(16);
   await shot(page, 'photocheck-end');
@@ -589,4 +600,18 @@ test('เกม Y4 โหมดหัวหน้านักสืบ: ล็�
   // ปลดล็อกจำไว้ในเครื่อง
   await page.reload();
   await expect(page.locator('#goX')).toBeEnabled();
+});
+
+test('เกม Y4: โพสต์แมวยักษ์ (ภาพ AI ที่บอกตรง ๆ) แชร์หรือไม่แชร์ก็ถูก', async ({ page }) => {
+  page.route('**/fonts.googleapis.com/**', r => r.abort());
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  for (const btn of ['#aSkip', '#aShare']) {
+    await page.goto('/games/photocheck.html');
+    await page.click('#goH');
+    await page.evaluate(() => { cur = deck.findIndex(p => p.pic === 'p_giant'); deal(); });
+    await page.click('#aNone'); await page.click(btn);
+    await expect(page.locator('.fb')).toHaveClass(/fb g/);
+    await expect(page.locator('#trail i.g')).toHaveCount(1);
+  }
+  await expect(page.locator('.fb h3')).toHaveText('👍 แชร์ได้เลย!');
 });
